@@ -28,6 +28,21 @@ jobs:
           powershell -ExecutionPolicy Bypass -File build\build.ps1
           if ($LASTEXITCODE -ne 0) { throw "Falha no build" }
 
+      - name: Gerar os PDFs (manual e documentação técnica) com o Edge
+        # Os PDFs anexados à Release saem sempre do HTML da própria versão (fonte Segoe UI do Windows)
+        shell: pwsh
+        run: |
+          $edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+          if (-not (Test-Path $edge)) { $edge = "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe" }
+          foreach ($par in @(@("docs\manual\manual.html", "docs\manual\Manual-DispatchBot.pdf"), @("docs\tecnico\documentacao-tecnica.html", "docs\tecnico\DispatchBot-Documentacao-Tecnica.pdf"))) {
+            $fonte = (Resolve-Path $par[0]).Path
+            $pdf = Join-Path (Get-Location) $par[1]
+            $antes = if (Test-Path $pdf) { (Get-Item $pdf).LastWriteTime } else { [datetime]::MinValue }
+            Start-Process -FilePath $edge -Wait -ArgumentList @("--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--print-to-pdf=`"$pdf`"", "`"file:///$($fonte -replace '\\','/')`"")
+            if (-not (Test-Path $pdf) -or (Get-Item $pdf).LastWriteTime -le $antes) { Write-Warning "PDF não gerado, vai o do repositório: $pdf"; continue }
+            Write-Host "PDF gerado: $pdf"
+          }
+
       - name: Publicar Release
         shell: pwsh
         env:
