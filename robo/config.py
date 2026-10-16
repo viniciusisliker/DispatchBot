@@ -53,6 +53,13 @@ def carregar() -> dict:
         if isinstance(meu, dict) and isinstance(tipo, dict) and meu.get("botao_enviar") == "" and tipo.get("botao_enviar"):
             meu["botao_enviar"] = tipo["botao_enviar"]
             mudou = True
+        # captura_numero com seletor vazio (Backup antes de 16/10/2026: lia só o texto visível e
+        # ficava com o CS, porque o INC está na aba escondida): troca pela captura do modelo
+        cap = meu.get("captura_numero") if isinstance(meu, dict) else None
+        cap_modelo = tipo.get("captura_numero") if isinstance(tipo, dict) else None
+        if isinstance(cap, dict) and isinstance(cap_modelo, dict) and cap.get("seletor") == "" and cap_modelo.get("seletor"):
+            meu["captura_numero"] = dict(cap_modelo)
+            mudou = True
         # ignorar_clientes: clientes novos do modelo entram na lista já instalada (a mescla não troca listas)
         if isinstance(meu, dict) and isinstance(tipo, dict) and isinstance(meu.get("ignorar_clientes"), list):
             atuais = {str(n).strip().lower() for n in meu["ignorar_clientes"]}
