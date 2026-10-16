@@ -109,7 +109,7 @@ Build: `powershell -ExecutionPolicy Bypass -File build\build.ps1` → `dist\inst
 
 ## Como trabalhar neste projeto
 
-- **Repositório (16/10/2026):** https://github.com/viniciusisliker/DispatchBot (**privado**, branch `main`). Fora do git (`.gitignore`): `.venv`, `dist`, `build/tmp`, `__pycache__`. Commitar e enviar quando o usuário pedir.
+- **Repositório (16/10/2026):** https://github.com/viniciusisliker/DispatchBot (**público** desde 16/10/2026, a pedido do usuário, ciente dos dados internos expostos; branch `main`). Instaladores em **Releases** (`v1.10.4` publicada em 16/10/2026); `builduild.ps1 -Publicar` cria a Release da versão no fim do build (exige tudo commitado; se já existir, troca o instalador). Fora do git (`.gitignore`): `.venv`, `dist`, `build/tmp`, `__pycache__`. Commitar e enviar quando o usuário pedir.
 - Testar contra um ServiceNow **simulado** local (http.server + formulário com a mesma estrutura do Service Portal: `#s2id_sp_formfield_*`, select2 com `.select2-drop-active`), usando `LOCALAPPDATA` apontado para uma pasta de teste. Nunca abrir chamado real nem executar o BackupBot.
 - Fluxos do Power Automate Desktop do usuário têm cópia legível em `%LOCALAPPDATA%\Microsoft\Power Automate Desktop\Console\Workspace\<workflowid>\<versão>\` (`script.robin`, `controlRepo.appmask`).
 - **Nunca** simular teclado (SendKeys) na área de trabalho do usuário.

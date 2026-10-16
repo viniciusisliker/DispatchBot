@@ -1,7 +1,9 @@
 ﻿# Gera dist\DispatchBot (PyInstaller) e o instalador dist\instalador\DispatchBot-Setup-<versao>.exe (Inno Setup 6).
 # Uso (na raiz do projeto):  powershell -ExecutionPolicy Bypass -File build\build.ps1
+# Com -Publicar: no fim cria a Release v<versao> no GitHub com o instalador (precisa do gh logado e do código commitado).
 # Assinatura opcional: defina $env:DISPATCHBOT_CERT_THUMBPRINT com o thumbprint de um certificado de
 # assinatura de código do repositório do usuário (reduz bloqueios do antivírus/SmartScreen).
+param([switch]$Publicar)
 $ErrorActionPreference = "Stop"
 $raiz = Split-Path -Parent $PSScriptRoot
 Set-Location $raiz
@@ -51,3 +53,20 @@ if (-not $iscc) {
 if ($LASTEXITCODE -ne 0) { throw "Falha no Inno Setup" }
 Assinar @("dist\instalador\DispatchBot-Setup-$versao.exe")
 Write-Host "Pronto: dist\instalador\DispatchBot-Setup-$versao.exe"
+
+# 6. Release no GitHub (só com -Publicar)
+if ($Publicar) {
+    if (git status --porcelain) { throw "Há mudanças sem commit: faça o commit antes de publicar" }
+    git push
+    if ($LASTEXITCODE -ne 0) { throw "Falha no git push" }
+    $instalador = "dist\instalador\DispatchBot-Setup-$versao.exe"
+    gh release view "v$versao" *> $null
+    if ($LASTEXITCODE -eq 0) {
+        # A Release já existe: só troca o instalador
+        gh release upload "v$versao" $instalador --clobber
+    } else {
+        gh release create "v$versao" $instalador --target (git rev-parse HEAD) --title "DispatchBot $versao" --generate-notes
+    }
+    if ($LASTEXITCODE -ne 0) { throw "Falha ao publicar a Release" }
+    Write-Host "Release publicada: v$versao"
+}
