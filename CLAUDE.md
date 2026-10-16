@@ -1,3 +1,5 @@
+> **1.10.6 (16/10/2026):** a Release **v1.10.5** saiu às 15:31 **sem** as correções do `Robo.evento` e do INC (mergeadas depois). Versão subida para 1.10.6 com as duas; instalador gerado pelo GitHub Actions (tag `v1.10.6`, `.github/workflows/release.yml`), notas em `build/notas/1.10.6.md`.
+
 > **1ª GMUD real de ponta a ponta (16/10/2026, 1.10.4, envio automático):** SO CHG0048707 → RITM0421153 (12:07) e INFRA CHG0048705 → RITM0421154 (12:08), com Submit sozinho, número no painel e ✅ com link de tratamento nos chats certos ((FC) LINUX - WINDOWS - VMWARE e (FC) NET / SOC). Falta: 1º Backup real que abra chamado e a mensagem ⚠️.
 
 > **Correção (16/10/2026, sem build):** às 12:08 o Retorno postou "✅ BACKUP ... appflexrj01-inst01.smpdc.gblx ...: chamado  aberto. Tratar:" (sem número e sem link) para um alerta **ignorado** (nenhum chamado foi aberto). Causa: a conclusão do ignorado falhou no meio e o arquivo ficou em /processando; `recuperar_reservas` viu `ok` no histórico e concluiu **com retorno**. Agora a recuperação só grava retorno quando o histórico tem número (ignorado e "aberto à mão" não vão para o Teams). Testado com fila local. Versão subida para **1.10.5** (instalador ainda não gerado).
@@ -77,7 +79,7 @@ Etapas do processo (usuário, 05/10/2026): envio do alerta → criação do cham
 | demo.py | demonstração: dois botões que preenchem GMUD (INFRA) e Backup no portal real sem enviar (`Demo DispatchBot.cmd`) |
 | config.py | carrega/mescla config (chaves novas entram sozinhas), `tipo_efetivo` (herança `herda`) |
 | mapear_campos.py | `DispatchBot-Mapear.exe`: lista campos do formulário; `--testar <json>` preenche sem enviar |
-| versao.py | versão única (hoje **1.10.5**) |
+| versao.py | versão única (hoje **1.10.6**) |
 
 Build: `powershell -ExecutionPolicy Bypass -File build\build.ps1` → `dist\instalador\DispatchBot-Setup-<versão>.exe`. Inno Setup 6 instalado por usuário (winget). Arquivos .iss e .ps1 precisam de UTF-8 **com BOM**.
 
