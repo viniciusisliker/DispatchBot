@@ -319,7 +319,9 @@ class FilaSharePoint:
             if status == "ok":
                 reg = historico.registro(id_alerta)
                 log.info("Recuperando %s: já tinha chamado %s.", reservado.name, reg.get("numero"))
-                self.concluir(reservado, alerta, reg.get("numero", ""), reg.get("url", ""))
+                # Sem número = ignorado ou aberto à mão: conclui sem retorno (senão o Teams diz "chamado aberto")
+                self.concluir(reservado, alerta, reg.get("numero", ""), reg.get("url", ""),
+                              gravar_retorno=bool(reg.get("numero")))
             elif status == "enviando":
                 self.mover_para_erro(
                     reservado, alerta,
