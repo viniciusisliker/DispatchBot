@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentação técnica do DispatchBot</title>
+<!-- Fonte do PDF anexado às Releases (DispatchBot-Documentacao-Tecnica.pdf). Gerar de novo com:
+     msedge --headless=new --no-pdf-header-footer --print-to-pdf=docs\tecnico\DispatchBot-Documentacao-Tecnica.pdf docs\tecnico\documentacao-tecnica.html
+     Ao mudar a versão, troque "1.10.5" no @page e na capa. -->
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm 16mm;
+    @bottom-left { content: "Documentação técnica do DispatchBot · versão 1.10.5"; font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; }
+    @bottom-right { content: counter(page); font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; } }
+  @page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+  :root { --teal: #0E9F8E; --teal-claro: #E3F6F3; --tinta: #1B2228; --apagado: #5B6670; --linha: #DDE3E8;
+          --amarelo: #B7790A; --amarelo-claro: #FDF3DE; --vermelho: #C23434; --vermelho-claro: #FBE7E7;
+          --verde: #23854E; --verde-claro: #E4F4EA; --cinza-claro: #F3F5F7; --azul: #2F5DA8; --azul-claro: #E6EEFA;
+          --mono: "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font: 10pt/1.5 "Segoe UI", "Liberation Sans", system-ui, sans-serif; color: var(--tinta); background: #fff; }
+  h1, h2, h3, h4 { line-height: 1.2; margin: 0; }
+  h2 { font-size: 18pt; margin: 0 0 4mm; padding-top: 1mm; }
+  h2 .num { color: var(--teal); margin-right: 3mm; }
+  h3 { font-size: 12pt; margin: 6mm 0 2mm; }
+  h4 { font-size: 10.5pt; margin: 4mm 0 1.5mm; }
+  p { margin: 0 0 2.6mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1mm; }
+  b { font-weight: 600; }
+  code { font-family: var(--mono); font-size: 8.6pt; background: var(--cinza-claro); border: 1px solid var(--linha); border-radius: 3px; padding: 0 1mm; overflow-wrap: anywhere; }
+  pre { font-family: var(--mono); font-size: 8.2pt; line-height: 1.45; background: #1C2624; color: #DCE7E3; border-radius: 6px; padding: 3.5mm 4mm; margin: 2.5mm 0 4mm; white-space: pre-wrap; overflow-wrap: anywhere; break-inside: avoid; }
+  pre .c { color: #7F918B; }
+  .secao { break-before: page; }
+  .sem-quebra { break-inside: avoid; }
+  .lead { font-size: 11pt; color: var(--apagado); margin-bottom: 5mm; }
+
+  /* Capa */
+  .capa { height: 297mm; background: #0F1215; color: #fff; padding: 30mm 22mm 22mm; display: flex; flex-direction: column; }
+  .capa img { width: 34mm; height: 34mm; border: 3px solid #fff; }
+  .capa .rotulo { margin-top: 26mm; color: #14B8A6; font-weight: 600; letter-spacing: 0.25em; font-size: 10pt; }
+  .capa h1 { font-size: 40pt; margin-top: 3mm; }
+  .capa .sub { font-size: 14pt; color: #B9C2CA; margin-top: 5mm; max-width: 150mm; line-height: 1.4; }
+  .capa .barra { width: 22mm; height: 2mm; background: #14B8A6; margin-top: 10mm; }
+  .capa .ficha { margin-top: 14mm; display: grid; grid-template-columns: 38mm 1fr; gap: 2mm 6mm; font-size: 10pt; color: #B9C2CA; }
+  .capa .ficha b { color: #fff; font-weight: 600; }
+  .capa .rodape { margin-top: auto; display: flex; justify-content: space-between; color: #8C969F; font-size: 9.5pt; border-top: 1px solid #2A3036; padding-top: 5mm; }
+
+  /* Sumário */
+  .sumario { list-style: none; padding: 0; margin: 3mm 0 0; columns: 2; column-gap: 8mm; }
+  .sumario li { display: flex; gap: 3mm; padding: 1.8mm 0; border-bottom: 1px solid var(--linha); font-size: 10.5pt; break-inside: avoid; }
+  .sumario li span:first-child { color: var(--teal); font-weight: 700; width: 7mm; flex: none; }
+
+  /* Caixas */
+  .caixa { border-radius: 6px; padding: 3mm 4.5mm; margin: 3.5mm 0; break-inside: avoid; border-left: 4px solid; }
+  .caixa p:last-child, .caixa ul:last-child { margin-bottom: 0; }
+  .caixa .t { font-weight: 700; display: block; margin-bottom: 1mm; }
+  .dica { background: var(--teal-claro); border-color: var(--teal); }
+  .atencao { background: var(--amarelo-claro); border-color: var(--amarelo); }
+  .perigo { background: var(--vermelho-claro); border-color: var(--vermelho); }
+  .info { background: var(--azul-claro); border-color: var(--azul); }
+
+  /* Diagramas em caixas */
+  .esteira { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; border: 1px solid var(--linha); border-radius: 8px; overflow: hidden; margin: 4mm 0; break-inside: avoid; }
+  .esteira > div { padding: 3mm; border-right: 1px solid var(--linha); background: var(--cinza-claro); font-size: 9pt; }
+  .esteira > div:last-child { border-right: 0; }
+  .esteira .onde { font: 600 7.5pt var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--teal); display: block; margin-bottom: 1mm; }
+  .esteira b { display: block; font-size: 10pt; margin-bottom: 1mm; }
+  .estados { display: flex; flex-wrap: wrap; align-items: center; gap: 2mm; margin: 3mm 0 4mm; font-size: 9pt; break-inside: avoid; }
+  .estados span.p { border: 1px solid var(--linha); background: var(--cinza-claro); border-radius: 5px; padding: 1.2mm 2.5mm; font-family: var(--mono); font-size: 8.5pt; }
+  .estados span.ok { background: var(--verde-claro); border-color: #B9E0C8; }
+  .estados span.er { background: var(--vermelho-claro); border-color: #F0C4C4; }
+  .estados span.s { color: var(--teal); font-weight: 700; }
+
+  /* Tabelas */
+  table { width: 100%; border-collapse: collapse; margin: 2.5mm 0 4mm; font-size: 9pt; }
+  tr { break-inside: avoid; }
+  th { text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.04em; color: var(--apagado); font-weight: 600; border-bottom: 2px solid var(--linha); padding: 1.6mm 2mm; }
+  td { border-bottom: 1px solid var(--linha); padding: 1.8mm 2mm; vertical-align: top; }
+  td:first-child code { white-space: nowrap; }
+  .t-chaves td:first-child { width: 48mm; }
+  .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .cartao { border: 1px solid var(--linha); border-radius: 8px; padding: 3.5mm; break-inside: avoid; }
+  .cartao h4 { margin-top: 0; }
+  .tag { font-size: 7.5pt; font-weight: 700; letter-spacing: 0.06em; color: var(--teal); text-transform: uppercase; }
+
+  @media screen {
+    body { background: #E9ECEF; }
+    .capa, .secao { max-width: 210mm; margin: 0 auto 8mm; background: #fff; padding: 16mm; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+    .capa { background: #0F1215; padding: 30mm 22mm 22mm; }
+  }
+  @media screen and (max-width: 700px) {
+    .capa, .secao { padding: 16px; }
+    .sumario { columns: 1; }
+    .duas, .esteira { grid-template-columns: 1fr; }
+    .esteira > div { border-right: 0; border-bottom: 1px solid var(--linha); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Capa -->
+<section class="capa">
+  <img src="../manual/avatar.png" alt="">
+  <div class="rotulo">DOCUMENTAÇÃO TÉCNICA</div>
+  <h1>DispatchBot</h1>
+  <div class="sub">Arquitetura, funcionamento interno, contratos de dados, configuração, build e operação do robô que abre chamados de GMUD e Backup no ServiceNow da Cirion.</div>
+  <div class="barra"></div>
+  <div class="ficha">
+    <span>Versão do código</span><b>1.10.5</b>
+    <span>Público</span><b>Time de RPA / desenvolvimento e sustentação</b>
+    <span>Repositório</span><b>github.com/viniciusisliker/DispatchBot</b>
+    <span>Pilha</span><b>Python 3.12 · Playwright · pystray · CustomTkinter · PyInstaller · Inno Setup 6</b>
+    <span>Integrações</span><b>Power Automate · SharePoint (API REST) · ServiceNow Employee Center · Teams</b>
+  </div>
+  <div class="rodape"><span>Operação YDUQS · Dispatcher N1</span><span>Versão 1.10.5 · outubro de 2026</span></div>
+</section>
+
+<!-- Sumário -->
+<section class="secao">
+  <h2>Sumário</h2>
+  <ol class="sumario">
+    <li><span>1</span>Visão geral e arquitetura</li>
+    <li><span>2</span>Ciclo de vida de um alerta</li>
+    <li><span>3</span>Processo, threads e sincronização</li>
+    <li><span>4</span>Loop principal</li>
+    <li><span>5</span>Processamento de um alerta</li>
+    <li><span>6</span>Preenchimento e envio no ServiceNow</li>
+    <li><span>7</span>Idempotência: nunca dois chamados</li>
+    <li><span>8</span>Fila no SharePoint (API REST)</li>
+    <li><span>9</span>Navegador, sessão e login SSO</li>
+    <li><span>10</span>Plantão entre máquinas e histórico do time</li>
+    <li><span>11</span>Parada de emergência</li>
+    <li><span>12</span>Interface: bandeja, painel e janelinha</li>
+    <li><span>13</span>Configuração (config.json)</li>
+    <li><span>14</span>Contratos de dados (JSON)</li>
+    <li><span>15</span>Fluxos do Power Automate</li>
+    <li><span>16</span>Tratamento de erros</li>
+    <li><span>17</span>Arquivos locais, logs e diagnóstico</li>
+    <li><span>18</span>Build, instalador e Releases</li>
+    <li><span>19</span>Ferramentas: Mapear, --testar e Demo</li>
+    <li><span>20</span>Testes e manutenção</li>
+    <li><span>21</span>Decisões fechadas, limites e pendências</li>
+  </ol>
+  <div class="caixa dica"><span class="t">Como ler este documento</span>
+    As seções 1 a 5 explicam o caminho de um alerta de ponta a ponta. As seções 6 a 12 detalham cada módulo. As seções 13 a 15 são referência (config, formatos dos arquivos e fluxos). As seções 16 a 21 cobrem operação, build e manutenção. Nomes entre <code>crases</code> são nomes reais do código (<code>arquivo.py</code>, <code>função</code>, <code>chave do config</code>).</div>
+  <div class="caixa info"><span class="t">Documentos relacionados</span>
+    <ul>
+      <li><b>Manual do plantonista</b> (<code>Manual-DispatchBot.pdf</code>, também anexo às Releases): uso do dia a dia, sem termos técnicos.</li>
+      <li><b>README.md</b>: instalação, mapeamento de campos, testes rápidos.</li>
+      <li><b>docs/power-automate.md</b>: passo a passo dos fluxos de nuvem (expressões completas).</li>
+      <li><b>fluxos/</b>: pacotes exportados dos três fluxos (.zip) e como importar.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 1 -->
+<section class="secao">
+  <h2><span class="num">1</span>Visão geral e arquitetura</h2>
+  <p class="lead">O DispatchBot é um robô RPA de desktop (Windows) que transforma alertas de GMUD e de falha de Backup em chamados no ServiceNow da Cirion, pelo Employee Center (<code>/esc</code>). Não existe API do ServiceNow disponível para o time: o robô usa um navegador real (Edge ou Chrome do sistema) com a sessão SSO do plantonista.</p>
+
+  <div class="esteira">
+    <div><span class="onde">Outlook</span><b>E-mail do alerta</b>GMUD (ServiceNow YDUQS) ou falha de Backup (CSV do NetBackup).</div>
+    <div><span class="onde">Power Automate</span><b>Fluxo de entrada</b>"GMUD | Todos" ou BackupBot: posta o card no Teams e grava um JSON em <code>pendentes</code>.</div>
+    <div><span class="onde">SharePoint</span><b>Fila</b><code>DispatchBot-Fila</code>: pastas <code>pendentes → processando → processados | erro</code> + <code>retorno</code>.</div>
+    <div><span class="onde">Máquina do N1</span><b>DispatchBot</b>Lê a fila pela API REST, preenche o formulário no navegador, envia e captura o número.</div>
+    <div><span class="onde">Power Automate → Teams</span><b>Retorno</b>"DispatchBot | Retorno" lê <code>retorno</code> e posta ✅ número + link (ou ⚠️ motivo) no chat do time.</div>
+  </div>
+
+  <h3>Componentes</h3>
+  <table>
+    <tr><th>Componente</th><th>Onde roda</th><th>Responsabilidade</th></tr>
+    <tr><td><b>GMUD | Todos</b></td><td>Power Automate (nuvem)</td><td>Gatilho na caixa da operação (e-mail "Uma tarefa de Mudança foi atribuída"). Extrai CHG, data, descrição e o time (<code>SN_TI_CHG_EXECUTOR_CIRION_&lt;TIME&gt;</code> ou <code>..._Backup_Cirion</code>), posta o card no chat do time e grava <code>&lt;TIME&gt;_*.json</code> em <code>pendentes</code>.</td></tr>
+    <tr><td><b>BackupBot</b></td><td>Power Automate (nuvem)</td><td>Gatilho na caixa do Backup. Lê o CSV anexo, filtra as falhas, posta o card e grava um <code>BACKUP_*.json</code> por linha de falha.</td></tr>
+    <tr><td><b>DispatchBot (robô)</b></td><td>Máquina do Dispatcher N1 (Windows, por usuário)</td><td>Fila, reserva, idempotência, preenchimento, envio, captura do número, retorno, painel, histórico do time, parada de emergência.</td></tr>
+    <tr><td><b>DispatchBot | Retorno</b></td><td>Power Automate (nuvem)</td><td>Gatilho em arquivo novo em <code>retorno</code>; Switch pelo <code>tipo</code> posta a mensagem no chat em grupo certo.</td></tr>
+    <tr><td><b>DispatchBot-Mapear</b></td><td>Máquina do desenvolvedor/N1</td><td>Ferramenta de console: lista campos de um formulário, testa o preenchimento sem enviar (<code>--testar</code>).</td></tr>
+  </table>
+
+  <h3>Princípios de projeto</h3>
+  <ul>
+    <li><b>O robô não inventa dados.</b> Faltou CHG, data ou descrição, ou a CHG não segue <code>CHG\d{7}</code>: não abre, vai para <code>/erro</code> e o Teams avisa.</li>
+    <li><b>Nunca dois chamados para o mesmo alerta.</b> Histórico local com <code>fsync</code> antes do clique em Enviar; status <code>enviando</code> bloqueia qualquer reenvio automático.</li>
+    <li><b>Nunca digita senha.</b> No login, só clica em "Use external login" e em "Submit"; o resto (conta Microsoft, Windows Hello) é do plantonista.</li>
+    <li><b>Um robô ativo por vez.</b> Só o Dispatcher N1 da vez fica ativo; os outros ficam em Pausado. A reserva atômica no SharePoint protege mesmo se dois ficarem ativos.</li>
+    <li><b>Formulários descritos no config.</b> Cada tipo de alerta é um bloco de <code>tipos</code> (URL, passos, seletores, captura do número). Tipo novo não exige código.</li>
+    <li><b>Falhar para o lado seguro.</b> Na dúvida (obrigatório vazio, conferência falhou), o robô não envia e chama o plantonista.</li>
+  </ul>
+
+  <h3>Mapa do código (<code>robo/</code>)</h3>
+  <table>
+    <tr><th>Arquivo</th><th>Linhas</th><th>Papel</th></tr>
+    <tr><td><code>main.py</code></td><td>~1300</td><td>Classe <code>Robo</code>: loop, ciclo, <code>processar</code>, guardas, novas tentativas, plantão, histórico do time, emergência, supervisor; <code>main()</code> com mutex e modo <code>--vigia</code>.</td></tr>
+    <tr><td><code>servicenow.py</code></td><td>~385</td><td>Placeholders, validação de dados, execução dos passos, detector de obrigatórios (<code>JS_OBRIGATORIOS</code>), envio/conferência, captura do número, link de tratamento.</td></tr>
+    <tr><td><code>fila_sharepoint.py</code></td><td>~390</td><td><code>FilaSharePoint</code>: fila pela API REST (MoveTo atômico, digest, renovação de sessão), status, plantão, histórico.</td></tr>
+    <tr><td><code>fila.py</code></td><td>~305</td><td><code>Fila</code> em pasta (modo antigo, OneDrive), <code>Historico</code> (<code>processados.jsonl</code>), constantes <code>HOST</code>/<code>SEP</code>.</td></tr>
+    <tr><td><code>navegador.py</code></td><td>~340</td><td><code>Navegador</code>: Edge→Chrome com perfil próprio, detecção e espera de login, cookies do SharePoint, limpeza de processos órfãos.</td></tr>
+    <tr><td><code>painel.py</code></td><td>~800</td><td>Painel CustomTkinter (thread própria), janelinha "Precisa de você", janela do nome, tela Histórico do time, <code>painel.jsonl</code>.</td></tr>
+    <tr><td><code>bandeja.py</code></td><td>~140</td><td>Ícone pystray (avatar + bolinha de status) e menu.</td></tr>
+    <tr><td><code>config.py</code></td><td>~140</td><td>Carregar/mesclar/salvar config, herança de tipos, nome do plantonista.</td></tr>
+    <tr><td><code>emergencia.py</code></td><td>~80</td><td>Atalho global (RegisterHotKey) e arquivo PARAR na pasta local.</td></tr>
+    <tr><td><code>log.py</code></td><td>~55</td><td>Log rotativo e screenshots de erro.</td></tr>
+    <tr><td><code>pasta.py</code></td><td>~155</td><td>Só no modo antigo: localizar/sincronizar a pasta do OneDrive.</td></tr>
+    <tr><td><code>mapear_campos.py</code></td><td>~175</td><td><code>DispatchBot-Mapear.exe</code>: mapear campos e <code>--testar</code>.</td></tr>
+    <tr><td><code>demo.py</code></td><td>~100</td><td>Demonstração: preenche GMUD e Backup no portal real sem enviar.</td></tr>
+    <tr><td><code>versao.py</code></td><td>2</td><td>Fonte única da versão (<code>VERSAO = "1.10.5"</code>).</td></tr>
+  </table>
+</section>
+
+<!-- 2 -->
+<section class="secao">
+  <h2><span class="num">2</span>Ciclo de vida de um alerta</h2>
+  <p class="lead">Um alerta é um arquivo JSON. O estado dele é a pasta onde está e, para a idempotência, a última linha do seu <code>id</code> no histórico local da máquina.</p>
+
+  <div class="estados">
+    <span class="p">pendentes/INFRA_x.json</span><span class="s">→ reservar (MoveTo) →</span>
+    <span class="p">processando/INFRA_x__HOST.json</span><span class="s">→</span>
+    <span class="p ok">processados/RITM0421153_INFRA_x.json</span><span class="s">ou</span>
+    <span class="p er">erro/INFRA_x.json</span><span class="s">+</span>
+    <span class="p">retorno/INFRA_x.json</span>
+  </div>
+
+  <table>
+    <tr><th>Pasta</th><th>Quem grava</th><th>Conteúdo</th></tr>
+    <tr><td><code>pendentes</code></td><td>Fluxos de entrada</td><td>Alerta original. O robô ignora arquivos com menos de <code>idade_minima_arquivo_seg</code> (5 s) e nomes iniciados por <code>~</code> ou <code>.</code>. Ordem: mais antigo primeiro.</td></tr>
+    <tr><td><code>processando</code></td><td>Robô (reserva)</td><td><code>&lt;nome&gt;__&lt;HOST&gt;.json</code>. A data do arquivo é regravada na reserva: é ela que as outras máquinas usam para detectar reserva abandonada.</td></tr>
+    <tr><td><code>processados</code></td><td>Robô</td><td>Alerta + <code>resultado</code> {numero, url, maquina, processado_em}. Nome <code>&lt;NUMERO&gt;_&lt;nome&gt;.json</code>; sem número (ignorado, aberto à mão) fica só <code>&lt;nome&gt;.json</code>.</td></tr>
+    <tr><td><code>erro</code></td><td>Robô</td><td>Alerta + <code>erro</code> {mensagem, maquina, em}. JSON ilegível: o arquivo original + <code>&lt;nome&gt;.erro.txt</code> com o motivo.</td></tr>
+    <tr><td><code>retorno</code></td><td>Robô</td><td>Resultado para o Teams (status <code>ok</code> ou <code>erro</code>), lido pelo fluxo Retorno.</td></tr>
+    <tr><td><code>status</code></td><td>Cada robô</td><td><code>&lt;HOST&gt;.json</code>: batimento a cada 5 min ou na troca de status.</td></tr>
+    <tr><td><code>plantao</code></td><td>Robô que assume</td><td><code>&lt;HOST alvo&gt;.json</code>: pedido para o robô alvo pausar.</td></tr>
+    <tr><td><code>historico</code></td><td>Cada robô</td><td><code>&lt;AAAA-MM-DD&gt;_&lt;HOST&gt;.jsonl</code>: eventos do dia da máquina.</td></tr>
+    <tr><td><code>PARAR*</code> (raiz)</td><td>Pessoa</td><td>Parada remota de todos os robôs; a 1ª linha vira o motivo.</td></tr>
+  </table>
+  <p>As subpastas que faltarem são criadas pelo robô (<code>verificar_pasta</code>, a cada 5 min). A raiz <code>DispatchBot-Fila</code> nunca é criada pelo robô: se não existir, é erro de configuração.</p>
+
+  <h3>Desfechos possíveis</h3>
+  <table>
+    <tr><th>Desfecho</th><th>Destino</th><th>Retorno (Teams)</th><th>Histórico local</th></tr>
+    <tr><td>Chamado aberto</td><td><code>processados/&lt;NUM&gt;_...</code></td><td>✅ número + link de tratamento</td><td><code>ok</code> com numero/url</td></tr>
+    <tr><td>Arquivo repetido (id já <code>ok</code>)</td><td><code>processados</code></td><td>nenhum</td><td>sem mudança</td></tr>
+    <tr><td>Cliente em <code>ignorar_clientes</code></td><td><code>processados</code></td><td>nenhum</td><td><code>ok</code> + <code>ignorado</code></td></tr>
+    <tr><td>Alerta antigo: "já foi aberto à mão"</td><td><code>processados</code></td><td>nenhum</td><td><code>ok</code> + <code>manual</code></td></tr>
+    <tr><td>Dado faltando, tipo desconhecido/não mapeado, texto ilegível, recusa do formulário</td><td><code>erro</code></td><td>⚠️ motivo</td><td><code>erro</code> (se houver id)</td></tr>
+    <tr><td>Falha depois do clique em Enviar / pulado / ninguém conferiu</td><td><code>erro</code></td><td>⚠️ "confira no ServiceNow"</td><td>mantém <code>enviando</code></td></tr>
+    <tr><td>Login pendente, pausa, emergência antes do envio</td><td>volta a <code>pendentes</code></td><td>nenhum</td><td>sem mudança</td></tr>
+    <tr><td>JSON inválido</td><td><code>erro</code> + <code>.erro.txt</code></td><td>nenhum (sem dados para o Teams)</td><td>sem mudança</td></tr>
+  </table>
+</section>
+
+<!-- 3 -->
+<section class="secao">
+  <h2><span class="num">3</span>Processo, threads e sincronização</h2>
+  <p class="lead">Um processo por usuário (<code>DispatchBot.exe</code>, sem console). O ícone da bandeja ocupa a thread principal; todo o Playwright roda numa única thread ("robo"). As demais threads só trocam sinais com ela.</p>
+
+  <table>
+    <tr><th>Thread</th><th>Origem</th><th>Faz</th></tr>
+    <tr><td><b>principal</b></td><td><code>Bandeja.rodar</code> (pystray)</td><td>Loop de mensagens do ícone e do menu. Callbacks do menu rodam aqui e só mexem em config/flags.</td></tr>
+    <tr><td><b>robo</b></td><td><code>Robo.loop</code></td><td>Único dono do Playwright e da fila (incluindo renovar a sessão do SharePoint, que abre o navegador).</td></tr>
+    <tr><td><b>supervisor</b></td><td><code>supervisionar</code></td><td>A cada 30 s: se a thread "robo" morreu, descarta o navegador (objetos do Playwright pertencem à thread antiga) e cria outra.</td></tr>
+    <tr><td><b>evento-sair</b></td><td><code>aguardar_evento_sair</code></td><td>Espera o evento nomeado <code>DispatchBot_Sair</code> (sinalizado pelo instalador) e encerra com segurança.</td></tr>
+    <tr><td><b>parada-remota</b></td><td><code>vigiar_parada_remota</code></td><td>Procura o arquivo <code>PARAR</code> a cada 10 s (SharePoint) ou 3 s (pasta). Usa a sessão já carregada, nunca renova (<code>pode_renovar=False</code>).</td></tr>
+    <tr><td><b>atalho</b></td><td><code>emergencia.escutar_atalho</code></td><td><code>RegisterHotKey</code> + <code>GetMessageW</code>: dispara <code>parar_agora("atalho")</code>.</td></tr>
+    <tr><td><b>painel</b></td><td><code>Painel._rodar</code></td><td>Mainloop do Tk (CustomTkinter). Sobe escondida no início: a janelinha "Precisa de você" depende dela.</td></tr>
+    <tr><td><b>pergunta-alerta-antigo</b></td><td><code>perguntar_por_caixa</code></td><td>Só sem painel: <code>MessageBoxW</code> Sim/Não/Cancelar, uma por vez.</td></tr>
+  </table>
+
+  <h3>Como as threads conversam</h3>
+  <ul>
+    <li><code>threading.Event</code>: <code>parar</code> (encerrando), <code>acordar</code> (verificar agora, interrompe a espera do polling), <code>emergencia</code> (parada imediata, vista por todos).</li>
+    <li><b>Pedidos por atributo</b>, consumidos pela thread do robô: <code>pedido_conferencia</code> ("mostrar"/"pular"), <code>pedido_login_frente</code>, <code>pedido_assumir</code> (hosts), <code>respostas_antigos</code>. O painel só grava o pedido; quem toca no navegador é sempre a thread do robô.</li>
+    <li><b>Estado para o painel</b>: <code>estado_painel()</code> monta um dicionário (status, detalhe, pendentes, em andamento, decisões, conferência, login, nome, outros ativos) lido pelo painel a cada 1 s.</li>
+    <li><b>Config como fonte de verdade</b> de <code>pausado</code>, <code>emergencia</code> e <code>envio_automatico</code>: o menu grava o arquivo; o loop relê o config a cada ciclo (<code>config.carregar()</code>), então editar o <code>config.json</code> não exige reiniciar.</li>
+    <li>Eventos do histórico do time ficam em <code>self.eventos</code> protegidos por <code>trava_eventos</code> (máx. 500 em memória) até a thread do robô gravar.</li>
+  </ul>
+
+  <h3>Início do processo (<code>main()</code>)</h3>
+  <ol>
+    <li>Mutex <code>DispatchBot_Mutex</code>: se já existe, sai (com <code>--vigia</code>, sai calado; sem, mostra "já está em execução").</li>
+    <li>Com <code>--vigia</code> e a flag <code>encerrado_pelo_usuario</code>: sai (o vigia respeita quem fechou pelo menu "Sair"). Sem <code>--vigia</code>, a flag é apagada.</li>
+    <li>Configura o log e o <code>threading.excepthook</code>; carrega o config (inválido = caixa com a linha do erro e sai).</li>
+    <li>Só no modo antigo (sem <code>fila_sharepoint.site</code>): acha/sincroniza a pasta do OneDrive.</li>
+    <li><code>Robo().iniciar()</code> → ícone + threads. Ao sair: <code>logging.shutdown()</code> e <code>os._exit(0)</code> (a thread do Tk podia segurar o processo e travar o build/instalador).</li>
+  </ol>
+</section>
+
+<!-- 4 -->
+<section class="secao">
+  <h2><span class="num">4</span>Loop principal</h2>
+  <p class="lead"><code>Robo.loop</code> repete a cada <code>intervalo_polling_seg</code> (15 s), ou antes quando o evento <code>acordar</code> é sinalizado (menu "Verificar agora", decisão do plantonista, troca de pausa).</p>
+
+  <pre><span class="c"># Robo.loop (resumo)</span>
+enquanto não encerrando:
+    cfg = config.carregar()                       <span class="c"># relê o config a cada volta</span>
+    pergunta o nome na 1ª execução (painel)
+    fila = abrir_fila(fila)                       <span class="c"># FilaSharePoint (padrão) ou Fila (pasta)</span>
+    fila.verificar_pasta()                        <span class="c"># a cada 5 min; cria subpastas</span>
+    tratar_plantao(fila)                          <span class="c"># grava pedidos "assumir"; lê pedido para esta máquina</span>
+    gravar_eventos(fila)                          <span class="c"># histórico do time</span>
+    se pausado ou emergência:
+        fecha o navegador; ícone cinza (ou vermelho na emergência); gravar_status
+    senão:
+        login_inicial() na 1ª vez, ou se o navegador "sempre aberto" estiver fechado
+        ciclo(fila)
+        manter_sessao()                           <span class="c"># recarrega o portal se parado há manter_sessao_min</span>
+        fechar_se_ocioso()                        <span class="c"># só se fechar_apos_ocioso_min &gt; 0</span>
+    espera acordar ou intervalo_polling_seg</pre>
+
+  <h3><code>ciclo(fila)</code></h3>
+  <ol>
+    <li><code>recuperar_reservas(historico)</code>: arquivos desta máquina que ficaram em <code>processando</code> (robô fechado no meio). Se o histórico diz <code>ok</code> → conclui (com retorno só se houver número); <code>enviando</code> → <code>/erro</code> "confira no ServiceNow"; outro → devolve a <code>pendentes</code>.</li>
+    <li><code>tratar_reservas_abandonadas(reserva_abandonada_min)</code>: reservas de <b>outras</b> máquinas paradas há mais de 60 min vão para <code>/erro</code> (não para <code>pendentes</code>: o chamado pode ter sido aberto antes da queda).</li>
+    <li><code>gravar_status</code>: batimento, leitura dos outros robôs, aviso de "outro robô ativo" (no máx. 1 por hora por máquina).</li>
+    <li>Lista <code>pendentes</code>; para cada arquivo, nessa ordem: para se pausado/emergência ou se um colega assumiu o plantão (<code>verificar_pedido_plantao</code>, a cada 30 s, só entre alertas); pula alerta antigo sem decisão; chama <code>processar</code>. Se <code>processar</code> devolve <code>False</code> (ex.: login pendente), o ciclo para: os próximos alertas dependem da mesma coisa.</li>
+  </ol>
+
+  <h3>Exceções no loop</h3>
+  <table>
+    <tr><th>Exceção</th><th>Tratamento</th></tr>
+    <tr><td><code>AguardandoPasta</code></td><td>Só modo antigo: ícone azul "Preparando"; aviso único se a pasta não aparecer em 10 min.</td></tr>
+    <tr><td><code>PastaIndisponivel</code>, <code>ConfigInvalido</code></td><td>Ícone vermelho (<code>erro_infra</code>); some sozinho quando o problema passa.</td></tr>
+    <tr><td>Janela do navegador fechada (<code>"has been closed"</code>)</td><td>Não é erro: descarta o navegador, notifica e reabre no próximo ciclo.</td></tr>
+    <tr><td>Qualquer outra</td><td><code>log.exception</code> + ícone vermelho com a mensagem amigável (<code>MENSAGENS_AMIGAVEIS</code>). Notificação repetida só se a mensagem mudar ou depois de 10 min.</td></tr>
+  </table>
+  <p>No fim do loop (<code>finally</code>): fecha o navegador, grava o status <code>encerrado</code>, evento "encerrou" e descarrega os eventos pendentes.</p>
+</section>
+
+<!-- 5 -->
+<section class="secao">
+  <h2><span class="num">5</span>Processamento de um alerta</h2>
+  <p class="lead"><code>Robo.processar(fila, arquivo)</code> aplica as guardas em ordem fixa. A ordem importa: nada que possa abrir um chamado acontece antes das verificações de identidade, legibilidade e duplicidade.</p>
+
+  <table>
+    <tr><th>#</th><th>Etapa</th><th>Regra</th><th>Resultado</th></tr>
+    <tr><td>1</td><td>Reservar</td><td><code>fila.reservar</code> (MoveTo atômico). Falhou = outra máquina pegou.</td><td>pula o arquivo</td></tr>
+    <tr><td>2</td><td>Ler o JSON</td><td>Falha de conexão → devolve; conteúdo inválido → erro.</td><td><code>/erro</code> + <code>.erro.txt</code></td></tr>
+    <tr><td>3</td><td>Limpar texto</td><td><code>limpar_texto</code>: remove caracteres de controle (menos <code>\n \r \t</code>) de todo o alerta. Motivo: CSV UTF-16 lido como UTF-8 no fluxo deixa <code>\0</code> entre as letras.</td><td>segue</td></tr>
+    <tr><td>4</td><td>Deduzir o tipo</td><td>Sem <code>tipo</code>: <code>grupo_executor</code> terminado em <code>BACKUP_CIRION</code> → <code>GMUD_BACKUP</code>; contendo <code>CIRION_</code> → o que vem depois (INFRA, DBA, SO...).</td><td>segue</td></tr>
+    <tr><td>5</td><td>Sem <code>id</code></td><td>—</td><td><code>/erro</code> ⚠️</td></tr>
+    <tr><td>6</td><td>Texto ilegível</td><td><code>texto_ilegivel</code> em chg/titulo/descricao: caractere <code>�</code> ou &gt; 20% de símbolos fora do comum. Título vira "(texto ilegível)", original em <code>titulo_original</code>.</td><td><code>/erro</code> ⚠️ "abra à mão pelo e-mail original"</td></tr>
+    <tr><td>7</td><td>Tipo desconhecido</td><td><code>config.tipo_efetivo</code> devolve None (tipos começando com <code>_</code> são modelos).</td><td><code>/erro</code> ⚠️</td></tr>
+    <tr><td>8</td><td>Idempotência</td><td>Histórico <code>ok</code> → conclui sem retorno (arquivo repetido). <code>enviando</code> → erro "confira no ServiceNow". <code>forcar_reprocessamento: true</code> ignora as duas.</td><td><code>processados</code> ou <code>/erro</code></td></tr>
+    <tr><td>9</td><td>Cliente ignorado</td><td><code>cliente_ignorado</code>: cliente da 4ª coluna da linha do CSV (no <code>id</code>, depois do <code>#</code>) ou um trecho do título está em <code>ignorar_clientes</code> do tipo. Compara o campo inteiro, sem maiúsculas; nome curto casa com FQDN.</td><td><code>processados</code>, sem chamado e sem Teams</td></tr>
+    <tr><td>10</td><td>Alerta antigo</td><td><code>recebido_em</code> há mais de <code>perguntar_alerta_antigo_min</code> (120): devolve o arquivo e pergunta (Abrir / Já foi aberto à mão / Decidir depois). "Depois" pergunta de novo em 30 min. Os alertas novos seguem.</td><td>espera / abre / <code>processados</code> (<code>manual</code>)</td></tr>
+    <tr><td>11</td><td>Login vencido</td><td><code>login_pendente</code> e alerta com mais de <code>max_espera_login_min</code> (60).</td><td><code>/erro</code> ⚠️ "abra manualmente"</td></tr>
+    <tr><td>12</td><td>Abrir o chamado</td><td>Até <code>tentativas_por_alerta</code> (3) vezes, com navegador novo e espera de <code>espera_entre_tentativas_seg × tentativa</code> (20 s, 40 s...). Detalhes na seção 6.</td><td>ver tabela abaixo</td></tr>
+    <tr><td>13</td><td>Concluir</td><td>Histórico <code>ok</code> → <code>painel.jsonl</code> → evento "chamado" → <code>fila.concluir</code> (processados + retorno). Se gravar na fila falhar, o chamado já está no histórico: o próximo ciclo refaz pela recuperação.</td><td>✅ no Teams</td></tr>
+  </table>
+
+  <h3>Exceções durante a abertura</h3>
+  <table>
+    <tr><th>Exceção</th><th>Significa</th><th>Ação</th></tr>
+    <tr><td><code>Interrompido</code></td><td>Pausa ou emergência no meio</td><td><code>interromper</code>: com <code>enviando</code> → <code>/erro</code>; senão devolve intacto.</td></tr>
+    <tr><td><code>LoginNaoConcluido</code></td><td>Ninguém fez login a tempo</td><td>Devolve a <code>pendentes</code>, ícone amarelo, interrompe o ciclo.</td></tr>
+    <tr><td><code>TipoNaoMapeado</code>, <code>DadoFaltando</code>, <code>FormularioRecusado</code></td><td>Repetir não adianta; nada foi aberto</td><td>Screenshot + <code>/erro</code> ⚠️.</td></tr>
+    <tr><td><code>Pulado</code></td><td>Plantonista clicou "Pular este alerta"</td><td><code>/erro</code> ⚠️; mantém <code>enviando</code> (bloqueia reenvio).</td></tr>
+    <tr><td><code>NaoConfirmado</code></td><td>Conferência sem clique em <code>confirmacao_timeout_min</code> (30)</td><td><code>/erro</code> ⚠️ "confira no ServiceNow"; mantém <code>enviando</code>.</td></tr>
+    <tr><td>Outra, com <code>enviando</code></td><td>Falhou depois do clique</td><td><code>/erro</code> ⚠️ "o chamado pode ter sido aberto". Nunca tenta de novo.</td></tr>
+    <tr><td>Outra, sem <code>enviando</code></td><td>Falha passageira (rede, timeout)</td><td>Nova tentativa; na última, <code>/erro</code> ⚠️ "(3 tentativas)".</td></tr>
+  </table>
+</section>
+
+<!-- 6 -->
+<section class="secao">
+  <h2><span class="num">6</span>Preenchimento e envio no ServiceNow</h2>
+  <p class="lead"><code>servicenow.abrir_chamado(nav, cfg, tipo_cfg, alerta, ...)</code> devolve <code>(numero, url)</code>. Tudo o que é específico de um formulário vem do bloco do tipo no config.</p>
+
+  <h3>Variáveis e placeholders</h3>
+  <p>Valores e buscas dos passos aceitam <code>{campo}</code> e <code>{campo|formato}</code> (regex <code>\{(\w+)(?:\|([^{}]+))?\}</code>). O dicionário de variáveis é montado por <code>variaveis()</code>, em prioridade crescente:</p>
+  <ol>
+    <li><code>padroes</code> do tipo (o alerta pode trocar; ex.: <code>servico_afetado</code>, <code>failure_type</code>, <code>impacto</code> do Backup);</li>
+    <li>campos simples do JSON do alerta (strings/números não vazios);</li>
+    <li><code>id_curto</code> = 10 primeiros hex do SHA-1 do <code>id</code>;</li>
+    <li><code>variaveis</code> do tipo (fixas: conta, caller, categoria, <code>time_titulo</code>). O alerta não sobrescreve.</li>
+  </ol>
+  <p>Datas: <code>ler_data</code> aceita ISO (com <code>Z</code>) e <code>dd/MM/yyyy HH:mm[:ss]</code>, <code>dd/MM/yyyy</code>, <code>yyyy-MM-dd HH:mm[:ss]</code>. O formato de saída usa tokens do Excel (<code>yyyy dd MM HH mm ss</code>), ex.: <code>{data_execucao|dd/MM HH:mm}</code> → <code>29/04 09:30</code>.</p>
+
+  <h3>Validações antes de abrir o navegador</h3>
+  <ul>
+    <li><b>Tipo não mapeado:</b> qualquer <code>PREENCHER</code> no bloco efetivo (sem as chaves <code>_ajuda</code>) → <code>TipoNaoMapeado</code>. Só no envio real; no <code>--testar</code> passa, para mapear aos poucos.</li>
+    <li><b>Dado faltando</b> (<code>faltando()</code>): todo placeholder usado em <code>url_formulario</code>, <code>valor</code> e <code>busca</code> (menos passos com <code>pular_se_vazio</code>) precisa existir e, se tiver formato de data, ser uma data válida. Depois, cada regex de <code>validar</code> precisa casar inteira (<code>re.fullmatch</code>), ex.: <code>chg: CHG\d{7}</code>. Qualquer problema → <code>DadoFaltando</code> listando todos.</li>
+  </ul>
+
+  <h3>Ações dos passos</h3>
+  <table>
+    <tr><th>Ação</th><th>O que faz no Playwright</th></tr>
+    <tr><td><code>preencher</code></td><td><code>locator.fill(valor)</code></td></tr>
+    <tr><td><code>selecionar</code></td><td><code>select_option(valor)</code> (valor ou texto da opção) em <code>&lt;select&gt;</code> nativo</td></tr>
+    <tr><td><code>referencia</code></td><td>Campo select2 com busca: clica, digita <code>busca</code> (ou <code>valor</code>) com <code>press_sequentially</code> (60 ms por tecla, o select2 busca por tecla) em <code>.select2-drop-active input.select2-input</code> e clica na opção que <b>contém</b> <code>valor</code>.</td></tr>
+    <tr><td><code>escolher</code></td><td>Lista fixa select2: clica e escolhe a opção cujo texto é <b>exatamente</b> <code>valor</code> (Categoria <code>Other</code>, Failure Type).</td></tr>
+    <tr><td><code>marcar</code></td><td><code>set_checked</code>; sem <code>valor</code> marca, com <code>false/0/não/vazio</code> desmarca.</td></tr>
+    <tr><td><code>clicar</code></td><td><code>click()</code></td></tr>
+    <tr><td><code>aguardar</code></td><td>Espera o seletor ficar visível ou <code>valor</code> ms.</td></tr>
+  </table>
+  <p>Opções por passo: <code>mapa</code> (tradução de valor, <code>*</code> = padrão), <code>opcional</code> (falha vira aviso no log), <code>pular_se_vazio</code>, <code>seletor_busca</code> e <code>seletor_opcao</code> (sobrescrevem os do select2). Antes de cada passo, <code>verificar_parada</code> levanta <code>Interrompido</code> se o robô foi pausado/parado. Falha num passo obrigatório vira <code>RuntimeError("Falha no passo N (...)")</code>.</p>
+
+  <h3>Envio automático × conferência</h3>
+  <p>O robô decide pelo grupo do tipo: <code>GMUD</code> para todo tipo que herda <code>_GMUD</code>, senão o próprio nome (<code>BACKUP</code>). Lê <code>envio_automatico[grupo]</code> (padrão <code>true</code>); o plantonista troca pelo menu do ícone. O resultado vai para <code>confirmar_antes_de_enviar</code> do tipo efetivo (a chave antiga no config não é mais lida).</p>
+  <ol>
+    <li>Guarda os números que já estão na tela (<code>ja_na_tela</code>): não contam como o número novo.</li>
+    <li><b>Envio automático:</b> só clica se <code>botao_enviar</code> estiver mapeado e <code>obrigatorios_vazios(page)</code> devolver lista vazia. O detector (<code>JS_OBRIGATORIOS</code>) procura <code>.form-group</code>/<code>.sp-form-field</code> visíveis com asterisco visível (<code>.mandatory</code>, <code>.fa-asterisk</code>), <code>is-required</code>, <code>[required]</code>, <code>aria-required</code> ou rótulo terminando em <code>*</code>; em campo de referência vale qualquer input não vazio do grupo. Obrigatório vazio, botão sem seletor ou erro na conferência = <b>não clica</b> e cai para a conferência com o motivo.</li>
+    <li><b>Ponto sem volta:</b> <code>antes_de_enviar()</code> grava <code>enviando</code> no histórico (com <code>fsync</code>) <b>antes</b> do clique ou da conferência.</li>
+    <li><b>Conferência:</b> traz o formulário para a frente, ícone amarelo, janelinha "Precisa de você" com os campos preenchidos (<code>resumo_campos</code>), o motivo e a contagem até <code>confirmacao_timeout_min</code>. Botões: "Mostrar formulário" (<code>bring_to_front</code>) e "Pular este alerta" (<code>Pulado</code>, só se nenhum número apareceu).</li>
+    <li><b>Captura do número</b> (laço de 1 s até <code>timeout_seg</code>): aplica <code>captura_numero.regex</code> ao texto de <code>seletor</code> (todos os elementos, mesmo escondidos) ou da página inteira; ignora os de <code>ja_na_tela</code>; escolhe na ordem de <code>preferir</code>; sem o preferido, espera <code>espera_preferido_seg</code> e aceita o primeiro. No automático, se <code>seletor_erro_validacao</code> aparecer → <code>FormularioRecusado</code>.</li>
+  </ol>
+
+  <table>
+    <tr><th>Tipo</th><th>Regex</th><th>Preferir</th><th>Seletor</th><th>Tempo</th></tr>
+    <tr><td>GMUD (Hosting)</td><td><code>(RITM|CS)\d{7}</code></td><td>RITM</td><td><code>#req-item-toggle a, .ticket-id</code></td><td>90 s; espera o RITM 30 s</td></tr>
+    <tr><td>BACKUP (Incidente)</td><td><code>(INC|RITM|REQ|CS)\d{7}</code></td><td>INC, RITM</td><td>página inteira</td><td>60 s; espera o preferido 10 s</td></tr>
+  </table>
+  <p>O Hosting cria um caso <b>CS</b> e um <b>RITM</b> ligado (aba Related Records, já no DOM escondido). O número do time é o RITM; o seletor restrito evita pegar RITMs citados na descrição.</p>
+
+  <h3>Link de tratamento</h3>
+  <p><code>link_tratamento(cfg, numero)</code> monta <code>instancia_url + link_tratamento</code> com a tabela pelo prefixo: RITM → <code>sc_req_item</code>, INC → <code>incident</code>, REQ → <code>sc_request</code>, CS → <code>sn_customerservice_case</code>. Resultado: <code>/now/nav/ui/classic/params/target/sc_req_item.do%3Fsysparm_query%3Dnumber%3DRITM0421153</code>. Vai no <code>url</code> do retorno, do histórico e do painel.</p>
+
+  <h3>Checagem de duplicado no portal (desligada)</h3>
+  <p><code>checar_duplicado_servicenow.ativo</code> (padrão <code>false</code>): antes de abrir, visita <code>url_busca</code> com <code>{id_curto}</code> e, se achar <code>regex_numero</code> na página, usa esse número. Fica desligada porque só um robô fica ativo e o histórico local já garante a idempotência.</p>
+</section>
+
+<!-- 7 -->
+<section class="secao">
+  <h2><span class="num">7</span>Idempotência: nunca dois chamados</h2>
+  <p class="lead">A garantia vem de três camadas: reserva atômica na fila, histórico local gravado em disco antes do clique, e recuperação conservadora depois de qualquer queda.</p>
+
+  <h3>Histórico local (<code>processados.jsonl</code>)</h3>
+  <p><code>fila.Historico</code>: uma linha JSON por mudança de status; vale a última linha de cada <code>id</code>. Cada gravação faz <code>flush</code> + <code>os.fsync</code>.</p>
+  <table>
+    <tr><th>Status</th><th>Quando</th><th>Efeito num arquivo com o mesmo id</th></tr>
+    <tr><td><code>enviando</code></td><td>Imediatamente antes do clique em Enviar (ou da conferência)</td><td>Bloqueia: vai para <code>/erro</code> "confira no ServiceNow"</td></tr>
+    <tr><td><code>ok</code></td><td>Número capturado (ou ignorado/manual)</td><td>Concluído sem chamado e sem Teams (repetido)</td></tr>
+    <tr><td><code>erro</code></td><td>Erro final com id conhecido</td><td>Pode ser reprocessado (move de volta para <code>pendentes</code>)</td></tr>
+  </table>
+  <ul>
+    <li><b>GMUD:</b> <code>id</code> = número da CHG. A mesma CHG nunca vira dois RITMs, mesmo com e-mail repetido ou dois fluxos ligados.</li>
+    <li><b>Backup:</b> <code>id</code> = <code>internetMessageId#&lt;linha inteira do CSV&gt;</code> (a linha tem o JobID, único).</li>
+    <li><b>Limite conhecido:</b> o histórico é <b>por máquina</b>. Se o mesmo alerta for reprocessado em outra máquina depois de <code>ok</code>, ela não sabe. Mitigação: só um robô ativo + MoveTo atômico (um arquivo só é reservado uma vez).</li>
+  </ul>
+
+  <h3>Recuperação depois de queda</h3>
+  <table>
+    <tr><th>Situação</th><th>Quem trata</th><th>Ação</th></tr>
+    <tr><td>Arquivo desta máquina em <code>processando</code>, histórico <code>ok</code></td><td><code>recuperar_reservas</code></td><td>Conclui; grava retorno <b>só se o histórico tem número</b> (1.10.5: ignorado e "aberto à mão" não geram ✅ vazio no Teams).</td></tr>
+    <tr><td>Idem, histórico <code>enviando</code></td><td><code>recuperar_reservas</code></td><td><code>/erro</code> "interrompido depois de clicar em Enviar".</td></tr>
+    <tr><td>Idem, sem histórico ou <code>erro</code></td><td><code>recuperar_reservas</code></td><td>Devolve a <code>pendentes</code>.</td></tr>
+    <tr><td>Arquivo de <b>outra</b> máquina parado há &gt; 60 min</td><td><code>tratar_reservas_abandonadas</code></td><td><code>/erro</code> "a máquina X reservou e não terminou".</td></tr>
+    <tr><td>Chamado aberto, falha ao gravar o resultado na fila</td><td>próximo ciclo</td><td>O histórico já tem <code>ok</code>: a recuperação conclui.</td></tr>
+  </table>
+
+  <h3>Reprocessar de propósito</h3>
+  <p>Mover o JSON de <code>/erro</code> para <code>pendentes</code> reprocessa se o histórico não for <code>enviando</code>/<code>ok</code>. Para forçar (depois de conferir no ServiceNow que o chamado não existe), acrescente <code>"forcar_reprocessamento": true</code> no JSON: ignora histórico, cliente ignorado, pergunta de alerta antigo e checagem de duplicado.</p>
+</section>
+
+<!-- 8 -->
+<section class="secao">
+  <h2><span class="num">8</span>Fila no SharePoint (API REST)</h2>
+  <p class="lead"><code>FilaSharePoint</code> tem a mesma interface da <code>Fila</code> de pasta. Fala direto com <code>{site}/_api/...</code> usando <code>urllib</code>, autenticada pelos cookies da sessão Microsoft do perfil do navegador do robô. Sem OneDrive, sem senha, sem app registrado no Azure.</p>
+
+  <div class="caixa info"><span class="t">Onde fica a fila</span>
+    Site <code>https://camara1.sharepoint.com/sites/MANAGEDSERVICE</code>, biblioteca "Documentos Compartilhados", pasta <code>YDUQS/N1/DispatchBot-Fila</code>. No config: <code>fila_sharepoint.site</code> e <code>fila_sharepoint.pasta</code> (caminho relativo ao servidor, com espaços).</div>
+
+  <h3>Autenticação</h3>
+  <ul>
+    <li><code>obter_cookies(renovar)</code> = <code>Navegador.cookies_sharepoint</code>. Sem renovar: lê os cookies do perfil (<code>FedAuth</code>/<code>rtFa</code>); na maioria das vezes nem abre o site.</li>
+    <li>Renovar: visita o site <b>sem janela</b>; se a Microsoft pedir login (ou o Edge sem janela der <code>net::ERR_FAILED</code>), reabre <b>com janela</b> e espera o plantonista (ícone amarelo). Pausado não abre janela.</li>
+    <li>Gravações (POST) levam <code>X-RequestDigest</code> de <code>contextinfo</code>, guardado até 2 min antes de vencer (~30 min).</li>
+    <li>Respostas 301/302/401/403 = sessão vencida: renova no máximo uma vez a cada 2 min e repete a chamada. Redirecionamentos não são seguidos (<code>_SemRedirecionar</code>). Persistindo: <code>PastaIndisponivel</code> "confira se a conta tem acesso ao site".</li>
+    <li>Chamadas de outras threads (parada remota, tela de histórico) usam <code>pode_renovar=False</code>: nunca mexem no navegador.</li>
+  </ul>
+
+  <h3>Chamadas usadas</h3>
+  <table>
+    <tr><th>Operação</th><th>Endpoint</th></tr>
+    <tr><td>Listar arquivos</td><td><code>GET web/GetFolderByServerRelativePath(decodedurl='…')/Files?$select=Name,ServerRelativeUrl,TimeLastModified</code></td></tr>
+    <tr><td>Listar subpastas</td><td><code>GET …/Folders?$select=Name</code></td></tr>
+    <tr><td>Criar subpasta</td><td><code>POST web/folders/AddUsingPath(decodedurl='…')</code></td></tr>
+    <tr><td>Ler arquivo</td><td><code>GET web/GetFileByServerRelativePath(decodedurl='…')/$value</code></td></tr>
+    <tr><td>Gravar (sobrescreve)</td><td><code>POST …/Files/AddUsingPath(decodedurl='nome',overwrite=true)</code></td></tr>
+    <tr><td>Mover (reserva)</td><td><code>POST …/MoveTo(newurl=@d,flags=0|1)?@d='destino'</code> — <code>flags=0</code> falha se o destino existe</td></tr>
+    <tr><td>Apagar</td><td><code>POST …</code> com <code>X-HTTP-Method: DELETE</code>, <code>IF-MATCH: *</code> (404 é ignorado)</td></tr>
+    <tr><td>Digest</td><td><code>POST contextinfo</code></td></tr>
+  </table>
+  <p>Caminhos vão em <code>decodedurl='…'</code> com aspas simples dobradas e o resto codificado (<code>_caminho</code>). Aceita JSON com ou sem BOM (<code>utf-8-sig</code>).</p>
+
+  <h3>Reserva e concorrência</h3>
+  <ul>
+    <li><b>Reservar</b> = <code>MoveTo</code> de <code>pendentes/A.json</code> para <code>processando/A__HOST.json</code>. É atômico no servidor: se outra máquina já moveu, dá 404 e esta desiste. Depois o conteúdo é regravado para a data do arquivo virar a hora da reserva.</li>
+    <li><code>confirmar_reserva</code> sempre <code>True</code> no SharePoint (a janela de espera <code>janela_confirmacao_seg</code> só existe no modo de pasta sincronizada, com desempate pelo menor hostname).</li>
+    <li><b>Devolver</b> = MoveTo de volta com sobrescrita.</li>
+    <li><b>Concluir</b> = grava em <code>processados</code>, apaga de <code>processando</code>, grava o retorno. <b>Erro</b> = grava em <code>erro</code>, apaga, grava o retorno (JSON ilegível: <code>.erro.txt</code> primeiro e depois move, para refazer se a conexão cair no meio).</li>
+  </ul>
+
+  <h3>Cadências</h3>
+  <table>
+    <tr><th>O quê</th><th>Frequência</th></tr>
+    <tr><td>Listar <code>pendentes</code></td><td>Cada ciclo (15 s ou ao acordar)</td></tr>
+    <tr><td><code>verificar_pasta</code> (subpastas)</td><td>5 min</td></tr>
+    <tr><td>Gravar <code>status/HOST.json</code></td><td>5 min ou na troca de status/pausa</td></tr>
+    <tr><td>Ler <code>status</code> dos outros</td><td>No máx. 1 vez por minuto (cache); considera sinal de até 12 min</td></tr>
+    <tr><td>Pedido de plantão para esta máquina</td><td>30 s (no loop e entre alertas)</td></tr>
+    <tr><td>Arquivo <code>PARAR</code></td><td>10 s (<code>intervalo_parar_seg</code>)</td></tr>
+  </table>
+
+  <h3>Modo antigo: pasta sincronizada (reserva)</h3>
+  <p>Com <code>fila_sharepoint.site</code> vazio, <code>Fila</code> usa uma pasta local sincronizada pelo OneDrive (<code>pasta_sincronizada</code>). <code>pasta.py</code> acha a pasta pelo registro (<code>SyncEngines\Providers\OneDrive</code>), pode abrir um link <code>odopen://</code> (<code>link_sincronizar</code>) e fixa a pasta como "sempre no dispositivo". A reserva é <code>os.rename</code> + espera de <code>janela_confirmacao_seg</code> e desempate pelo menor hostname. Fica só como alternativa.</p>
+</section>
+
+<!-- 9 -->
+<section class="secao">
+  <h2><span class="num">9</span>Navegador, sessão e login SSO</h2>
+  <p class="lead"><code>Navegador</code> abre o Edge (ou o Chrome, pela ordem de <code>navegador.canais</code>) instalado na máquina, com <code>launch_persistent_context</code> no perfil próprio <code>%LOCALAPPDATA%\DispatchBot\browser-profile</code>. Nenhum navegador é empacotado.</p>
+
+  <h3>Abertura</h3>
+  <ul>
+    <li>Argumentos: <code>--start-maximized --no-first-run --no-default-browser-check --hide-crash-restore-bubble</code>, <code>no_viewport</code>, timeout padrão das ações <code>timeout_acao_seg</code> (30 s).</li>
+    <li>Falhou nos dois canais: <code>matar_navegadores_orfaos()</code> (PowerShell/CIM: só processos <code>msedge</code>/<code>chrome</code> cuja linha de comando contém o perfil do robô; o navegador pessoal não é tocado) e tenta de novo.</li>
+    <li>Fechamento pela pessoa: evento <code>close</code> marca como fechado; reabre no próximo uso.</li>
+  </ul>
+
+  <h3>Sessão do ServiceNow</h3>
+  <ul>
+    <li>A sessão <b>não sobrevive</b> ao fechamento do navegador (confirmado em 01/10/2026). Por isso o padrão é <code>fechar_apos_ocioso_min: 0</code> (sempre aberto) e o robô abre o portal ao iniciar (<code>login_inicial</code>), para o login acontecer no começo do plantão. Na 1ª vez grava a flag <code>login_inicial_ok</code>.</li>
+    <li><code>manter_sessao</code>: navegador parado há <code>manter_sessao_min</code> (10) → recarrega o portal. Se a sessão caiu, pede o login na hora. Login não feito → tenta abrir de novo em 15 min.</li>
+  </ul>
+
+  <h3>Detecção da tela de login (<code>na_tela_de_login</code>)</h3>
+  <ol>
+    <li>URL contém algum de <code>login.padroes_url_login</code> (<code>login.microsoftonline.com</code>, <code>/login.do</code>, <code>external_login</code>, <code>/saml</code>...), ou</li>
+    <li>o host é diferente da instância, ou</li>
+    <li>algum de <code>login.seletores_tela_login</code> está visível (o Service Portal mostra o login no mesmo endereço: <code>input[type=password]</code>, "Use external login"...).</li>
+  </ol>
+
+  <h3>Espera do login (<code>esperar_login</code>)</h3>
+  <ul>
+    <li>Clica em <code>login.botao_sso</code> ("Use external login") no máximo 2 vezes, com 20 s entre cliques.</li>
+    <li>Na tela "External login" (<code>tela_email</code>): se <code>email_sso</code> estiver preenchido, digita o e-mail; clica em Submit (<code>botao_email</code>) no máximo 2 vezes, com 15 s entre cliques. Nunca digita senha.</li>
+    <li>Carência de <code>aviso_apos_seg</code> (15 s) antes de avisar: o SSO costuma concluir sozinho. Depois: ícone amarelo, notificação, janelinha com "Mostrar janela de login".</li>
+    <li>Concluído = 3 verificações seguidas (~6 s) fora da tela de login e com o portal pronto (<code>seletor_portal_pronto</code>, opcional). Evita falso positivo no meio dos redirecionamentos.</li>
+    <li>Limite <code>timeout_login_min</code> (15) → <code>LoginNaoConcluido</code>. Pausa durante a espera → <code>Interrompido</code>.</li>
+    <li><code>ir_para(url)</code>: se passou pelo SSO e caiu em outra página (o SSO às vezes volta para a página inicial), navega de novo para a URL pedida; se cair no login outra vez → <code>LoginNaoConcluido</code>.</li>
+  </ul>
+
+  <div class="caixa atencao"><span class="t">Fluxo real de login (Cirion)</span>
+    Portal → "Use external login" (robô) → "External login" + Submit (robô, campo vazio) → conta Microsoft → Windows Hello (plantonista). Confirmado no portal real em 13/10/2026.</div>
+</section>
+
+<!-- 10 -->
+<section class="secao">
+  <h2><span class="num">10</span>Plantão entre máquinas e histórico do time</h2>
+  <p class="lead">Várias máquinas têm o robô instalado; só uma deve ficar ativa. O SharePoint serve de canal entre elas: status, pedidos de plantão e histórico. Não há trava rígida: é coordenação com aviso.</p>
+
+  <h3>Nome do plantonista</h3>
+  <p><code>nome_plantonista</code> no config (máx. 40 caracteres). Vazio = usuário do Windows arrumado (<code>vinicius.morais</code> → "Vinicius Morais"). Perguntado na 1ª execução pela janelinha do painel; trocado pelo menu "Meu nome no DispatchBot...". Vai no status, nos eventos e no painel dos colegas.</p>
+
+  <h3>Outros robôs ativos</h3>
+  <ul>
+    <li><code>status_outros(12 min)</code> lê <code>status/*.json</code> das outras máquinas (também com o robô pausado) e <code>outros_ativos()</code> filtra os não pausados.</li>
+    <li>Painel: faixa amarela "Também ativo: Fulano (HOST), ativo desde, último sinal há X min" + botão <b>Assumir o plantão</b>.</li>
+    <li>Ativo com outro ativo: notificação no máximo 1 vez por hora por máquina.</li>
+    <li>Retomar com outro ativo: caixa Sim (assumir) / Não (ativar mesmo assim) / Cancelar (continua pausado).</li>
+  </ul>
+
+  <h3>Assumir o plantão</h3>
+  <ol>
+    <li>Quem assume grava <code>plantao/&lt;HOST alvo&gt;.json</code> (<code>{de_nome, de_host, em, ts}</code>) e se ativa. Evento <code>assumiu</code>.</li>
+    <li>O robô alvo lê o pedido a cada 30 s, no loop e <b>entre um alerta e outro</b> (nunca no meio), apaga o arquivo, pausa com o detalhe "Fulano assumiu o plantão às HH:MM", notifica e mostra uma caixa ao dono. Evento <code>plantao_passado</code>. O Edge do colega fica aberto (só pausa).</li>
+    <li>Pedido com mais de 15 min (máquina estava desligada) ou alvo já pausado: só apaga.</li>
+    <li>Quem assumiu é avisado quando o status do outro aparece pausado, ou se ele não responder em 12 min.</li>
+  </ol>
+
+  <h3>Histórico do time</h3>
+  <ul>
+    <li>Arquivo por máquina e dia: <code>historico/&lt;AAAA-MM-DD&gt;_&lt;HOST&gt;.jsonl</code>. O SharePoint não faz append: o robô guarda as linhas do dia em memória e <b>regrava o arquivo inteiro</b>; ao reabrir no mesmo dia, lê o que já existe e continua. Só a própria máquina grava no seu arquivo (sem conflito).</li>
+    <li><code>Robo.evento()</code> enfileira; <code>gravar_eventos</code> (thread do robô) grava por dia; falhou, tenta no próximo ciclo (até 500 eventos em memória).</li>
+    <li>Tela <b>Histórico do time</b> (rodapé do painel): Hoje/Ontem, junta todas as máquinas e os eventos ainda não gravados; a leitura roda numa thread à parte com <code>pode_renovar=False</code>.</li>
+  </ul>
+  <table>
+    <tr><th>Evento</th><th>Quando</th></tr>
+    <tr><td><code>iniciou</code> / <code>encerrou</code></td><td>Robô aberto / fechado</td></tr>
+    <tr><td><code>ativou</code> / <code>pausou</code></td><td>Pausa pelo usuário (menu/painel)</td></tr>
+    <tr><td><code>emergencia</code></td><td>Parada pelo menu, atalho ou arquivo PARAR</td></tr>
+    <tr><td><code>assumiu</code> / <code>plantao_passado</code></td><td>Pedido de plantão enviado / recebido</td></tr>
+    <tr><td><code>chamado</code></td><td>Chamado aberto (com tipo, numero, url)</td></tr>
+    <tr><td><code>erro</code></td><td>Alerta foi para <code>/erro</code></td></tr>
+    <tr><td><code>manual</code> / <code>ignorado</code></td><td>Alerta antigo marcado como aberto à mão / cliente ignorado</td></tr>
+    <tr><td><code>login</code> / <code>login_ok</code></td><td>Começou a esperar login / login feito</td></tr>
+    <tr><td><code>envio</code></td><td>Envio automático ligado/desligado</td></tr>
+    <tr><td><code>nome</code></td><td>Troca de nome</td></tr>
+  </table>
+</section>
+
+<!-- 11 -->
+<section class="secao">
+  <h2><span class="num">11</span>Parada de emergência</h2>
+  <p class="lead">Para o caso de o robô abrir chamados errados. Interrompe no meio do passo, sem esperar o alerta terminar.</p>
+
+  <table>
+    <tr><th>Origem</th><th>Como</th><th>Alcance</th><th>Como liberar</th></tr>
+    <tr><td><code>menu</code></td><td>"PARAR AGORA" no menu do ícone (pede confirmação desde a 1.7.1) ou no painel (imediato)</td><td>Esta máquina</td><td>Desmarcar Pausado</td></tr>
+    <tr><td><code>atalho</code></td><td>1º livre de <code>atalho_emergencia</code>: <code>Ctrl+Alt+Shift+P</code>, <code>Ctrl+Alt+Shift+X</code>, <code>Ctrl+Alt+Pause</code></td><td>Esta máquina</td><td>Desmarcar Pausado</td></tr>
+    <tr><td><code>remota</code></td><td>Arquivo <code>PARAR*</code> na raiz da <code>DispatchBot-Fila</code> (1ª linha = motivo)</td><td>Todas as máquinas, em até 10 s</td><td>Apagar o arquivo</td></tr>
+  </table>
+
+  <h3>O que acontece (<code>parar_agora</code>)</h3>
+  <ol>
+    <li>Sinaliza o evento <code>emergencia</code> (todas as threads veem) e registra o evento no histórico.</li>
+    <li>Parada local: grava <code>pausado: true</code> e <code>emergencia: {origem, em}</code> no config. Nem reiniciar nem o vigia fazem o robô voltar sozinho.</li>
+    <li>Ícone vermelho com o motivo + notificação.</li>
+    <li><code>matar_navegadores_orfaos()</code>: derruba o navegador do robô, então a ação em andamento falha na hora.</li>
+    <li>O alerta em andamento: sem <code>enviando</code> volta intacto para <code>pendentes</code>; com <code>enviando</code> vai para <code>/erro</code> "confira no ServiceNow".</li>
+  </ol>
+  <p>A parada remota não grava no config: some sozinha quando o arquivo é apagado. Enquanto o PARAR existir, "Retomar" pelo menu é recusado com aviso.</p>
+</section>
+
+<!-- 12 -->
+<section class="secao">
+  <h2><span class="num">12</span>Interface: bandeja, painel e janelinha</h2>
+
+  <h3>Ícone da bandeja (<code>bandeja.py</code>)</h3>
+  <p>Avatar (<code>assets/avatar.png</code>) com bolinha de status no canto inferior direito. Tooltip <code>DispatchBot - &lt;status&gt;: &lt;detalhe&gt;</code> (máx. 127 caracteres).</p>
+  <table>
+    <tr><th>Status</th><th>Cor</th><th>Quando</th></tr>
+    <tr><td><code>ativo</code></td><td>verde <code>#2E9E5B</code></td><td>Lendo a fila / pronto</td></tr>
+    <tr><td><code>preparando</code></td><td>azul <code>#2F7FD1</code></td><td>Só no modo pasta: esperando o OneDrive</td></tr>
+    <tr><td><code>login</code></td><td>amarelo <code>#E0A100</code></td><td>Esperando login (ServiceNow ou SharePoint)</td></tr>
+    <tr><td><code>confirmar</code></td><td>amarelo</td><td>Formulário preenchido esperando conferência</td></tr>
+    <tr><td><code>erro</code></td><td>vermelho <code>#D23C3C</code></td><td>Erro de infraestrutura, alerta em <code>/erro</code> ou emergência</td></tr>
+    <tr><td><code>pausado</code></td><td>cinza <code>#8A8F8C</code></td><td>Pausado (detalhe: quem assumiu o plantão)</td></tr>
+  </table>
+  <p>Menu: PARAR AGORA (com o atalho ativo ao lado) · Status · Versão · <b>Abrir painel</b> (clique simples no ícone) · Verificar pendentes agora · Pausado · Enviar GMUD sem conferir · Enviar Backup sem conferir · Meu nome no DispatchBot... · Abrir pasta DispatchBot-Fila · Abrir pasta de logs · Abrir config.json · Sair.</p>
+
+  <h3>Painel (<code>painel.py</code>)</h3>
+  <ul>
+    <li>CustomTkinter em tema escuro, ícones do Windows (fontes Segoe Fluent Icons/MDL2 desenhadas em imagem). Thread própria; fechar a janela só esconde.</li>
+    <li>Cabeçalho (avatar, status, detalhe, resumo "plantonista: nome", Pausar/Retomar), faixa "Também ativo", 4 contadores do dia, "Precisa de você", "Chamados abertos hoje" (Tratar/Copiar), "Erros de hoje: abrir à mão" (motivo, Abrir no ServiceNow, Copiar), rodapé (Verificar agora, Logs, Histórico do time, PARAR AGORA).</li>
+    <li>Fonte das listas: <code>painel.jsonl</code> local (só as últimas 2000 linhas, filtradas pelo dia). Atualiza a cada 3 s; a seção "Precisa de você" e as contagens regressivas a cada 1 s.</li>
+    <li>O painel não altera fila nem config diretamente: chama os callbacks do <code>Robo</code>.</li>
+  </ul>
+
+  <h3>Janelinha "Precisa de você"</h3>
+  <p>Toplevel no canto inferior direito, sempre por cima, com rolagem (altura = conteúdo, até ~65% da tela). Abre sozinha mesmo com o painel fechado. Mostra: login esperando ("Mostrar janela de login"), conferência (campos, motivo "Não enviei sozinho: …", contagem, "Mostrar formulário", "Pular este alerta") e decisões de alertas antigos (Abrir chamado / Já foi aberto à mão / Decidir depois). Sem o painel disponível, a reserva são caixas do Windows (<code>MessageBoxW</code>).</p>
+</section>
+
+<!-- 13 -->
+<section class="secao">
+  <h2><span class="num">13</span>Configuração (<code>config.json</code>)</h2>
+  <p class="lead">Fica em <code>%LOCALAPPDATA%\DispatchBot\config.json</code>. Na 1ª execução é copiado de <code>config.default.json</code> (empacotado). Relido a cada ciclo. Chaves que começam com <code>_</code> são ajuda e são ignoradas.</p>
+
+  <h3>Carga, mescla e gravação</h3>
+  <ul>
+    <li><code>carregar()</code> lê com <code>utf-8-sig</code>; JSON inválido → <code>ConfigInvalido</code> com linha e coluna (o robô segue com a última configuração válida em memória e fica vermelho).</li>
+    <li><b>Mescla</b> (<code>_mesclar</code>): chaves que existem no modelo e não no arquivo do usuário entram sozinhas, recursivamente em dicionários. Valores do usuário sempre prevalecem. <b>Listas não são mescladas</b>: um passo novo em <code>passos</code> não chega a um config já instalado.</li>
+    <li>Exceção pontual: <code>botao_enviar</code> vazio no usuário e preenchido no modelo é copiado do modelo.</li>
+    <li><code>salvar()</code>: grava em <code>.tmp</code> e faz <code>os.replace</code> (atômico).</li>
+  </ul>
+
+  <h3>Chaves gerais</h3>
+  <table class="t-chaves">
+    <tr><th>Chave</th><th>Padrão</th><th>Uso</th></tr>
+    <tr><td><code>instancia_url</code></td><td>https://envdatacenter.service-now.com</td><td>Base de todas as URLs relativas.</td></tr>
+    <tr><td><code>portal_path</code></td><td><code>/esc</code></td><td>Portal aberto no login e no "manter sessão".</td></tr>
+    <tr><td><code>link_tratamento</code></td><td><code>/now/nav/ui/classic/…{tabela}…{numero}</code></td><td>Link do chamado na interface clássica.</td></tr>
+    <tr><td><code>fila_sharepoint.site</code> / <code>.pasta</code></td><td>MANAGEDSERVICE / …/DispatchBot-Fila</td><td>Fila no SharePoint. <code>site</code> vazio = modo pasta.</td></tr>
+    <tr><td><code>fila_sharepoint.intervalo_parar_seg</code></td><td>10</td><td>Busca do arquivo PARAR.</td></tr>
+    <tr><td><code>pasta_sincronizada</code>, <code>link_sincronizar</code></td><td>""</td><td>Só modo pasta (OneDrive).</td></tr>
+    <tr><td><code>intervalo_polling_seg</code></td><td>15</td><td>Intervalo do loop.</td></tr>
+    <tr><td><code>idade_minima_arquivo_seg</code></td><td>5</td><td>Ignora arquivos recém-criados.</td></tr>
+    <tr><td><code>janela_confirmacao_seg</code></td><td>10</td><td>Só modo pasta: espera antes de confirmar a reserva.</td></tr>
+    <tr><td><code>pausado</code></td><td>false</td><td>Gravado pelo menu/painel.</td></tr>
+    <tr><td><code>emergencia</code></td><td>(ausente)</td><td>Gravado pela parada local; removido ao retomar.</td></tr>
+    <tr><td><code>nome_plantonista</code></td><td>""</td><td>Nome visto pelo time.</td></tr>
+    <tr><td><code>envio_automatico.GMUD</code> / <code>.BACKUP</code></td><td>true / true</td><td>Envio sem conferência (seção 6).</td></tr>
+    <tr><td><code>perguntar_alerta_antigo_min</code></td><td>120</td><td>Idade para perguntar antes de abrir. 0 = nunca pergunta.</td></tr>
+    <tr><td><code>tentativas_por_alerta</code></td><td>3</td><td>Tentativas em falha passageira.</td></tr>
+    <tr><td><code>espera_entre_tentativas_seg</code></td><td>20</td><td>Multiplicado pelo número da tentativa.</td></tr>
+    <tr><td><code>max_espera_login_min</code></td><td>60</td><td>Alerta esperando login há mais que isso vai para <code>/erro</code>.</td></tr>
+    <tr><td><code>reserva_abandonada_min</code></td><td>60</td><td>Reserva de outra máquina parada → <code>/erro</code>.</td></tr>
+    <tr><td><code>atalho_emergencia</code></td><td>3 combinações</td><td>Tentadas em ordem.</td></tr>
+    <tr><td><code>navegador.canais</code></td><td>msedge, chrome</td><td>Ordem de tentativa.</td></tr>
+    <tr><td><code>navegador.timeout_acao_seg</code></td><td>30</td><td>Timeout padrão do Playwright.</td></tr>
+    <tr><td><code>navegador.timeout_login_min</code></td><td>15</td><td>Espera máxima de um login.</td></tr>
+    <tr><td><code>navegador.fechar_apos_ocioso_min</code></td><td>0</td><td>0 = sempre aberto (recomendado).</td></tr>
+    <tr><td><code>navegador.manter_sessao_min</code></td><td>10</td><td>Recarga do portal com o robô parado. 0 = desliga.</td></tr>
+    <tr><td><code>login.*</code></td><td>ver seção 9</td><td><code>padroes_url_login</code>, <code>seletores_tela_login</code>, <code>botao_sso</code>, <code>email_sso</code>, <code>tela_email</code>, <code>campo_email</code>, <code>botao_email</code>, <code>aviso_apos_seg</code>, <code>seletor_portal_pronto</code>.</td></tr>
+    <tr><td><code>checar_duplicado_servicenow.*</code></td><td>ativo: false</td><td>Busca opcional no portal (seção 6).</td></tr>
+  </table>
+
+  <h3>Bloco de um tipo (<code>tipos.&lt;NOME&gt;</code>)</h3>
+  <table class="t-chaves">
+    <tr><th>Chave</th><th>Uso</th></tr>
+    <tr><td><code>herda</code></td><td>Usa outro bloco como base. Dicionários (ex.: <code>variaveis</code>) são somados; as outras chaves são substituídas. <code>tipo_efetivo()</code> aplica.</td></tr>
+    <tr><td><code>url_formulario</code></td><td>URL do formulário sem o domínio (aceita placeholders).</td></tr>
+    <tr><td><code>seletor_formulario_pronto</code></td><td>Espera esse elemento antes do 1º passo.</td></tr>
+    <tr><td><code>variaveis</code> / <code>padroes</code></td><td>Fixas / sobrescrevíveis pelo alerta.</td></tr>
+    <tr><td><code>validar</code></td><td>Regex por campo do alerta (casamento inteiro).</td></tr>
+    <tr><td><code>passos</code></td><td>Lista de <code>{campo, acao, seletor, valor, busca, mapa, opcional, pular_se_vazio}</code>.</td></tr>
+    <tr><td><code>botao_enviar</code></td><td>Seletor do Submit/Enviar (<code>#submit-btn</code> nos dois formulários).</td></tr>
+    <tr><td><code>seletor_erro_validacao</code></td><td>Mensagem de recusa do ServiceNow (vazio nos dois formulários).</td></tr>
+    <tr><td><code>confirmacao_timeout_min</code></td><td>Prazo da conferência (30).</td></tr>
+    <tr><td><code>captura_numero</code></td><td><code>regex</code>, <code>preferir</code>, <code>seletor</code>, <code>espera_preferido_seg</code>, <code>timeout_seg</code>.</td></tr>
+    <tr><td><code>ignorar_clientes</code></td><td>Só Backup: hosts cujas falhas não abrem chamado.</td></tr>
+  </table>
+
+  <h3>Tipos configurados</h3>
+  <table>
+    <tr><th>Tipo</th><th>Formulário</th><th>Título</th><th>Observação</th></tr>
+    <tr><td><code>_GMUD</code> (modelo)</td><td>Hosting <code>sys_id=42761d80…3593</code> (POP 11)</td><td><code>#GMUD {chg} | {time_titulo} | {data_execucao|dd/MM HH:mm} |</code></td><td>Conta <code>…(3-9R2V6QXWXV)</code>, CallerID <code>OPERACAO YDUQS</code>, Categoria <code>Other</code>, descrição = <code>{descricao}</code>; <code>validar.chg = CHG\d{7}</code>.</td></tr>
+    <tr><td><code>INFRA</code> / <code>DBA</code> / <code>SO</code></td><td>herda <code>_GMUD</code></td><td><code>SOC</code> / <code>DBA</code> / <code>SO</code></td><td>Em produção.</td></tr>
+    <tr><td><code>GMUD_BACKUP</code></td><td>herda <code>_GMUD</code></td><td><code>BACKUP</code></td><td>Fila <code>SN_TI_CHG_EXECUTOR_Backup_Cirion</code> (desde 16/10/2026). Não confundir com <code>BACKUP</code>.</td></tr>
+    <tr><td><code>PRODUCAO</code></td><td>herda <code>_GMUD</code></td><td><code>PREENCHER</code></td><td>Fora do escopo: sempre <code>/erro</code> (<code>TipoNaoMapeado</code>).</td></tr>
+    <tr><td><code>BACKUP</code></td><td>Incidente, cartão Backup <code>sys_id=ca634cdd…35b7</code></td><td><code>#FALHA DE BACKUP {titulo}</code></td><td>Account, Contact, Service Affected (Veritas Netbackup), Failure Type (Execution failure), Impacto (mínimo), Short Description, Description. <code>ignorar_clientes</code>: <code>appflexrj01-inst01.smpdc.gblx</code>, <code>appnburj03</code>.</td></tr>
+  </table>
+  <div class="caixa dica"><span class="t">Tipo novo sem código</span>
+    Crie um bloco em <code>tipos</code> (com <code>"herda": "_GMUD"</code> se for o mesmo formulário), mapeie os seletores com o Mapear, teste com <code>--testar</code> e ajuste o fluxo de entrada para gravar o <code>tipo</code> e o Retorno para ter o Case do chat. Se o tipo for de GMUD, o grupo de envio automático já é <code>GMUD</code>.</div>
+</section>
+
+<!-- 14 -->
+<section class="secao">
+  <h2><span class="num">14</span>Contratos de dados (JSON)</h2>
+  <p class="lead">Todos os arquivos são UTF-8 (com ou sem BOM na leitura; sem BOM na gravação), um objeto JSON por arquivo, exceto os <code>.jsonl</code> (uma linha por registro).</p>
+
+  <h3>Entrada · <code>pendentes/&lt;TIPO&gt;_&lt;aaaaMMdd_HHmmss&gt;_&lt;guid8&gt;.json</code></h3>
+  <div class="duas">
+<pre><span class="c">// GMUD (fluxo "GMUD | Todos")</span>
+{
+  "versao": 2,
+  "id": "CHG0048707",
+  "tipo": "SO",
+  "grupo_executor": "SN_TI_CHG_EXECUTOR_CIRION_SO",
+  "chg": "CHG0048707",
+  "ctask": "CTASK…",
+  "data_execucao": "16/10/2026 14:00",
+  "tipo_mudanca": "Normal",
+  "titulo": "…",
+  "descricao": "…",
+  "recebido_em": "2026-10-16T12:05:00-03:00",
+  "dados_brutos": "…"
+}</pre>
+<pre><span class="c">// Falha de Backup (BackupBot)</span>
+{
+  "versao": 2,
+  "id": "&lt;msgid@…&gt;#26661937,NBMASTER…,
+         POLITICA,cliente,UNKNOWN,…,Failed,4287",
+  "tipo": "BACKUP",
+  "titulo": "POLITICA | cliente | Job 26661937
+             | Status 4287",
+  "descricao": "…",
+  "servico_afetado": "(opcional)",
+  "failure_type": "(opcional)",
+  "recebido_em": "2026-10-16T08:24:00-03:00",
+  "dados_brutos": "…"
+}</pre>
+  </div>
+  <table>
+    <tr><th>Campo</th><th>Obrigatório</th><th>Uso no robô</th></tr>
+    <tr><td><code>id</code></td><td>sim</td><td>Chave de idempotência. GMUD = CHG.</td></tr>
+    <tr><td><code>tipo</code></td><td>sim*</td><td>Bloco do config. *Sem ele, deduzido de <code>grupo_executor</code>.</td></tr>
+    <tr><td><code>chg</code>, <code>data_execucao</code>, <code>descricao</code></td><td>GMUD</td><td>Título e descrição; <code>chg</code> validada.</td></tr>
+    <tr><td><code>titulo</code>, <code>descricao</code></td><td>Backup</td><td>Short Description e Description; cliente lido do título/<code>id</code>.</td></tr>
+    <tr><td><code>recebido_em</code></td><td>recomendado</td><td>Alerta antigo e limite de espera do login (ISO 8601).</td></tr>
+    <tr><td><code>forcar_reprocessamento</code></td><td>não</td><td><code>true</code> ignora as proteções (seção 7).</td></tr>
+    <tr><td><code>teams</code>, <code>dados_brutos</code>, <code>ctask</code>, <code>tipo_mudanca</code>, <code>versao</code></td><td>não</td><td>Repassados/ignorados; disponíveis como placeholders.</td></tr>
+  </table>
+
+  <h3>Retorno · <code>retorno/&lt;nome original&gt;.json</code></h3>
+<pre>{
+  "id": "CHG0048707", "tipo": "SO", "titulo": "…",
+  "status": "ok",                  <span class="c">// ok | erro</span>
+  "numero": "RITM0421153",         <span class="c">// vazio no erro</span>
+  "url": "https://envdatacenter.service-now.com/now/nav/ui/classic/params/target/sc_req_item.do%3Fsysparm_query%3Dnumber%3DRITM0421153",
+  "mensagem": "",                  <span class="c">// motivo no erro</span>
+  "maquina": "HOST", "processado_em": "2026-10-16T12:07:31-03:00", "teams": {}
+}</pre>
+
+  <h3>Arquivos de coordenação</h3>
+  <table>
+    <tr><th>Arquivo</th><th>Campos</th></tr>
+    <tr><td><code>status/&lt;HOST&gt;.json</code></td><td><code>status</code>, <code>pausado</code>, <code>versao</code>, <code>usuario</code>, <code>nome</code>, <code>ativo_desde</code>, <code>detalhe</code>, <code>host</code>, <code>atualizado_em</code>, <code>ts</code> (epoch). Ao sair: <code>status: "encerrado"</code>.</td></tr>
+    <tr><td><code>plantao/&lt;HOST alvo&gt;.json</code></td><td><code>de_nome</code>, <code>de_host</code>, <code>em</code>, <code>ts</code></td></tr>
+    <tr><td><code>historico/&lt;dia&gt;_&lt;HOST&gt;.jsonl</code></td><td><code>em</code>, <code>host</code>, <code>nome</code>, <code>usuario</code>, <code>evento</code>, <code>texto</code> + extras (<code>tipo</code>, <code>numero</code>, <code>url</code>, <code>de_host</code>, <code>de_nome</code>, <code>para_host</code>, <code>para_nome</code>)</td></tr>
+    <tr><td><code>processados/…</code></td><td>Alerta + <code>resultado</code>: <code>numero</code>, <code>url</code>, <code>maquina</code>, <code>processado_em</code></td></tr>
+    <tr><td><code>erro/…</code></td><td>Alerta + <code>erro</code>: <code>mensagem</code>, <code>maquina</code>, <code>em</code></td></tr>
+  </table>
+
+  <h3>Arquivos locais</h3>
+  <table>
+    <tr><th>Arquivo</th><th>Linha</th></tr>
+    <tr><td><code>processados.jsonl</code></td><td><code>{id, status, em, maquina, tipo, numero?, url?, mensagem?, ignorado?, manual?}</code></td></tr>
+    <tr><td><code>painel.jsonl</code></td><td><code>{em, status: ok|erro, tipo, alerta (CHG/título), numero, url, mensagem}</code></td></tr>
+  </table>
+</section>
+
+<!-- 15 -->
+<section class="secao">
+  <h2><span class="num">15</span>Fluxos do Power Automate</h2>
+  <p class="lead">Três fluxos de nuvem, agrupados na Solução "DispatchBot". Pacotes exportados em <code>fluxos/</code>; passo a passo completo em <code>docs/power-automate.md</code>.</p>
+
+  <div class="cartao"><span class="tag">Entrada · produção desde 05/10/2026</span><h4>GMUD | Todos</h4>
+    <ul>
+      <li>Gatilho: e-mail novo de <code>noreply.yduqs@service-now.com</code>, assunto "Uma tarefa de Mudança foi atribuída". Trigger condition: corpo contém <code>SN_TI_CHG_EXECUTOR_CIRION_</code> <b>ou</b> (minúsculas) <code>sn_ti_chg_executor_backup_cirion</code>.</li>
+      <li><code>Html to text</code> → Compose <code>Time</code> (INFRA/DBA/SO/PRODUCAO pelo grupo executor; <code>GMUD_BACKUP</code> quando contém <code>backup_cirion</code>) → <code>Recorte</code> (entre "Prezado" e "Informações sobre sua") → Switch por <code>Time</code> posta o card no chat do time (Default: Terminate) → <code>JSON GMUD</code> → Create file <code>&lt;Time&gt;_….json</code> em <code>pendentes</code>.</li>
+      <li>CHG por <code>indexOf('CHG0')</code>; data depois de <code>Início:</code>; descrição = Descrição resumida.</li>
+    </ul>
+  </div>
+  <div class="cartao" style="margin-top:4mm"><span class="tag">Entrada</span><h4>BackupBot</h4>
+    <ul>
+      <li>Gatilho na caixa do Backup (outra caixa, por isso não há fluxo de entrada único). Lê o CSV anexo (<code>base64ToString(contentBytes)</code> do <b>primeiro anexo</b>), filtra as falhas, posta o card e, no loop "Para Cada Falha", monta <code>JSON_BACKUP</code> e cria o arquivo em <code>pendentes</code>.</li>
+      <li>CSV sem cabeçalho: <code>[0]</code> JobID, <code>[1]</code> Master, <code>[2]</code> Política, <code>[3]</code> Cliente, <code>[4]</code> Agendamento, datas entre aspas <b>com vírgula dentro</b>, Status, Código. O <code>split</code> só é confiável até <code>[4]</code>; o Código vem de <code>last(...)</code>.</li>
+      <li>Título: <code>take(Política | Cliente | Job &lt;id&gt; | Status &lt;código&gt;, 130)</code>.</li>
+    </ul>
+  </div>
+  <div class="cartao" style="margin-top:4mm"><span class="tag">Saída · desde 09/10/2026</span><h4>DispatchBot | Retorno</h4>
+    <ul>
+      <li>Gatilho: arquivo criado em <code>…/DispatchBot-Fila/retorno</code> (trigger condition: termina em <code>.json</code>) → Get file content → Compose <code>Retorno</code> = <code>json(string(body('Get_file_content')))</code> → Compose <code>Mensagem</code> (✅ ou ⚠️; no BACKUP usa o <code>titulo</code>, nos outros o <code>id</code>) → Switch em <code>outputs('Retorno')?['tipo']</code>.</li>
+    </ul>
+    <table>
+      <tr><th>Case</th><th>Chat em grupo (Flow bot)</th></tr>
+      <tr><td><code>INFRA</code></td><td>(FC) NET / SOC</td></tr>
+      <tr><td><code>DBA</code></td><td>(FC) BANCO DE DADOS (DBA'S + N1 + Gestão)</td></tr>
+      <tr><td><code>SO</code></td><td>(FC) LINUX - WINDOWS - VMWARE</td></tr>
+      <tr><td><code>BACKUP</code>, <code>GMUD_BACKUP</code></td><td>(FC) NETBACKUP</td></tr>
+      <tr><td><code>TESTE</code></td><td>Automação DispatchBot (testes)</td></tr>
+    </table>
+  </div>
+  <div class="caixa atencao"><span class="t">Cuidados</span>
+    <ul>
+      <li>Arquivo de teste do Retorno vai em <code>/retorno</code>, nunca em <code>/pendentes</code>.</li>
+      <li>Chats em grupo não têm thread: o Retorno posta mensagem nova no mesmo chat do card.</li>
+      <li>Risco aceito: o BackupBot usa o primeiro anexo; se não for o CSV, o texto sai ilegível e a guarda do robô manda para <code>/erro</code>.</li>
+      <li>Regra do projeto: não alterar fluxos em produção sem necessidade; preferir criar novos (exceção registrada: Case <code>GMUD_BACKUP</code>).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="secao">
+  <h2><span class="num">16</span>Tratamento de erros</h2>
+  <p class="lead">Regra geral: erro de <b>dado</b> ou de <b>formulário</b> vai para <code>/erro</code> e o Teams avisa (o plantonista abre à mão); erro de <b>infraestrutura</b> deixa o alerta na fila e o ícone vermelho até passar.</p>
+
+  <table>
+    <tr><th>Situação</th><th>Comportamento</th></tr>
+    <tr><td>Rede, instância lenta, navegador travado</td><td>Até 3 tentativas com navegador novo; depois <code>/erro</code>.</td></tr>
+    <tr><td>Formulário recusado pelo ServiceNow</td><td><code>/erro</code> com a mensagem da tela (exige <code>seletor_erro_validacao</code>).</td></tr>
+    <tr><td>Falha depois do clique em Enviar</td><td><code>/erro</code> "confira no ServiceNow"; nunca reenvia.</td></tr>
+    <tr><td>Envio automático com obrigatório vazio</td><td>Não envia; conferência pelo plantonista com o motivo.</td></tr>
+    <tr><td>Ninguém faz login</td><td>Alerta volta a <code>pendentes</code>; depois de 60 min desde o recebimento → <code>/erro</code> ⚠️.</td></tr>
+    <tr><td>SharePoint fora do ar / sem acesso</td><td>Vermelho (<code>PastaIndisponivel</code>); volta sozinho.</td></tr>
+    <tr><td>Sessão Microsoft vencida</td><td>Renova sozinho; se pedir login, janela + amarelo.</td></tr>
+    <tr><td><code>config.json</code> com erro de digitação</td><td>Vermelho com a linha do erro; segue com a última configuração válida.</td></tr>
+    <tr><td>Alerta antigo</td><td>Pergunta; sem resposta, espera em <code>pendentes</code> sem travar os novos.</td></tr>
+    <tr><td>Texto ilegível</td><td><code>/erro</code> ⚠️ "abra à mão pelo e-mail original".</td></tr>
+    <tr><td>Janela do Edge fechada</td><td>Notifica e reabre no próximo ciclo (não fica vermelho).</td></tr>
+    <tr><td>Robô fechado no meio de um alerta</td><td>Recuperação na volta (seção 7).</td></tr>
+    <tr><td>Máquina de colega caiu com alerta reservado</td><td>Depois de 60 min → <code>/erro</code> para conferência.</td></tr>
+    <tr><td>Edge preso no perfil do robô</td><td>Mata só os processos do perfil do robô e reabre.</td></tr>
+    <tr><td>Exceção inesperada na thread do robô</td><td>Supervisor recria a thread em até 30 s; o vigia reabre o processo se ele morrer.</td></tr>
+  </table>
+
+  <h3>Mensagens amigáveis</h3>
+  <p><code>MENSAGENS_AMIGAVEIS</code> troca erros técnicos por texto para o plantonista (janela fechada, <code>Timeout</code>, <code>net::ERR_INTERNET_DISCONNECTED</code>, <code>ERR_NAME_NOT_RESOLVED</code>, <code>getaddrinfo failed</code>...). Para os demais, usa a 1ª linha da exceção (até 500 caracteres). O log mantém o traceback completo.</p>
+</section>
+
+<!-- 17 -->
+<section class="secao">
+  <h2><span class="num">17</span>Arquivos locais, logs e diagnóstico</h2>
+
+  <table>
+    <tr><th>Caminho</th><th>Conteúdo</th></tr>
+    <tr><td><code>%LOCALAPPDATA%\Programs\DispatchBot\</code></td><td>Binários (onedir do PyInstaller), <code>exemplos\*.json</code>, desinstalador.</td></tr>
+    <tr><td><code>%LOCALAPPDATA%\DispatchBot\config.json</code></td><td>Configuração do usuário.</td></tr>
+    <tr><td><code>…\logs\robo.log</code></td><td>Log rotativo: 2 MB × 10 arquivos, nível INFO, formato <code>data hora NÍVEL mensagem</code>.</td></tr>
+    <tr><td><code>…\logs\screenshots\</code></td><td>PNG de página inteira nos erros (<code>AAAAmmdd_HHMMSS_erro_&lt;tipo&gt;_&lt;arquivo&gt;.png</code>); apagados após 30 dias.</td></tr>
+    <tr><td><code>…\processados.jsonl</code></td><td>Histórico de idempotência (não apagar).</td></tr>
+    <tr><td><code>…\painel.jsonl</code></td><td>Resultados para o painel.</td></tr>
+    <tr><td><code>…\browser-profile\</code></td><td>Perfil do Edge do robô (cookies do ServiceNow e da Microsoft).</td></tr>
+    <tr><td><code>…\campos_mapeados.json</code></td><td>Saída do Mapear.</td></tr>
+    <tr><td><code>…\encerrado_pelo_usuario</code></td><td>Flag: o vigia não reabre.</td></tr>
+    <tr><td><code>…\login_inicial_ok</code></td><td>Flag: login inicial já feito.</td></tr>
+  </table>
+
+  <h3>Mensagens do log que valem saber</h3>
+  <table>
+    <tr><th>Trecho</th><th>Significa</th></tr>
+    <tr><td><code>Robô 1.10.5 iniciado em HOST.</code></td><td>Thread do robô subiu.</td></tr>
+    <tr><td><code>Processando &lt;arquivo&gt;</code></td><td>Reserva feita.</td></tr>
+    <tr><td><code>Envio automático suspenso (...)</code></td><td>Caiu para a conferência; o motivo vem entre parênteses.</td></tr>
+    <tr><td><code>Chamado RITM… aberto (SO, …).</code></td><td>Sucesso.</td></tr>
+    <tr><td><code>-&gt; /erro: …</code></td><td>Erro final com motivo.</td></tr>
+    <tr><td><code>Sessão do SharePoint vencida (HTTP 401); renovando.</code></td><td>Renovação normal.</td></tr>
+    <tr><td><code>Login no ServiceNow necessário. Aguardando…</code></td><td>Passou a carência; plantonista avisado.</td></tr>
+    <tr><td><code>Tela External login: clicando em Submit.</code></td><td>Passo automático do SSO.</td></tr>
+    <tr><td><code>Alerta já processado (chamado …). Arquivo repetido ignorado</code></td><td>Idempotência atuou.</td></tr>
+    <tr><td><code>PARADA DE EMERGÊNCIA (origem)</code></td><td>Parada acionada.</td></tr>
+    <tr><td><code>A thread do robô parou inesperadamente; reiniciando.</code></td><td>Supervisor atuou; veja o traceback acima.</td></tr>
+  </table>
+
+  <h3>Roteiro de diagnóstico</h3>
+  <ol>
+    <li><b>Ícone e painel:</b> status, detalhe, "Precisa de você", erros de hoje com motivo.</li>
+    <li><b>Fila:</b> onde está o arquivo (<code>pendentes</code> parado = robô pausado/login; <code>processando</code> = reservado por qual HOST; <code>erro</code> = motivo no JSON).</li>
+    <li><b>status/</b>: qual máquina está ativa, versão, último sinal.</li>
+    <li><b>Log</b> no horário + screenshot correspondente.</li>
+    <li><b>processados.jsonl</b>: último status do <code>id</code> (<code>enviando</code> explica por que não reenviou).</li>
+    <li><b>Histórico do time</b>: quem pausou, assumiu, ligou/desligou envio.</li>
+  </ol>
+</section>
+
+<!-- 18 -->
+<section class="secao">
+  <h2><span class="num">18</span>Build, instalador e Releases</h2>
+
+  <h3>Build local (<code>build\build.ps1</code>)</h3>
+  <ol>
+    <li>Cria <code>.venv</code> e instala <code>requirements.txt</code> (<code>playwright</code>, <code>pystray</code>, <code>pillow</code>, <code>customtkinter</code>) + <code>pyinstaller</code>. Não roda <code>playwright install</code>.</li>
+    <li>Lê a versão de <code>robo\versao.py</code> (fonte única).</li>
+    <li><code>py_compile</code> de todos os <code>robo\*.py</code>.</li>
+    <li><code>build\gerar_imagens.py</code> (ícone e imagens do instalador a partir do avatar), <code>build\versao_exe.py</code> (recurso de versão: nome "DispatchBot" nas notificações) e PyInstaller com <code>build\robo.spec</code>.</li>
+    <li>Assinatura opcional com <code>DISPATCHBOT_CERT_THUMBPRINT</code> (signtool do Windows SDK).</li>
+    <li>Inno Setup 6 (<code>installer\DispatchBot.iss</code>) → <code>dist\instalador\DispatchBot-Setup-&lt;versão&gt;.exe</code>.</li>
+    <li>Com <code>-Publicar</code>: exige tudo commitado, faz <code>git push</code> e cria/atualiza a Release <code>v&lt;versão&gt;</code> com o instalador, o manual e esta documentação (avisa se algum PDF estiver mais antigo que o HTML).</li>
+  </ol>
+  <p><code>robo.spec</code>: dois executáveis numa pasta onedir — <code>DispatchBot.exe</code> (sem console, com ícone e recurso de versão) e <code>DispatchBot-Mapear.exe</code> (com console). Inclui o driver do Playwright e o CustomTkinter (<code>collect_all</code>), <code>config.default.json</code> e <code>assets/avatar.png</code>.</p>
+
+  <h3>Release automática (GitHub Actions)</h3>
+  <p><code>.github/workflows/release.yml</code>: dispara ao enviar uma tag <code>v*</code> ou à mão (Run workflow). Em <code>windows-latest</code>: Python 3.12, Inno Setup (choco, se faltar), <code>build.ps1</code>, e publica a Release com os anexos <b>DispatchBot-Setup-&lt;versão&gt;.exe</b>, <b>Manual-DispatchBot.pdf</b> e <b>DispatchBot-Documentacao-Tecnica.pdf</b>. Notas de <code>build\notas\&lt;versão&gt;.md</code> (sem o arquivo: notas automáticas). Se a Release já existe, só troca os anexos.</p>
+
+  <h3>Instalador (Inno Setup)</h3>
+  <ul>
+    <li>Por usuário, sem admin (<code>PrivilegesRequired=lowest</code>), em <code>{localappdata}\Programs\DispatchBot</code>; textos para o plantonista; avisa se não houver Edge nem Chrome.</li>
+    <li>Atualização limpa: remove <code>{app}\_internal</code>; config, logs e sessão ficam em <code>%LOCALAPPDATA%\DispatchBot</code>.</li>
+    <li>Antes de instalar/desinstalar: sinaliza o evento <code>DispatchBot_Sair</code> e espera o mutex sumir por até 30 s (o robô termina o alerta em andamento); depois <code>taskkill</code>.</li>
+    <li>Autostart: <code>HKCU\…\Run\DispatchBot</code>. Vigia: tarefa agendada <code>DispatchBot Vigia</code> a cada 5 min (<code>schtasks /SC MINUTE /MO 5 /IT</code>) com <code>--vigia</code>.</li>
+    <li>Desinstalação: remove a tarefa e pergunta se apaga também <code>%LOCALAPPDATA%\DispatchBot</code>.</li>
+    <li>Modo silencioso: <code>/VERYSILENT</code> (o robô também é aberto no fim).</li>
+    <li>Arquivos <code>.iss</code> e <code>.ps1</code> precisam ser UTF-8 <b>com BOM</b>.</li>
+  </ul>
+
+  <h3>Publicar uma versão</h3>
+  <ol>
+    <li>Subir <code>VERSAO</code> em <code>robo\versao.py</code> e escrever <code>build\notas\&lt;versão&gt;.md</code>.</li>
+    <li>Se mudou algo para o plantonista: atualizar <code>docs\manual\manual.html</code> e regerar o PDF. Se mudou algo técnico: atualizar <code>docs\tecnico\documentacao-tecnica.html</code> (versão no <code>@page</code> e na capa) e regerar o PDF.</li>
+    <li>Commit, tag <code>v&lt;versão&gt;</code> e push da tag (Actions publica) — ou <code>build.ps1 -Publicar</code> numa máquina Windows.</li>
+  </ol>
+<pre><span class="c">REM gerar os PDFs (Edge do Windows)</span>
+msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\manual\Manual-DispatchBot.pdf" "%CD%\docs\manual\manual.html"
+msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\DispatchBot-Documentacao-Tecnica.pdf" "%CD%\docs\tecnico\documentacao-tecnica.html"</pre>
+</section>
+
+<!-- 19 -->
+<section class="secao">
+  <h2><span class="num">19</span>Ferramentas: Mapear, --testar e Demo</h2>
+
+  <h3>Mapear campos (<code>DispatchBot-Mapear.exe</code>)</h3>
+  <ol>
+    <li>Pause o robô (os dois usam o mesmo perfil do navegador).</li>
+    <li>Menu Iniciar → DispatchBot → <b>Mapear campos do ServiceNow</b>: abre o portal com o Playwright Inspector.</li>
+    <li>Navegue até o formulário e clique em Resume (▶): o console lista seletor, ação sugerida e rótulo de cada campo; a lista completa (com opções dos selects) vai para <code>campos_mapeados.json</code>.</li>
+    <li>Copie a URL para <code>url_formulario</code> e os seletores para os <code>passos</code>.</li>
+  </ol>
+
+  <h3>Testar sem enviar</h3>
+<pre>"%LOCALAPPDATA%\Programs\DispatchBot\DispatchBot-Mapear.exe" --testar "%LOCALAPPDATA%\Programs\DispatchBot\exemplos\INFRA.json"</pre>
+  <p>Preenche o formulário do tipo do JSON <b>sem enviar</b> (deixa passar <code>PREENCHER</code>), lista os campos obrigatórios marcando <code>VAZIO</code> os não preenchidos e os botões visíveis. Falha num passo: screenshot e a lista mesmo assim. <code>--enviar</code> abre o chamado de verdade (só com CHG fictícia e combinado com o time).</p>
+  <table>
+    <tr><th>Exemplo</th><th>Esperado</th></tr>
+    <tr><td><code>INFRA.json</code>, <code>DBA.json</code>, <code>SO.json</code></td><td>Formulário Hosting preenchido (CHGs fictícias <code>CHG999000x</code>).</td></tr>
+    <tr><td><code>BACKUP.json</code></td><td>Incidente com os 6 obrigatórios preenchidos.</td></tr>
+    <tr><td><code>GMUD_SEM_DATA.json</code></td><td><code>/erro</code> sem abrir (dado faltando).</td></tr>
+    <tr><td><code>PRODUCAO.json</code></td><td><code>/erro</code> (tipo não mapeado).</td></tr>
+    <tr><td><code>TIPO_INVALIDO.json</code></td><td><code>/erro</code> (tipo desconhecido).</td></tr>
+    <tr><td><code>RETORNO_TESTE.json</code></td><td>Em <code>/retorno</code>: posta no chat de teste.</td></tr>
+  </table>
+
+  <h3>Demo</h3>
+  <p><code>Demo DispatchBot.cmd</code> → <code>robo\demo.py</code>: janela com dois botões que preenchem GMUD (INFRA) e Backup no portal real sem enviar. Serve para apresentar o robô.</p>
+</section>
+
+<!-- 20 -->
+<section class="secao">
+  <h2><span class="num">20</span>Testes e manutenção</h2>
+
+  <h3>Ambiente de teste local</h3>
+  <ul>
+    <li><b>LOCALAPPDATA de teste:</b> rode com <code>LOCALAPPDATA</code> apontando para uma pasta temporária. Config, histórico, logs e perfil ficam lá; nada encosta na instalação real.</li>
+    <li><b>Fila local:</b> <code>fila_sharepoint.site</code> vazio e <code>pasta_sincronizada</code> numa pasta com as subpastas; jogue os exemplos em <code>pendentes</code>.</li>
+    <li><b>ServiceNow simulado:</b> <code>http.server</code> servindo um formulário com a mesma estrutura do Service Portal (<code>#s2id_sp_formfield_*</code>, select2 com <code>.select2-drop-active</code>, asterisco <code>.mandatory</code>, <code>#submit-btn</code> que mostra um número). Aponte <code>instancia_url</code> para ele.</li>
+    <li><b>Instalador:</b> instalar com dados de teste e desinstalar no fim; conferir que nada ficou no <code>%LOCALAPPDATA%\DispatchBot</code> real.</li>
+  </ul>
+  <div class="caixa perigo"><span class="t">Nunca</span>
+    <ul>
+      <li>Abrir chamado real em teste (<code>--enviar</code> só combinado), nem executar o BackupBot.</li>
+      <li>Colocar arquivo de teste em <code>/pendentes</code> da fila real (Retorno de teste vai em <code>/retorno</code> com <code>tipo: TESTE</code>).</li>
+      <li>Simular teclado (SendKeys) na área de trabalho do usuário.</li>
+    </ul>
+  </div>
+
+  <h3>Checklist de uma mudança</h3>
+  <ol>
+    <li>Ler o trecho do código e o <code>CLAUDE.md</code> (decisões e estado).</li>
+    <li>Mudar mantendo o estilo: código simples, comentários e mensagens em português.</li>
+    <li>Testar com fila local e formulário simulado; para o painel, prints com dados de exemplo.</li>
+    <li>Atualizar versão, notas, README/manual/esta documentação conforme o que mudou.</li>
+    <li>Gerar o instalador, instalar por cima numa máquina, conferir o log e o ícone.</li>
+  </ol>
+
+  <h3>Pontos de extensão</h3>
+  <table>
+    <tr><th>Quero…</th><th>Onde</th></tr>
+    <tr><td>Novo tipo de alerta</td><td>Bloco em <code>tipos</code> + fluxo de entrada + Case no Retorno.</td></tr>
+    <tr><td>Novo campo num formulário</td><td>Passo em <code>passos</code>. Atenção: listas não são mescladas; máquinas instaladas precisam do passo no próprio <code>config.json</code>.</td></tr>
+    <tr><td>Nova regra para não abrir chamado</td><td>Guarda em <code>Robo.processar</code>, <b>antes</b> da abertura e depois da idempotência.</td></tr>
+    <tr><td>Nova ação de passo</td><td><code>servicenow.executar_passo</code>.</td></tr>
+    <tr><td>Novo evento do histórico</td><td><code>Robo.evento(tipo, texto)</code> + rótulo/cor em <code>painel.EVENTOS</code>.</td></tr>
+    <tr><td>Nova mensagem amigável</td><td><code>main.MENSAGENS_AMIGAVEIS</code>.</td></tr>
+  </table>
+</section>
+
+<!-- 21 -->
+<section class="secao">
+  <h2><span class="num">21</span>Decisões fechadas, limites e pendências</h2>
+
+  <h3>Decisões fechadas (não reabrir)</h3>
+  <ul>
+    <li>Chamados pelo <b>Employee Center</b> (<code>/esc</code>), não pelo Service Operations Workspace.</li>
+    <li>Se POPs divergirem, vale o mais recente; o BackupBot (PAD, 15/07/2026) vale sobre o POP 03.</li>
+    <li>Depois de abrir a GMUD: <b>só avisar no Teams</b>; sem planilha CHANGES e sem Planner.</li>
+    <li>Só o Dispatcher N1 da vez fica ativo; fila numa biblioteca do SharePoint do time.</li>
+    <li>O robô não inventa dados; nunca reenvia sozinho depois do clique em Enviar.</li>
+    <li>Número da GMUD = RITM (não o CS), com link de tratamento na interface clássica.</li>
+    <li>Envio automático (GMUD e Backup) por padrão desde 16/10/2026, com conferência de obrigatórios.</li>
+    <li>Login: robô clica em "Use external login" e "Submit" sem preencher nada; nunca senha.</li>
+    <li>Fora do escopo: entrada por e-mail genérico/IA, fluxo de tratamento do chamado, PRODUCAO.</li>
+  </ul>
+
+  <h3>Limites conhecidos</h3>
+  <ul>
+    <li>Idempotência por máquina (histórico local); depende de um robô ativo e da reserva atômica.</li>
+    <li>Sessão do ServiceNow não sobrevive ao fechamento do navegador; o timeout real da Cirion não foi medido.</li>
+    <li>Seletores do Service Portal podem mudar com atualização da Cirion: o envio automático cai para conferência (obrigatório vazio) ou o passo falha e vai para <code>/erro</code> com screenshot.</li>
+    <li>BackupBot lê o primeiro anexo do e-mail (risco aceito; coberto pela guarda de texto ilegível).</li>
+    <li>Sem certificado de assinatura de código: SmartScreen/antivírus podem reclamar (o antivírus já removeu um desinstalador instalado em <code>%TEMP%</code>).</li>
+  </ul>
+
+  <h3>Pendências (outubro de 2026)</h3>
+  <ul>
+    <li>1º Backup real que abra chamado (Submit → INC → Teams) e a 1ª mensagem ⚠️ real do Retorno.</li>
+    <li>1ª GMUD de Backup (<code>GMUD_BACKUP</code>) real.</li>
+    <li>Teste de plantão com duas máquinas reais no SharePoint.</li>
+    <li>Instalar na máquina do N1 e compartilhar o manual com o time.</li>
+    <li>Recomendado: certificado de assinatura de código.</li>
+  </ul>
+
+  <h3>Linha do tempo resumida</h3>
+  <table>
+    <tr><th>Versão</th><th>Destaques</th></tr>
+    <tr><td>1.6.x</td><td>Fila direto no SharePoint (API REST); Failure Type no Backup; <code>--testar</code> lista obrigatórios.</td></tr>
+    <tr><td>1.7.x</td><td>Painel do plantonista; alerta antigo pergunta antes; PARAR do menu com confirmação; limpeza de <code>\0</code>.</td></tr>
+    <tr><td>1.8.x</td><td>Avatar com bolinha de status; janelinha "Precisa de você"; guarda de texto ilegível; Submit no External login.</td></tr>
+    <tr><td>1.9 / 1.10.0</td><td>Painel escuro CustomTkinter (versão A); mensagens amigáveis; janela do Edge fechada não é erro.</td></tr>
+    <tr><td>1.10.3</td><td>Janelinha com rolagem; saída garantida do processo.</td></tr>
+    <tr><td>1.10.4</td><td>Envio automático com conferência de obrigatórios; clientes ignorados no Backup; <code>GMUD_BACKUP</code>; plantão entre máquinas e histórico do time. 1ª GMUD real de ponta a ponta (16/10/2026).</td></tr>
+    <tr><td>1.10.5</td><td>Recuperação não gera ✅ sem número para alerta ignorado/aberto à mão. Release automática no GitHub Actions.</td></tr>
+  </table>
+</section>
+
+</body>
+</html>

@@ -106,6 +106,8 @@ Build: `powershell -ExecutionPolicy Bypass -File build\build.ps1` → `dist\inst
 
 ## Páginas publicadas (claude.ai, privadas)
 
+- **Documentação técnica detalhada em PDF** (16/10/2026, **1.10.5**, 38 páginas, para o time de RPA): `docs/tecnico/DispatchBot-Documentacao-Tecnica.pdf`, fonte `docs/tecnico/documentacao-tecnica.html` (usa `../manual/avatar.png`). Anexada às Releases junto com o manual (`build.ps1 -Publicar` e `.github/workflows/release.yml`). Ao mudar algo técnico: atualizar o HTML (versão no `@page` e na capa) e regerar o PDF (Edge `--headless=new --no-pdf-header-footer --print-to-pdf`).
+
 - **Manual do plantonista em PDF** (atualizado em 16/10/2026 para a **1.10.4**, **12 páginas**): `docs/manual/Manual-DispatchBot.pdf`, fonte `docs/manual/manual.html` (+ imagens na mesma pasta: ícones por cor gerados com `bandeja.imagem`; prints com dados de exemplo e LOCALAPPDATA de teste: painel com a faixa "Também ativo", Histórico do time, janela do nome e janelinha "Não enviei sozinho"). Cobre envio automático, nome, assumir o plantão, histórico do time, GMUD de Backup e clientes ignorados. Gerar de novo: Edge `--headless=new --no-pdf-header-footer --print-to-pdf`.
 
 - Guia dos colaboradores (linguagem simples, sem termos técnicos): https://claude.ai/artifact/NFd2diiab85WsmXrFgqR9A — fonte `docs/guia.html` (publicar com `url` desse link).

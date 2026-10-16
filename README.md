@@ -8,7 +8,7 @@ Power Automate ──JSON──▶ SharePoint /DispatchBot-Fila/pendentes ──
        └──── mensagem no chat do time (Teams) ◀── /retorno ◀───────────────────┘
 ```
 
-Guia para os plantonistas: [docs/guia.html](docs/guia.html) · Arquitetura e decisões: [docs/tecnico.html](docs/tecnico.html) · Ajustes nos fluxos: [docs/power-automate.md](docs/power-automate.md)
+Guia para os plantonistas: [docs/guia.html](docs/guia.html) · Arquitetura e decisões: [docs/tecnico.html](docs/tecnico.html) · Documentação técnica detalhada: [docs/tecnico/documentacao-tecnica.html](docs/tecnico/documentacao-tecnica.html) (PDF anexo às Releases) · Ajustes nos fluxos: [docs/power-automate.md](docs/power-automate.md)
 
 ## Instalar (plantonista)
 

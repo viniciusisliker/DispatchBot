@@ -1,6 +1,6 @@
 ﻿# Gera dist\DispatchBot (PyInstaller) e o instalador dist\instalador\DispatchBot-Setup-<versao>.exe (Inno Setup 6).
 # Uso (na raiz do projeto):  powershell -ExecutionPolicy Bypass -File build\build.ps1
-# Com -Publicar: no fim cria a Release v<versao> no GitHub com o instalador e o manual em PDF (precisa do gh logado e do código commitado).
+# Com -Publicar: no fim cria a Release v<versao> no GitHub com o instalador, o manual e a documentação técnica em PDF (precisa do gh logado e do código commitado).
 # Assinatura opcional: defina $env:DISPATCHBOT_CERT_THUMBPRINT com o thumbprint de um certificado de
 # assinatura de código do repositório do usuário (reduz bloqueios do antivírus/SmartScreen).
 param([switch]$Publicar)
@@ -59,15 +59,21 @@ if ($Publicar) {
     if (git status --porcelain) { throw "Há mudanças sem commit: faça o commit antes de publicar" }
     git push
     if ($LASTEXITCODE -ne 0) { throw "Falha no git push" }
-    # Anexos: instalador e manual do plantonista (o PDF é gerado à parte, a partir de docs\manual\manual.html)
+    # Anexos: instalador, manual do plantonista e documentação técnica (os PDFs são gerados à parte, a partir dos .html)
     $anexos = @("dist\instalador\DispatchBot-Setup-$versao.exe")
-    $manual = "docs\manual\Manual-DispatchBot.pdf"
-    if (Test-Path $manual) {
-        if ((Get-Item $manual).LastWriteTime -lt (Get-Item "docs\manual\manual.html").LastWriteTime) {
-            Write-Warning "O PDF do manual é mais antigo que o manual.html: gere o PDF de novo se mudou algo."
-        }
-        $anexos += $manual
-    } else { Write-Warning "Manual não encontrado ($manual); publicando só o instalador." }
+    $pdfs = @(
+        @("docs\manual\Manual-DispatchBot.pdf", "docs\manual\manual.html"),
+        @("docs\tecnico\DispatchBot-Documentacao-Tecnica.pdf", "docs\tecnico\documentacao-tecnica.html")
+    )
+    foreach ($par in $pdfs) {
+        $pdf, $fonte = $par
+        if (Test-Path $pdf) {
+            if ((Get-Item $pdf).LastWriteTime -lt (Get-Item $fonte).LastWriteTime) {
+                Write-Warning "$pdf é mais antigo que $fonte`: gere o PDF de novo se mudou algo."
+            }
+            $anexos += $pdf
+        } else { Write-Warning "PDF não encontrado ($pdf); publicando sem ele." }
+    }
     gh release view "v$versao" *> $null
     if ($LASTEXITCODE -eq 0) {
         # A Release já existe: só troca os anexos
