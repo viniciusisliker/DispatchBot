@@ -37,7 +37,9 @@ jobs:
           $exe = "dist\instalador\DispatchBot-Setup-$versao.exe"
           if (-not (Test-Path $exe)) { throw "Instalador não encontrado: $exe" }
           $anexos = @($exe)
-          if (Test-Path "docs\manual\Manual-DispatchBot.pdf") { $anexos += "docs\manual\Manual-DispatchBot.pdf" }
+          foreach ($pdf in @("docs\manual\Manual-DispatchBot.pdf", "docs\tecnico\DispatchBot-Documentacao-Tecnica.pdf")) {
+            if (Test-Path $pdf) { $anexos += $pdf } else { Write-Warning "PDF não encontrado: $pdf" }
+          }
           gh release view "v$versao" *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release upload "v$versao" @anexos --clobber
