@@ -232,7 +232,7 @@
     <tr><td><code>historico</code></td><td>Cada robô</td><td><code>&lt;AAAA-MM-DD&gt;_&lt;HOST&gt;.jsonl</code>: eventos do dia da máquina.</td></tr>
     <tr><td><code>PARAR*</code> (raiz)</td><td>Pessoa</td><td>Parada remota de todos os robôs; a 1ª linha vira o motivo.</td></tr>
   </table>
-  <p>As subpastas que faltarem são criadas pelo robô (<code>verificar_pasta</code>, a cada 5 min). A raiz <code>DispatchBot-Fila</code> nunca é criada pelo robô: se não existir, é erro de configuração.</p>
+  <p>As subpastas que faltarem são criadas pelo robô (<code>verificar_pasta</code>: a cada 5 min no SharePoint, a cada ciclo na pasta local). A raiz <code>DispatchBot-Fila</code> nunca é criada pelo robô: se não existir, é erro de configuração.</p>
 
   <h3>Desfechos possíveis</h3>
   <table>
@@ -241,8 +241,10 @@
     <tr><td>Arquivo repetido (id já <code>ok</code>)</td><td><code>processados</code></td><td>nenhum</td><td>sem mudança</td></tr>
     <tr><td>Cliente em <code>ignorar_clientes</code></td><td><code>processados</code></td><td>nenhum</td><td><code>ok</code> + <code>ignorado</code></td></tr>
     <tr><td>Alerta antigo: "já foi aberto à mão"</td><td><code>processados</code></td><td>nenhum</td><td><code>ok</code> + <code>manual</code></td></tr>
-    <tr><td>Dado faltando, tipo desconhecido/não mapeado, texto ilegível, recusa do formulário</td><td><code>erro</code></td><td>⚠️ motivo</td><td><code>erro</code> (se houver id)</td></tr>
-    <tr><td>Falha depois do clique em Enviar / pulado / ninguém conferiu</td><td><code>erro</code></td><td>⚠️ "confira no ServiceNow"</td><td>mantém <code>enviando</code></td></tr>
+    <tr><td>Dado faltando, tipo não mapeado, texto ilegível, recusa do formulário</td><td><code>erro</code></td><td>⚠️ motivo</td><td><code>erro</code></td></tr>
+    <tr><td>Tipo desconhecido</td><td><code>erro</code></td><td>⚠️ motivo</td><td>sem mudança (<code>erro_final</code> com id vazio)</td></tr>
+    <tr><td>Falha depois do clique em Enviar / ninguém conferiu</td><td><code>erro</code></td><td>⚠️ "confira no ServiceNow"</td><td>mantém <code>enviando</code></td></tr>
+    <tr><td>Pulado pelo plantonista</td><td><code>erro</code></td><td>⚠️ "o plantonista pulou este alerta…; o chamado não foi enviado. Abra à mão."</td><td>mantém <code>enviando</code></td></tr>
     <tr><td>Login pendente, pausa, emergência antes do envio</td><td>volta a <code>pendentes</code></td><td>nenhum</td><td>sem mudança</td></tr>
     <tr><td>JSON inválido</td><td><code>erro</code> + <code>.erro.txt</code></td><td>nenhum (sem dados para o Teams)</td><td>sem mudança</td></tr>
   </table>
@@ -262,6 +264,8 @@
     <tr><td><b>parada-remota</b></td><td><code>vigiar_parada_remota</code></td><td>Procura o arquivo <code>PARAR</code> a cada 10 s (SharePoint) ou 3 s (pasta). Usa a sessão já carregada, nunca renova (<code>pode_renovar=False</code>).</td></tr>
     <tr><td><b>atalho</b></td><td><code>emergencia.escutar_atalho</code></td><td><code>RegisterHotKey</code> + <code>GetMessageW</code>: dispara <code>parar_agora("atalho")</code>.</td></tr>
     <tr><td><b>painel</b></td><td><code>Painel._rodar</code></td><td>Mainloop do Tk (CustomTkinter). Sobe escondida no início: a janelinha "Precisa de você" depende dela.</td></tr>
+    <tr><td><b>painel-inicio</b></td><td><code>Robo.iniciar</code></td><td>Curta: sobe o painel escondido sem atrasar o início do robô.</td></tr>
+    <tr><td><i>leitura do histórico</i></td><td><code>Painel._carregar_historico</code></td><td>Lê <code>historico/</code> do SharePoint para a tela Histórico do time sem travar o Tk (<code>pode_renovar=False</code>).</td></tr>
     <tr><td><b>pergunta-alerta-antigo</b></td><td><code>perguntar_por_caixa</code></td><td>Só sem painel: <code>MessageBoxW</code> Sim/Não/Cancelar, uma por vez.</td></tr>
   </table>
 
@@ -401,7 +405,7 @@ enquanto não encerrando:
     <li><b>Envio automático:</b> só clica se <code>botao_enviar</code> estiver mapeado e <code>obrigatorios_vazios(page)</code> devolver lista vazia. O detector (<code>JS_OBRIGATORIOS</code>) procura <code>.form-group</code>/<code>.sp-form-field</code> visíveis com asterisco visível (<code>.mandatory</code>, <code>.fa-asterisk</code>), <code>is-required</code>, <code>[required]</code>, <code>aria-required</code> ou rótulo terminando em <code>*</code>; em campo de referência vale qualquer input não vazio do grupo. Obrigatório vazio, botão sem seletor ou erro na conferência = <b>não clica</b> e cai para a conferência com o motivo.</li>
     <li><b>Ponto sem volta:</b> <code>antes_de_enviar()</code> grava <code>enviando</code> no histórico (com <code>fsync</code>) <b>antes</b> do clique ou da conferência.</li>
     <li><b>Conferência:</b> traz o formulário para a frente, ícone amarelo, janelinha "Precisa de você" com os campos preenchidos (<code>resumo_campos</code>), o motivo e a contagem até <code>confirmacao_timeout_min</code>. Botões: "Mostrar formulário" (<code>bring_to_front</code>) e "Pular este alerta" (<code>Pulado</code>, só se nenhum número apareceu).</li>
-    <li><b>Captura do número</b> (laço de 1 s até <code>timeout_seg</code>): aplica <code>captura_numero.regex</code> ao texto de <code>seletor</code> (todos os elementos, mesmo escondidos) ou da página inteira; ignora os de <code>ja_na_tela</code> (números já presentes antes do envio, no texto visível <b>e</b> no do seletor); escolhe na ordem de <code>preferir</code>; sem o preferido, espera <code>espera_preferido_seg</code> e aceita o primeiro. No automático, se <code>seletor_erro_validacao</code> aparecer → <code>FormularioRecusado</code>.</li>
+    <li><b>Captura do número</b> (laço de 1 s até <code>timeout_seg</code> depois do clique do robô, padrão 60 s se faltar a chave; na conferência, até <code>confirmacao_timeout_min</code>): aplica <code>captura_numero.regex</code> ao texto de <code>seletor</code> (todos os elementos, mesmo escondidos) ou da página inteira; ignora os de <code>ja_na_tela</code> (números já presentes antes do envio, no texto visível <b>e</b> no do seletor); escolhe na ordem de <code>preferir</code>; sem o preferido, espera <code>espera_preferido_seg</code> (padrão 10 s se faltar a chave) e aceita o primeiro. No automático, se <code>seletor_erro_validacao</code> aparecer → <code>FormularioRecusado</code>.</li>
   </ol>
 
   <table>
@@ -551,7 +555,7 @@ enquanto não encerrando:
   <p class="lead">Várias máquinas têm o robô instalado; só uma deve ficar ativa. O SharePoint serve de canal entre elas: status, pedidos de plantão e histórico. Não há trava rígida: é coordenação com aviso.</p>
 
   <h3>Nome do plantonista</h3>
-  <p><code>nome_plantonista</code> no config (máx. 40 caracteres). Vazio = usuário do Windows arrumado (<code>vinicius.morais</code> → "Vinicius Morais"). Perguntado na 1ª execução pela janelinha do painel; trocado pelo menu "Meu nome no DispatchBot...". Vai no status, nos eventos e no painel dos colegas.</p>
+  <p><code>nome_plantonista</code> no config (máx. 40 caracteres). Vazio = usuário do Windows arrumado (<code>vinicius.morais</code> → "Vinicius Morais"). Perguntado pela janelinha do painel sempre que estiver vazio (uma vez por execução; fechar a janela grava o nome sugerido); trocado pelo menu "Meu nome no DispatchBot...". Vai no status, nos eventos e no painel dos colegas.</p>
 
   <h3>Outros robôs ativos</h3>
   <ul>
@@ -564,9 +568,9 @@ enquanto não encerrando:
   <h3>Assumir o plantão</h3>
   <ol>
     <li>Quem assume grava <code>plantao/&lt;HOST alvo&gt;.json</code> (<code>{de_nome, de_host, em, ts}</code>) e se ativa. Evento <code>assumiu</code>.</li>
-    <li>O robô alvo lê o pedido a cada 30 s, no loop e <b>entre um alerta e outro</b> (nunca no meio), apaga o arquivo, pausa com o detalhe "Fulano assumiu o plantão às HH:MM", notifica e mostra uma caixa ao dono. Evento <code>plantao_passado</code>. O Edge do colega fica aberto (só pausa).</li>
+    <li>O robô alvo lê o pedido a cada 30 s, no loop e <b>entre um alerta e outro</b> (nunca no meio), apaga o arquivo, pausa com o detalhe "Fulano assumiu o plantão às HH:MM", notifica e mostra uma caixa ao dono. Evento <code>plantao_passado</code>. Como em qualquer pausa, o loop fecha o navegador do robô no ciclo seguinte (<code>fechar_navegador</code>).</li>
     <li>Pedido com mais de 15 min (máquina estava desligada) ou alvo já pausado: só apaga.</li>
-    <li>Quem assumiu é avisado quando o status do outro aparece pausado, ou se ele não responder em 12 min.</li>
+    <li>Quem assumiu é avisado quando o status do outro aparece pausado, ou se ele não responder em 12 min. Se o outro simplesmente parar de dar sinal (status com mais de 12 min), o pedido é esquecido só com uma linha no log, sem notificação.</li>
   </ol>
 
   <h3>Histórico do time</h3>
@@ -597,7 +601,7 @@ enquanto não encerrando:
 
   <table>
     <tr><th>Origem</th><th>Como</th><th>Alcance</th><th>Como liberar</th></tr>
-    <tr><td><code>menu</code></td><td>"PARAR AGORA" no menu do ícone (pede confirmação desde a 1.7.1) ou no painel (imediato)</td><td>Esta máquina</td><td>Desmarcar Pausado</td></tr>
+    <tr><td><code>menu</code></td><td>"PARAR AGORA" no menu do ícone (pede confirmação desde a 1.7.1) ou no painel (também pede confirmação)</td><td>Esta máquina</td><td>Desmarcar Pausado</td></tr>
     <tr><td><code>atalho</code></td><td>1º livre de <code>atalho_emergencia</code>: <code>Ctrl+Alt+Shift+P</code>, <code>Ctrl+Alt+Shift+X</code>, <code>Ctrl+Alt+Pause</code></td><td>Esta máquina</td><td>Desmarcar Pausado</td></tr>
     <tr><td><code>remota</code></td><td>Arquivo <code>PARAR*</code> na raiz da <code>DispatchBot-Fila</code> (1ª linha = motivo)</td><td>Todas as máquinas, em até 10 s</td><td>Apagar o arquivo</td></tr>
   </table>
@@ -649,7 +653,7 @@ enquanto não encerrando:
 
   <h3>Carga, mescla e gravação</h3>
   <ul>
-    <li><code>carregar()</code> lê com <code>utf-8-sig</code>; JSON inválido → <code>ConfigInvalido</code> com linha e coluna (o robô segue com a última configuração válida em memória e fica vermelho).</li>
+    <li><code>carregar()</code> lê com <code>utf-8-sig</code>; JSON inválido → <code>ConfigInvalido</code> com linha e coluna (o ciclo inteiro é pulado: o robô fica vermelho com a linha do erro e não lê a fila até o arquivo ser corrigido; ações do menu que gravam o config, como Pausado, envio e nome, também falham).</li>
     <li><b>Mescla</b> (<code>_mesclar</code>): chaves que existem no modelo e não no arquivo do usuário entram sozinhas, recursivamente em dicionários. Valores do usuário sempre prevalecem. <b>Listas não são mescladas</b>: um passo novo em <code>passos</code> não chega a um config já instalado.</li>
     <li>Exceções pontuais: <code>botao_enviar</code> vazio no usuário e preenchido no modelo é copiado do modelo; <code>captura_numero</code> com <code>seletor</code> vazio é trocada pela do modelo (1.10.6, captura do INC); clientes do modelo que faltam em <code>ignorar_clientes</code> são acrescentados à lista instalada (1.10.5; não dá para tirar um cliente do modelo só pelo config.json).</li>
     <li><code>salvar()</code>: grava em <code>.tmp</code> e faz <code>os.replace</code> (atômico).</li>
@@ -694,7 +698,7 @@ enquanto não encerrando:
     <tr><td><code>seletor_formulario_pronto</code></td><td>Espera esse elemento antes do 1º passo.</td></tr>
     <tr><td><code>variaveis</code> / <code>padroes</code></td><td>Fixas / sobrescrevíveis pelo alerta.</td></tr>
     <tr><td><code>validar</code></td><td>Regex por campo do alerta (casamento inteiro).</td></tr>
-    <tr><td><code>passos</code></td><td>Lista de <code>{campo, acao, seletor, valor, busca, mapa, opcional, pular_se_vazio}</code>.</td></tr>
+    <tr><td><code>passos</code></td><td>Lista de <code>{campo, acao, seletor, valor, busca, seletor_busca, seletor_opcao, mapa, opcional, pular_se_vazio}</code>.</td></tr>
     <tr><td><code>botao_enviar</code></td><td>Seletor do Submit/Enviar (<code>#submit-btn</code> nos dois formulários).</td></tr>
     <tr><td><code>seletor_erro_validacao</code></td><td>Mensagem de recusa do ServiceNow (vazio nos dois formulários).</td></tr>
     <tr><td><code>confirmacao_timeout_min</code></td><td>Prazo da conferência (30).</td></tr>
@@ -786,7 +790,7 @@ enquanto não encerrando:
   <h3>Arquivos locais</h3>
   <table>
     <tr><th>Arquivo</th><th>Linha</th></tr>
-    <tr><td><code>processados.jsonl</code></td><td><code>{id, status, em, maquina, tipo, numero?, url?, mensagem?, ignorado?, manual?}</code></td></tr>
+    <tr><td><code>processados.jsonl</code></td><td><code>{id, status, em, maquina, tipo, numero?, url?, mensagem?, ignorado?, manual?}</code> (<code>ignorado</code> = nome do cliente que casou)</td></tr>
     <tr><td><code>painel.jsonl</code></td><td><code>{em, status: ok|erro, tipo, alerta (CHG/título), numero, url, mensagem}</code></td></tr>
   </table>
 </section>
@@ -847,7 +851,7 @@ enquanto não encerrando:
     <tr><td>Ninguém faz login</td><td>Alerta volta a <code>pendentes</code>; depois de 60 min desde o recebimento → <code>/erro</code> ⚠️.</td></tr>
     <tr><td>SharePoint fora do ar / sem acesso</td><td>Vermelho (<code>PastaIndisponivel</code>); volta sozinho.</td></tr>
     <tr><td>Sessão Microsoft vencida</td><td>Renova sozinho; se pedir login, janela + amarelo.</td></tr>
-    <tr><td><code>config.json</code> com erro de digitação</td><td>Vermelho com a linha do erro; segue com a última configuração válida.</td></tr>
+    <tr><td><code>config.json</code> com erro de digitação</td><td>Vermelho com a linha do erro; não processa nada até corrigir o arquivo.</td></tr>
     <tr><td>Alerta antigo</td><td>Pergunta; sem resposta, espera em <code>pendentes</code> sem travar os novos.</td></tr>
     <tr><td>Texto ilegível</td><td><code>/erro</code> ⚠️ "abra à mão pelo e-mail original".</td></tr>
     <tr><td>Janela do Edge fechada</td><td>Notifica e reabre no próximo ciclo (não fica vermelho).</td></tr>
@@ -918,12 +922,12 @@ enquanto não encerrando:
     <li><code>build\gerar_imagens.py</code> (ícone e imagens do instalador a partir do avatar), <code>build\versao_exe.py</code> (recurso de versão: nome "DispatchBot" nas notificações) e PyInstaller com <code>build\robo.spec</code>.</li>
     <li>Assinatura opcional com <code>DISPATCHBOT_CERT_THUMBPRINT</code> (signtool do Windows SDK).</li>
     <li>Inno Setup 6 (<code>installer\DispatchBot.iss</code>) → <code>dist\instalador\DispatchBot-Setup-&lt;versão&gt;.exe</code>.</li>
-    <li>Com <code>-Publicar</code>: exige tudo commitado, faz <code>git push</code> e cria/atualiza a Release <code>v&lt;versão&gt;</code> com o instalador, o manual e esta documentação (avisa se algum PDF estiver mais antigo que o HTML).</li>
+    <li>Com <code>-Publicar</code>: exige tudo commitado, faz <code>git push</code> e cria/atualiza a Release <code>v&lt;versão&gt;</code> com o instalador, o manual e esta documentação (avisa se algum PDF estiver mais antigo que o HTML). Usa sempre notas automáticas (<code>--generate-notes</code>): <code>build\notas</code> só é lido pelo Actions. Sem o Inno Setup, o build só avisa e termina sem instalador.</li>
   </ol>
   <p><code>robo.spec</code>: dois executáveis numa pasta onedir — <code>DispatchBot.exe</code> (sem console, com ícone e recurso de versão) e <code>DispatchBot-Mapear.exe</code> (com console). Inclui o driver do Playwright e o CustomTkinter (<code>collect_all</code>), <code>config.default.json</code> e <code>assets/avatar.png</code>.</p>
 
   <h3>Release automática (GitHub Actions)</h3>
-  <p><code>.github/workflows/release.yml</code>: dispara ao enviar uma tag <code>v*</code> ou à mão (Run workflow). Em <code>windows-latest</code>: Python 3.12, Inno Setup (choco, se faltar), <code>build.ps1</code>, e publica a Release com os anexos <b>DispatchBot-Setup-&lt;versão&gt;.exe</b>, <b>Manual-DispatchBot.pdf</b> e <b>DispatchBot-Documentacao-Tecnica.pdf</b>. Notas de <code>build\notas\&lt;versão&gt;.md</code> (sem o arquivo: notas automáticas). Se a Release já existe, só troca os anexos.</p>
+  <p><code>.github/workflows/release.yml</code>: dispara ao enviar uma tag <code>v*</code> ou à mão (Run workflow). Em <code>windows-latest</code>: Python 3.12, Inno Setup (choco, se faltar), <code>build.ps1</code>, e publica a Release com os anexos <b>DispatchBot-Setup-&lt;versão&gt;.exe</b>, <b>Manual-DispatchBot.pdf</b> e <b>DispatchBot-Documentacao-Tecnica.pdf</b>. Antes de publicar, gera os dois PDFs de novo com o Edge (<code>--headless=new --disable-gpu --no-pdf-header-footer --print-to-pdf</code>) a partir do HTML da versão; se o PDF não sair, avisa e anexa o do repositório. Notas de <code>build\notas\&lt;versão&gt;.md</code> (sem o arquivo: notas automáticas). Se a Release já existe, só troca os anexos.</p>
 
   <h3>Instalador (Inno Setup)</h3>
   <ul>
@@ -963,14 +967,15 @@ msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\D
 <pre>"%LOCALAPPDATA%\Programs\DispatchBot\DispatchBot-Mapear.exe" --testar "%LOCALAPPDATA%\Programs\DispatchBot\exemplos\INFRA.json"</pre>
   <p>Preenche o formulário do tipo do JSON <b>sem enviar</b> (deixa passar <code>PREENCHER</code>), lista os campos obrigatórios marcando <code>VAZIO</code> os não preenchidos e os botões visíveis. Falha num passo: screenshot e a lista mesmo assim. <code>--enviar</code> abre o chamado de verdade (só com CHG fictícia e combinado com o time).</p>
   <table>
-    <tr><th>Exemplo</th><th>Esperado</th></tr>
+    <tr><th>Exemplo (pasta <code>exemplos</code>)</th><th>Esperado na fila real (copiado para <code>pendentes</code>)</th></tr>
     <tr><td><code>INFRA.json</code>, <code>DBA.json</code>, <code>SO.json</code></td><td>Formulário Hosting preenchido (CHGs fictícias <code>CHG999000x</code>).</td></tr>
     <tr><td><code>BACKUP.json</code></td><td>Incidente com os 6 obrigatórios preenchidos.</td></tr>
     <tr><td><code>GMUD_SEM_DATA.json</code></td><td><code>/erro</code> sem abrir (dado faltando).</td></tr>
     <tr><td><code>PRODUCAO.json</code></td><td><code>/erro</code> (tipo não mapeado).</td></tr>
     <tr><td><code>TIPO_INVALIDO.json</code></td><td><code>/erro</code> (tipo desconhecido).</td></tr>
-    <tr><td><code>RETORNO_TESTE.json</code></td><td>Em <code>/retorno</code>: posta no chat de teste.</td></tr>
+    <tr><td><code>RETORNO_TESTE.json</code>, <code>RETORNO_TESTE_INFRA.json</code></td><td>Em <code>/retorno</code>: <code>RETORNO_TESTE</code> posta no chat de teste; <code>RETORNO_TESTE_INFRA</code> cai no Case INFRA e posta no chat <b>real</b> (FC) NET / SOC (usar só combinado com o time).</td></tr>
   </table>
+  <p>Com <code>--testar</code> é diferente: nada vai para <code>/erro</code>. <code>PRODUCAO.json</code> preenche (o <code>PREENCHER</code> passa sem envio), <code>GMUD_SEM_DATA.json</code> mostra <code>FALHOU: …</code> e <code>TIPO_INVALIDO.json</code> mostra "Tipo … não existe".</p>
 
   <h3>Demo</h3>
   <p><code>Demo DispatchBot.cmd</code> → <code>robo\demo.py</code>: janela com dois botões que preenchem GMUD (INFRA) e Backup no portal real sem enviar. Serve para apresentar o robô.</p>
