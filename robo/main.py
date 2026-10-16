@@ -121,8 +121,11 @@ def cliente_ignorado(alerta: dict, ignorar) -> str:
     nomes = [str(n).strip().lower() for n in (ignorar or []) if str(n).strip()]
     if not nomes:
         return ""
-    linha_csv = str(alerta.get("id") or "").split("#", 1)[-1]
-    campos = linha_csv.split(",") + str(alerta.get("titulo") or "").split("|")
+    # Só a coluna Cliente: as outras (ex.: Master, [1]) se repetem em todo alerta e ignorariam tudo
+    id_alerta = str(alerta.get("id") or "")
+    colunas = id_alerta.split("#", 1)[1].split(",") if "#" in id_alerta else []
+    trechos = str(alerta.get("titulo") or "").split("|")
+    campos = [colunas[3] if len(colunas) > 3 else "", trechos[1] if len(trechos) > 1 else ""]
     campos = [c.strip().strip('"').lower() for c in campos]
     for nome in nomes:
         for campo in campos:
