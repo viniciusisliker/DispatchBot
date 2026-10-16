@@ -185,8 +185,8 @@
     "BACKUP": {
       "_ajuda": "Formulário de Incidente do cartão Backup no Employee Center, como no BackupBot (Power Automate Desktop, 15/07/2026). Envio automático ou com conferência: chave envio_automatico.BACKUP (menu do ícone).",
       "_origem": "URL, seletores e valores de Conta, Contato, Serviço Afetado e Impacto vêm do BackupBot. O POP 03 sugere impacto 'Nenhum'; vale o BackupBot, que é o mais recente. Título #FALHA DE BACKUP segue o POP 08.",
-      "_ajuda_ignorar_clientes": "Clientes (hosts) cujas falhas não abrem chamado: o alerta vai para processados sem chamado e sem Teams. appflexrj01-inst01 e appnburj03 são media servers do NetBackup (orientação do time de NetBackup, 16/10/2026).",
-      "ignorar_clientes": ["appflexrj01-inst01.smpdc.gblx", "appnburj03"],
+      "_ajuda_ignorar_clientes": "Clientes (hosts) cujas falhas não abrem chamado: o alerta vai para processados sem chamado e sem Teams. appflexrj01-inst01 e appnburj03 são media servers do NetBackup (orientação do time de NetBackup, 16/10/2026); nbmasterbrarj01 entrou a pedido do usuário em 16/10/2026. Compara só a coluna Cliente. Clientes novos do modelo entram sozinhos na lista do config.json instalado.",
+      "ignorar_clientes": ["appflexrj01-inst01.smpdc.gblx", "appnburj03", "nbmasterbrarj01"],
       "url_formulario": "/esc?id=sc_cat_item&sys_id=ca634cdd87a1b510baccc8840cbb35b7",
       "seletor_formulario_pronto": "#sp_formfield_short_description",
       "variaveis": {

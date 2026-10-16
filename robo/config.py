@@ -53,6 +53,13 @@ def carregar() -> dict:
         if isinstance(meu, dict) and isinstance(tipo, dict) and meu.get("botao_enviar") == "" and tipo.get("botao_enviar"):
             meu["botao_enviar"] = tipo["botao_enviar"]
             mudou = True
+        # ignorar_clientes: clientes novos do modelo entram na lista já instalada (a mescla não troca listas)
+        if isinstance(meu, dict) and isinstance(tipo, dict) and isinstance(meu.get("ignorar_clientes"), list):
+            atuais = {str(n).strip().lower() for n in meu["ignorar_clientes"]}
+            for n in tipo.get("ignorar_clientes") or []:
+                if str(n).strip().lower() not in atuais:
+                    meu["ignorar_clientes"].append(n)
+                    mudou = True
     if mudou:
         salvar(cfg)
     return cfg
