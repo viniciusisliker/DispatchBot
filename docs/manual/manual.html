@@ -214,7 +214,7 @@
 <section class="secao">
   <h2><span class="num">4</span>O painel do robô</h2>
   <p class="lead">Clique no ícone para abrir o painel. Fechar o painel <b>não</b> desliga o robô.</p>
-  <figure style="max-width:140mm"><img src="painel.png" alt="Painel do DispatchBot"><figcaption>Painel com dados de exemplo: status no topo, a faixa "Também ativo" (outro robô ligado), os contadores e as listas do dia.</figcaption></figure>
+  <figure style="max-width:112mm"><img src="painel.png" alt="Painel do DispatchBot"><figcaption>Painel com dados de exemplo: status no topo, a faixa "Também ativo" (outro robô ligado), os contadores e as listas do dia.</figcaption></figure>
 
   <table>
     <tr><th>Parte</th><th>O que mostra</th></tr>
@@ -248,10 +248,8 @@
         <li>Normalmente o robô envia sozinho. Se faltar um campo obrigatório, ele <b>não envia</b>: o ícone fica <b style="color:var(--amarelo)">amarelo</b> e a janelinha mostra o motivo ("Não enviei sozinho: …"), os campos e o tempo que falta.</li>
         <li>Clique em <span class="ui">Ver formulário</span> para trazer o navegador do robô para a frente.</li>
         <li>Complete o que faltar, confira e clique em <span class="ui">Submit</span> (GMUD) ou <span class="ui">Enviar</span> (Backup) <b>no próprio formulário</b>.</li>
-        <li>Pronto: o robô pega o número, a janelinha some e o Teams avisa.</li>
+        <li>Pronto: o robô pega o número, a janelinha some e o Teams avisa. <b>Prazo: 30 minutos.</b> Sem envio nesse tempo, o Teams avisa para abrir à mão.</li>
       </ol>
-      <div class="caixa atencao"><span class="t">Prazo: 30 minutos</span>
-        Sem envio em 30 minutos, o robô desiste daquele alerta e o Teams avisa que o chamado precisa ser aberto à mão.</div>
     </div>
   </div>
 
@@ -261,10 +259,10 @@
   <h3>B. Alerta antigo</h3>
   <p>Quando um alerta chegou há <b>mais de 2 horas</b> (por exemplo, enquanto o robô estava pausado), o robô não abre sozinho: ele pergunta.</p>
   <table>
-    <tr><th>Botão</th><th>Quando usar</th><th>O que acontece</th></tr>
-    <tr><td><span class="ui">Abrir chamado</span></td><td>Ninguém abriu ainda.</td><td>O robô abre o chamado normalmente.</td></tr>
-    <tr><td><span class="ui">Já foi aberto</span></td><td>Alguém já abriu à mão.</td><td>O alerta é arquivado. Sem chamado e sem mensagem no Teams.</td></tr>
-    <tr><td><span class="ui">Depois</span></td><td>Não sabe agora.</td><td>Pergunta de novo em 30 minutos. Os alertas novos seguem normalmente.</td></tr>
+    <tr><th>Botão</th><th>Quando usar e o que acontece</th></tr>
+    <tr><td><span class="ui">Abrir chamado</span></td><td>Ninguém abriu ainda: o robô abre normalmente.</td></tr>
+    <tr><td><span class="ui">Já foi aberto</span></td><td>Alguém já abriu à mão: o alerta é arquivado, sem chamado e sem mensagem no Teams.</td></tr>
+    <tr><td><span class="ui">Depois</span></td><td>Não sabe agora: pergunta de novo em 30 minutos (os alertas novos seguem).</td></tr>
   </table>
 
 </section>
