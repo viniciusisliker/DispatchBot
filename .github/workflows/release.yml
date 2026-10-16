@@ -1,0 +1,52 @@
+# Gera o instalador numa máquina Windows do GitHub e publica a Release.
+# Dispara ao enviar uma tag v<versão> (ex.: v1.10.5) ou à mão (Actions → Release → Run workflow).
+# A versão vem de robo/versao.py; as notas vêm de build/notas/<versão>.md (sem o arquivo: notas automáticas).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build (PyInstaller + Inno Setup)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+          powershell -ExecutionPolicy Bypass -File build\build.ps1
+          if ($LASTEXITCODE -ne 0) { throw "Falha no build" }
+
+      - name: Publicar Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $versao = (python -c "import sys; sys.path.insert(0, 'robo'); from versao import VERSAO; print(VERSAO)").Trim()
+          $exe = "dist\instalador\DispatchBot-Setup-$versao.exe"
+          if (-not (Test-Path $exe)) { throw "Instalador não encontrado: $exe" }
+          $anexos = @($exe)
+          if (Test-Path "docs\manual\Manual-DispatchBot.pdf") { $anexos += "docs\manual\Manual-DispatchBot.pdf" }
+          gh release view "v$versao" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload "v$versao" @anexos --clobber
+          } else {
+            $notas = "build\notas\$versao.md"
+            if (Test-Path $notas) {
+              gh release create "v$versao" @anexos --target $env:GITHUB_SHA --title "DispatchBot $versao" --notes-file $notas
+            } else {
+              gh release create "v$versao" @anexos --target $env:GITHUB_SHA --title "DispatchBot $versao" --generate-notes
+            }
+          }
+          if ($LASTEXITCODE -ne 0) { throw "Falha ao publicar a Release" }
