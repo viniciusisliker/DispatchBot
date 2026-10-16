@@ -6,10 +6,10 @@
 <title>Documentação técnica do DispatchBot</title>
 <!-- Fonte do PDF anexado às Releases (DispatchBot-Documentacao-Tecnica.pdf). Gerar de novo com:
      msedge --headless=new --no-pdf-header-footer --print-to-pdf=docs\tecnico\DispatchBot-Documentacao-Tecnica.pdf docs\tecnico\documentacao-tecnica.html
-     Ao mudar a versão, troque "1.10.5" no @page e na capa. -->
+     Ao mudar a versão, troque "1.10.6" no @page e na capa. -->
 <style>
   @page { size: A4; margin: 18mm 16mm 20mm 16mm;
-    @bottom-left { content: "Documentação técnica do DispatchBot · versão 1.10.5"; font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; }
+    @bottom-left { content: "Documentação técnica do DispatchBot · versão 1.10.6"; font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; }
     @bottom-right { content: counter(page); font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; } }
   @page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
   :root { --teal: #0E9F8E; --teal-claro: #E3F6F3; --tinta: #1B2228; --apagado: #5B6670; --linha: #DDE3E8;
@@ -107,13 +107,13 @@
   <div class="sub">Arquitetura, funcionamento interno, contratos de dados, configuração, build e operação do robô que abre chamados de GMUD e Backup no ServiceNow da Cirion.</div>
   <div class="barra"></div>
   <div class="ficha">
-    <span>Versão do código</span><b>1.10.5</b>
+    <span>Versão do código</span><b>1.10.6</b>
     <span>Público</span><b>Time de RPA / desenvolvimento e sustentação</b>
     <span>Repositório</span><b>github.com/viniciusisliker/DispatchBot</b>
     <span>Pilha</span><b>Python 3.12 · Playwright · pystray · CustomTkinter · PyInstaller · Inno Setup 6</b>
     <span>Integrações</span><b>Power Automate · SharePoint (API REST) · ServiceNow Employee Center · Teams</b>
   </div>
-  <div class="rodape"><span>Operação YDUQS · Dispatcher N1</span><span>Versão 1.10.5 · outubro de 2026</span></div>
+  <div class="rodape"><span>Operação YDUQS · Dispatcher N1</span><span>Versão 1.10.6 · outubro de 2026</span></div>
 </section>
 
 <!-- Sumário -->
@@ -203,7 +203,7 @@
     <tr><td><code>pasta.py</code></td><td>~155</td><td>Só no modo antigo: localizar/sincronizar a pasta do OneDrive.</td></tr>
     <tr><td><code>mapear_campos.py</code></td><td>~175</td><td><code>DispatchBot-Mapear.exe</code>: mapear campos e <code>--testar</code>.</td></tr>
     <tr><td><code>demo.py</code></td><td>~100</td><td>Demonstração: preenche GMUD e Backup no portal real sem enviar.</td></tr>
-    <tr><td><code>versao.py</code></td><td>2</td><td>Fonte única da versão (<code>VERSAO = "1.10.5"</code>).</td></tr>
+    <tr><td><code>versao.py</code></td><td>2</td><td>Fonte única da versão (<code>VERSAO = "1.10.6"</code>).</td></tr>
   </table>
 </section>
 
@@ -340,7 +340,7 @@ enquanto não encerrando:
     <tr><td>6</td><td>Texto ilegível</td><td><code>texto_ilegivel</code> em chg/titulo/descricao: caractere <code>�</code> ou &gt; 20% de símbolos fora do comum. Título vira "(texto ilegível)", original em <code>titulo_original</code>.</td><td><code>/erro</code> ⚠️ "abra à mão pelo e-mail original"</td></tr>
     <tr><td>7</td><td>Tipo desconhecido</td><td><code>config.tipo_efetivo</code> devolve None (tipos começando com <code>_</code> são modelos).</td><td><code>/erro</code> ⚠️</td></tr>
     <tr><td>8</td><td>Idempotência</td><td>Histórico <code>ok</code> → conclui sem retorno (arquivo repetido). <code>enviando</code> → erro "confira no ServiceNow". <code>forcar_reprocessamento: true</code> ignora as duas.</td><td><code>processados</code> ou <code>/erro</code></td></tr>
-    <tr><td>9</td><td>Cliente ignorado</td><td><code>cliente_ignorado</code>: cliente da 4ª coluna da linha do CSV (no <code>id</code>, depois do <code>#</code>) ou um trecho do título está em <code>ignorar_clientes</code> do tipo. Compara o campo inteiro, sem maiúsculas; nome curto casa com FQDN.</td><td><code>processados</code>, sem chamado e sem Teams</td></tr>
+    <tr><td>9</td><td>Cliente ignorado</td><td><code>cliente_ignorado</code>: compara <b>só a coluna Cliente</b> (4ª coluna da linha do CSV, no <code>id</code> depois do <code>#</code>, ou 2º trecho do título <code>Política | Cliente | …</code>) com <code>ignorar_clientes</code> do tipo. As outras colunas (ex.: Master) se repetem em todo alerta e não entram (1.10.5). Compara o campo inteiro, sem maiúsculas; nome curto casa com FQDN.</td><td><code>processados</code>, sem chamado e sem Teams</td></tr>
     <tr><td>10</td><td>Alerta antigo</td><td><code>recebido_em</code> há mais de <code>perguntar_alerta_antigo_min</code> (120): devolve o arquivo e pergunta (Abrir / Já foi aberto à mão / Decidir depois). "Depois" pergunta de novo em 30 min. Os alertas novos seguem.</td><td>espera / abre / <code>processados</code> (<code>manual</code>)</td></tr>
     <tr><td>11</td><td>Login vencido</td><td><code>login_pendente</code> e alerta com mais de <code>max_espera_login_min</code> (60).</td><td><code>/erro</code> ⚠️ "abra manualmente"</td></tr>
     <tr><td>12</td><td>Abrir o chamado</td><td>Até <code>tentativas_por_alerta</code> (3) vezes, com navegador novo e espera de <code>espera_entre_tentativas_seg × tentativa</code> (20 s, 40 s...). Detalhes na seção 6.</td><td>ver tabela abaixo</td></tr>
@@ -401,15 +401,16 @@ enquanto não encerrando:
     <li><b>Envio automático:</b> só clica se <code>botao_enviar</code> estiver mapeado e <code>obrigatorios_vazios(page)</code> devolver lista vazia. O detector (<code>JS_OBRIGATORIOS</code>) procura <code>.form-group</code>/<code>.sp-form-field</code> visíveis com asterisco visível (<code>.mandatory</code>, <code>.fa-asterisk</code>), <code>is-required</code>, <code>[required]</code>, <code>aria-required</code> ou rótulo terminando em <code>*</code>; em campo de referência vale qualquer input não vazio do grupo. Obrigatório vazio, botão sem seletor ou erro na conferência = <b>não clica</b> e cai para a conferência com o motivo.</li>
     <li><b>Ponto sem volta:</b> <code>antes_de_enviar()</code> grava <code>enviando</code> no histórico (com <code>fsync</code>) <b>antes</b> do clique ou da conferência.</li>
     <li><b>Conferência:</b> traz o formulário para a frente, ícone amarelo, janelinha "Precisa de você" com os campos preenchidos (<code>resumo_campos</code>), o motivo e a contagem até <code>confirmacao_timeout_min</code>. Botões: "Mostrar formulário" (<code>bring_to_front</code>) e "Pular este alerta" (<code>Pulado</code>, só se nenhum número apareceu).</li>
-    <li><b>Captura do número</b> (laço de 1 s até <code>timeout_seg</code>): aplica <code>captura_numero.regex</code> ao texto de <code>seletor</code> (todos os elementos, mesmo escondidos) ou da página inteira; ignora os de <code>ja_na_tela</code>; escolhe na ordem de <code>preferir</code>; sem o preferido, espera <code>espera_preferido_seg</code> e aceita o primeiro. No automático, se <code>seletor_erro_validacao</code> aparecer → <code>FormularioRecusado</code>.</li>
+    <li><b>Captura do número</b> (laço de 1 s até <code>timeout_seg</code>): aplica <code>captura_numero.regex</code> ao texto de <code>seletor</code> (todos os elementos, mesmo escondidos) ou da página inteira; ignora os de <code>ja_na_tela</code> (números já presentes antes do envio, no texto visível <b>e</b> no do seletor); escolhe na ordem de <code>preferir</code>; sem o preferido, espera <code>espera_preferido_seg</code> e aceita o primeiro. No automático, se <code>seletor_erro_validacao</code> aparecer → <code>FormularioRecusado</code>.</li>
   </ol>
 
   <table>
     <tr><th>Tipo</th><th>Regex</th><th>Preferir</th><th>Seletor</th><th>Tempo</th></tr>
     <tr><td>GMUD (Hosting)</td><td><code>(RITM|CS)\d{7}</code></td><td>RITM</td><td><code>#req-item-toggle a, .ticket-id</code></td><td>90 s; espera o RITM 30 s</td></tr>
-    <tr><td>BACKUP (Incidente)</td><td><code>(INC|RITM|REQ|CS)\d{7}</code></td><td>INC, RITM</td><td>página inteira</td><td>60 s; espera o preferido 10 s</td></tr>
+    <tr><td>BACKUP (Incidente)</td><td><code>(INC|RITM|REQ|CS)\d{7}</code></td><td>INC</td><td><code>body</code> (página inteira, inclusive escondido)</td><td>120 s; espera o INC 60 s</td></tr>
   </table>
   <p>O Hosting cria um caso <b>CS</b> e um <b>RITM</b> ligado (aba Related Records, já no DOM escondido). O número do time é o RITM; o seletor restrito evita pegar RITMs citados na descrição.</p>
+  <p>O Incidente do Backup também cria um <b>CS</b>, e o <b>INC</b> fica na aba Related Records, escondida. Até a 1.10.5 o seletor vazio lia só o texto visível (<code>inner_text</code>) e o robô aceitava o CS depois de 10 s. Desde a 1.10.6 o seletor é <code>body</code> (lê também o escondido) e o robô espera o INC por até 60 s; sem INC nesse tempo, aceita o CS (o chamado já foi criado). O número que o time usa no Backup é o <b>INC</b>.</p>
 
   <h3>Link de tratamento</h3>
   <p><code>link_tratamento(cfg, numero)</code> monta <code>instancia_url + link_tratamento</code> com a tabela pelo prefixo: RITM → <code>sc_req_item</code>, INC → <code>incident</code>, REQ → <code>sc_request</code>, CS → <code>sn_customerservice_case</code>. Resultado: <code>/now/nav/ui/classic/params/target/sc_req_item.do%3Fsysparm_query%3Dnumber%3DRITM0421153</code>. Vai no <code>url</code> do retorno, do histórico e do painel.</p>
@@ -650,7 +651,7 @@ enquanto não encerrando:
   <ul>
     <li><code>carregar()</code> lê com <code>utf-8-sig</code>; JSON inválido → <code>ConfigInvalido</code> com linha e coluna (o robô segue com a última configuração válida em memória e fica vermelho).</li>
     <li><b>Mescla</b> (<code>_mesclar</code>): chaves que existem no modelo e não no arquivo do usuário entram sozinhas, recursivamente em dicionários. Valores do usuário sempre prevalecem. <b>Listas não são mescladas</b>: um passo novo em <code>passos</code> não chega a um config já instalado.</li>
-    <li>Exceção pontual: <code>botao_enviar</code> vazio no usuário e preenchido no modelo é copiado do modelo.</li>
+    <li>Exceções pontuais: <code>botao_enviar</code> vazio no usuário e preenchido no modelo é copiado do modelo; <code>captura_numero</code> com <code>seletor</code> vazio é trocada pela do modelo (1.10.6, captura do INC); clientes do modelo que faltam em <code>ignorar_clientes</code> são acrescentados à lista instalada (1.10.5; não dá para tirar um cliente do modelo só pelo config.json).</li>
     <li><code>salvar()</code>: grava em <code>.tmp</code> e faz <code>os.replace</code> (atômico).</li>
   </ul>
 
@@ -708,7 +709,7 @@ enquanto não encerrando:
     <tr><td><code>INFRA</code> / <code>DBA</code> / <code>SO</code></td><td>herda <code>_GMUD</code></td><td><code>SOC</code> / <code>DBA</code> / <code>SO</code></td><td>Em produção.</td></tr>
     <tr><td><code>GMUD_BACKUP</code></td><td>herda <code>_GMUD</code></td><td><code>BACKUP</code></td><td>Fila <code>SN_TI_CHG_EXECUTOR_Backup_Cirion</code> (desde 16/10/2026). Não confundir com <code>BACKUP</code>.</td></tr>
     <tr><td><code>PRODUCAO</code></td><td>herda <code>_GMUD</code></td><td><code>PREENCHER</code></td><td>Fora do escopo: sempre <code>/erro</code> (<code>TipoNaoMapeado</code>).</td></tr>
-    <tr><td><code>BACKUP</code></td><td>Incidente, cartão Backup <code>sys_id=ca634cdd…35b7</code></td><td><code>#FALHA DE BACKUP {titulo}</code></td><td>Account, Contact, Service Affected (Veritas Netbackup), Failure Type (Execution failure), Impacto (mínimo), Short Description, Description. <code>ignorar_clientes</code>: <code>appflexrj01-inst01.smpdc.gblx</code>, <code>appnburj03</code>.</td></tr>
+    <tr><td><code>BACKUP</code></td><td>Incidente, cartão Backup <code>sys_id=ca634cdd…35b7</code></td><td><code>#FALHA DE BACKUP {titulo}</code></td><td>Account, Contact, Service Affected (Veritas Netbackup), Failure Type (Execution failure), Impacto (mínimo), Short Description, Description. <code>ignorar_clientes</code>: <code>appflexrj01-inst01.smpdc.gblx</code>, <code>appnburj03</code>, <code>nbmasterbrarj01</code>.</td></tr>
   </table>
   <div class="caixa dica"><span class="t">Tipo novo sem código</span>
     Crie um bloco em <code>tipos</code> (com <code>"herda": "_GMUD"</code> se for o mesmo formulário), mapeie os seletores com o Mapear, teste com <code>--testar</code> e ajuste o fluxo de entrada para gravar o <code>tipo</code> e o Retorno para ter o Case do chat. Se o tipo for de GMUD, o grupo de envio automático já é <code>GMUD</code>.</div>
@@ -881,7 +882,7 @@ enquanto não encerrando:
   <h3>Mensagens do log que valem saber</h3>
   <table>
     <tr><th>Trecho</th><th>Significa</th></tr>
-    <tr><td><code>Robô 1.10.5 iniciado em HOST.</code></td><td>Thread do robô subiu.</td></tr>
+    <tr><td><code>Robô 1.10.6 iniciado em HOST.</code></td><td>Thread do robô subiu.</td></tr>
     <tr><td><code>Processando &lt;arquivo&gt;</code></td><td>Reserva feita.</td></tr>
     <tr><td><code>Envio automático suspenso (...)</code></td><td>Caiu para a conferência; o motivo vem entre parênteses.</td></tr>
     <tr><td><code>Chamado RITM… aberto (SO, …).</code></td><td>Sucesso.</td></tr>
@@ -1010,7 +1011,7 @@ msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\D
     <tr><td>Novo campo num formulário</td><td>Passo em <code>passos</code>. Atenção: listas não são mescladas; máquinas instaladas precisam do passo no próprio <code>config.json</code>.</td></tr>
     <tr><td>Nova regra para não abrir chamado</td><td>Guarda em <code>Robo.processar</code>, <b>antes</b> da abertura e depois da idempotência.</td></tr>
     <tr><td>Nova ação de passo</td><td><code>servicenow.executar_passo</code>.</td></tr>
-    <tr><td>Novo evento do histórico</td><td><code>Robo.evento(tipo, texto)</code> + rótulo/cor em <code>painel.EVENTOS</code>.</td></tr>
+    <tr><td>Novo evento do histórico</td><td><code>Robo.evento(nome_evento, texto, /, **extra)</code> + rótulo/cor em <code>painel.EVENTOS</code>. <code>nome_evento</code> é só posicional: os extras podem levar <code>tipo=</code> (tipo do alerta) sem conflito.</td></tr>
     <tr><td>Nova mensagem amigável</td><td><code>main.MENSAGENS_AMIGAVEIS</code>.</td></tr>
   </table>
 </section>
@@ -1026,7 +1027,7 @@ msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\D
     <li>Depois de abrir a GMUD: <b>só avisar no Teams</b>; sem planilha CHANGES e sem Planner.</li>
     <li>Só o Dispatcher N1 da vez fica ativo; fila numa biblioteca do SharePoint do time.</li>
     <li>O robô não inventa dados; nunca reenvia sozinho depois do clique em Enviar.</li>
-    <li>Número da GMUD = RITM (não o CS), com link de tratamento na interface clássica.</li>
+    <li>Número da GMUD = RITM e do Backup = INC (nunca o CS), com link de tratamento na interface clássica.</li>
     <li>Envio automático (GMUD e Backup) por padrão desde 16/10/2026, com conferência de obrigatórios.</li>
     <li>Login: robô clica em "Use external login" e "Submit" sem preencher nada; nunca senha.</li>
     <li>Fora do escopo: entrada por e-mail genérico/IA, fluxo de tratamento do chamado, PRODUCAO.</li>
@@ -1059,7 +1060,8 @@ msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\D
     <tr><td>1.9 / 1.10.0</td><td>Painel escuro CustomTkinter (versão A); mensagens amigáveis; janela do Edge fechada não é erro.</td></tr>
     <tr><td>1.10.3</td><td>Janelinha com rolagem; saída garantida do processo.</td></tr>
     <tr><td>1.10.4</td><td>Envio automático com conferência de obrigatórios; clientes ignorados no Backup; <code>GMUD_BACKUP</code>; plantão entre máquinas e histórico do time. 1ª GMUD real de ponta a ponta (16/10/2026).</td></tr>
-    <tr><td>1.10.5</td><td>Recuperação não gera ✅ sem número para alerta ignorado/aberto à mão. Release automática no GitHub Actions.</td></tr>
+    <tr><td>1.10.5</td><td>Recuperação não gera ✅ sem número para alerta ignorado/aberto à mão; <code>nbmasterbrarj01</code> ignorado e comparação só pela coluna Cliente. Release automática no GitHub Actions.</td></tr>
+    <tr><td>1.10.6</td><td>Backup captura o <b>INC</b> (aba escondida) em vez do CS; <code>Robo.evento</code> não estoura mais com <code>tipo=</code> nos extras (o arquivo não fica parado em <code>processando</code>).</td></tr>
   </table>
 </section>
 
