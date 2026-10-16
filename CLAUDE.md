@@ -1,4 +1,4 @@
-> **Correção (16/10/2026, sem build):** às 12:08 o Retorno postou "✅ BACKUP ... appflexrj01-inst01.smpdc.gblx ...: chamado  aberto. Tratar:" (sem número e sem link) para um alerta **ignorado** (nenhum chamado foi aberto). Causa: a conclusão do ignorado falhou no meio e o arquivo ficou em /processando; `recuperar_reservas` viu `ok` no histórico e concluiu **com retorno**. Agora a recuperação só grava retorno quando o histórico tem número (ignorado e "aberto à mão" não vão para o Teams). Testado com fila local. Entra no próximo instalador.
+> **Correção (16/10/2026, sem build):** às 12:08 o Retorno postou "✅ BACKUP ... appflexrj01-inst01.smpdc.gblx ...: chamado  aberto. Tratar:" (sem número e sem link) para um alerta **ignorado** (nenhum chamado foi aberto). Causa: a conclusão do ignorado falhou no meio e o arquivo ficou em /processando; `recuperar_reservas` viu `ok` no histórico e concluiu **com retorno**. Agora a recuperação só grava retorno quando o histórico tem número (ignorado e "aberto à mão" não vão para o Teams). Testado com fila local. Versão subida para **1.10.5** (instalador ainda não gerado).
 
 # DispatchBot — contexto do projeto
 
@@ -67,7 +67,7 @@ Etapas do processo (usuário, 05/10/2026): envio do alerta → criação do cham
 | demo.py | demonstração: dois botões que preenchem GMUD (INFRA) e Backup no portal real sem enviar (`Demo DispatchBot.cmd`) |
 | config.py | carrega/mescla config (chaves novas entram sozinhas), `tipo_efetivo` (herança `herda`) |
 | mapear_campos.py | `DispatchBot-Mapear.exe`: lista campos do formulário; `--testar <json>` preenche sem enviar |
-| versao.py | versão única (hoje **1.10.3**) |
+| versao.py | versão única (hoje **1.10.5**) |
 
 Build: `powershell -ExecutionPolicy Bypass -File build\build.ps1` → `dist\instalador\DispatchBot-Setup-<versão>.exe`. Inno Setup 6 instalado por usuário (winget). Arquivos .iss e .ps1 precisam de UTF-8 **com BOM**.
 
