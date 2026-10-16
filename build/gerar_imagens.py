@@ -46,10 +46,10 @@ def marca(lado: int, fundo=TEAL) -> Image.Image:
 
 
 def marca_avatar(lado: int) -> Image.Image:
-    """Avatar do robô (assets/avatar.png) inteiro, quadrado (o mesmo da bandeja,
+    """Avatar do robô (assets/coruja.png) inteiro, quadrado (o mesmo da bandeja,
     sem a bolinha de status). Sem o arquivo, usa a marca desenhada."""
     try:
-        rosto = Image.open(ASSETS / "avatar.png").convert("RGBA")
+        rosto = Image.open(ASSETS / "coruja.png").convert("RGBA")
     except OSError:
         return marca(lado)
     s = lado * 4

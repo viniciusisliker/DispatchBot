@@ -1,3 +1,5 @@
+> **Ícone de coruja (16/10/2026, sem build):** pedido do usuário. `assets/coruja.png` (desenhada por `build/gerar_coruja.py`, estilo chapado do avatar, com óculos) substitui `avatar.png` na bandeja/painel (`bandeja.avatar`), no `robo.spec` e no `gerar_imagens.py`; `icone.ico` e `instalador/pequena-*.png` regerados. **Falta:** `instalador/grande-*.png` (precisa das fontes Segoe: rodar `python build\gerar_imagens.py` no Windows antes do build) e as imagens do manual. `avatar.png` continua no repo para voltar.
+
 > **1.10.6 (16/10/2026):** a Release **v1.10.5** saiu às 15:31 **sem** as correções do `Robo.evento` e do INC (mergeadas depois). Versão subida para 1.10.6 com as duas; instalador gerado pelo GitHub Actions (tag `v1.10.6`, `.github/workflows/release.yml`), notas em `build/notas/1.10.6.md`.
 
 > **1ª GMUD real de ponta a ponta (16/10/2026, 1.10.4, envio automático):** SO CHG0048707 → RITM0421153 (12:07) e INFRA CHG0048705 → RITM0421154 (12:08), com Submit sozinho, número no painel e ✅ com link de tratamento nos chats certos ((FC) LINUX - WINDOWS - VMWARE e (FC) NET / SOC). Falta: 1º Backup real que abra chamado e a mensagem ⚠️.

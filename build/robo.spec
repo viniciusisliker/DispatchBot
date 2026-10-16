@@ -16,7 +16,7 @@ comum = dict(
     pathex=[os.path.join(RAIZ, "robo")],
     binaries=pw_binaries,
     datas=pw_datas + [(os.path.join(RAIZ, "config.default.json"), "."),
-                      (os.path.join(RAIZ, "assets", "avatar.png"), "assets")],
+                      (os.path.join(RAIZ, "assets", "coruja.png"), "assets")],
     hiddenimports=pw_hidden + ["pystray._win32"],
 )
 

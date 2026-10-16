@@ -19,11 +19,11 @@ _AVATAR = None
 
 
 def avatar():
-    """Avatar do robô (assets/avatar.png, imagem inteira), carregado uma vez. None se o arquivo não existir."""
+    """Avatar do robô (assets/coruja.png, imagem inteira), carregado uma vez. None se o arquivo não existir."""
     global _AVATAR
     if _AVATAR is None:
         try:
-            _AVATAR = Image.open(config.pasta_recursos() / "assets" / "avatar.png").convert("RGBA")
+            _AVATAR = Image.open(config.pasta_recursos() / "assets" / "coruja.png").convert("RGBA")
         except OSError:
             _AVATAR = False
     return _AVATAR or None
