@@ -1,3 +1,5 @@
+> **1ª GMUD real de ponta a ponta (16/10/2026, 1.10.4, envio automático):** SO CHG0048707 → RITM0421153 (12:07) e INFRA CHG0048705 → RITM0421154 (12:08), com Submit sozinho, número no painel e ✅ com link de tratamento nos chats certos ((FC) LINUX - WINDOWS - VMWARE e (FC) NET / SOC). Falta: 1º Backup real que abra chamado e a mensagem ⚠️.
+
 > **Correção (16/10/2026, sem build):** às 12:08 o Retorno postou "✅ BACKUP ... appflexrj01-inst01.smpdc.gblx ...: chamado  aberto. Tratar:" (sem número e sem link) para um alerta **ignorado** (nenhum chamado foi aberto). Causa: a conclusão do ignorado falhou no meio e o arquivo ficou em /processando; `recuperar_reservas` viu `ok` no histórico e concluiu **com retorno**. Agora a recuperação só grava retorno quando o histórico tem número (ignorado e "aberto à mão" não vão para o Teams). Testado com fila local. Versão subida para **1.10.5** (instalador ainda não gerado).
 
 # DispatchBot — contexto do projeto
