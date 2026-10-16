@@ -1,0 +1,19 @@
+{
+  "versao": 2,
+  "id": "CHG9990004",
+  "tipo": "PRODUCAO",
+  "grupo_executor": "SN_TI_CHG_EXECUTOR_CIRION_PRODUCAO",
+  "chg": "CHG9990004",
+  "ctask": "CTASK9990004",
+  "data_execucao": "02/05/2026 08:00",
+  "tipo_mudanca": "Normal",
+  "titulo": "TESTE - Janela de deploy",
+  "descricao": "TESTE do DispatchBot, ignorar. Deploy da nova versão do portal acadêmico.",
+  "recebido_em": "2026-09-29T10:00:00-03:00",
+  "dados_brutos": "Uma tarefa de Mudança foi atribuída a você ou ao seu grupo executor. CHG9990004 ...",
+  "teams": {
+    "team_id": "",
+    "channel_id": "",
+    "message_id": ""
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "CHG9990001",
+  "tipo": "TESTE",
+  "titulo": "",
+  "status": "ok",
+  "numero": "RITM9990001",
+  "url": "https://envdatacenter.service-now.com/now/nav/ui/classic/params/target/sc_req_item.do%3Fsysparm_query%3Dnumber%3DRITM9990001",
+  "mensagem": "",
+  "maquina": "TESTE",
+  "processado_em": "2026-10-09T10:00:00",
+  "teams": {}
+}

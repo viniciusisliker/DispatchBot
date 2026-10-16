@@ -1,0 +1,19 @@
+{
+  "versao": 2,
+  "id": "CHG9990001",
+  "tipo": "INFRA",
+  "grupo_executor": "SN_TI_CHG_EXECUTOR_CIRION_INFRA",
+  "chg": "CHG9990001",
+  "ctask": "CTASK9990001",
+  "data_execucao": "29/04/2026 09:30",
+  "tipo_mudanca": "Normal",
+  "titulo": "TESTE - Criação de Regras de Segurança",
+  "descricao": "TESTE do DispatchBot, ignorar. Criação de novas regras de segurança nos firewalls para liberação de acesso a serviços.",
+  "recebido_em": "2026-09-29T10:00:00-03:00",
+  "dados_brutos": "Uma tarefa de Mudança foi atribuída a você ou ao seu grupo executor. CHG9990001 ...",
+  "teams": {
+    "team_id": "",
+    "channel_id": "",
+    "message_id": ""
+  }
+}

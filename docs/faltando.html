@@ -1,0 +1,279 @@
+<title>DispatchBot: o que falta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: uma coluna estreita; cada etapa é um <details> recolhível com passos marcáveis */
+:root{
+  --bg:#F3F5F4; --surface:#FFFFFF; --sunken:#E8ECEA;
+  --ink:#16201D; --muted:#56635E; --line:#D3DAD7;
+  --accent:#0E6B66; --accent-soft:#D6ECE9;
+  --ok:#1F7A3E; --ok-soft:#DDF1E3;
+  --warn:#9A5B00; --warn-soft:#FBEBCF;
+  --code-bg:#1C2624; --code-ink:#DCE7E3;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cond:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#101614; --surface:#18201E; --sunken:#1F2926;
+    --ink:#E4ECE9; --muted:#9AA9A4; --line:#2E3A37;
+    --accent:#5CC4B9; --accent-soft:#16332F;
+    --ok:#6BD08D; --ok-soft:#173222;
+    --warn:#F0B454; --warn-soft:#3A2A10;
+    --code-bg:#0B100F; --code-ink:#D5E2DD;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101614; --surface:#18201E; --sunken:#1F2926;
+  --ink:#E4ECE9; --muted:#9AA9A4; --line:#2E3A37;
+  --accent:#5CC4B9; --accent-soft:#16332F;
+  --ok:#6BD08D; --ok-soft:#173222;
+  --warn:#F0B454; --warn-soft:#3A2A10;
+  --code-bg:#0B100F; --code-ink:#D5E2DD;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);padding-inline:16px}
+main{max-width:760px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:var(--cond);font-weight:600;text-wrap:balance;margin:0;letter-spacing:.005em}
+h1{font-size:30px;line-height:1.15}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+header{display:flex;flex-direction:column;gap:10px}
+header p{margin:0;color:var(--muted);max-width:62ch}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--sunken);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+
+.barra{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;font-size:13px;color:var(--muted)}
+.progresso{flex:1 1 220px;height:6px;background:var(--sunken);border-radius:99px;overflow:hidden}
+.progresso i{display:block;height:100%;width:0;background:var(--ok);transition:width .25s}
+.barra b{color:var(--ink);font-variant-numeric:tabular-nums}
+.botoes{display:flex;gap:8px}
+button{font:500 13px var(--sans);color:var(--accent);background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button:focus-visible,summary:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.etapas{display:flex;flex-direction:column;gap:10px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+details[open]{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:14px 16px}
+summary::-webkit-details-marker{display:none}
+.letra{font:600 14px/1 var(--mono);width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:var(--accent-soft);color:var(--accent)}
+details.feita .letra{background:var(--ok-soft);color:var(--ok)}
+.tit{display:flex;flex-direction:column;min-width:0}
+.tit strong{font-weight:600;font-size:16px}
+.tit span{font-size:13px;color:var(--muted)}
+.conta{font:500 12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+details.feita .conta{color:var(--ok)}
+.seta{display:inline-block;margin-left:8px;transition:transform .2s}
+details[open] .seta{transform:rotate(90deg)}
+
+.corpo{padding:0 16px 16px 60px;display:flex;flex-direction:column;gap:12px}
+.corpo p{margin:0;max-width:65ch}
+ol.passos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+ol.passos li{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start}
+ol.passos li > div{min-width:0}
+ol.passos input{margin:4px 0 0;width:16px;height:16px;accent-color:var(--ok)}
+ol.passos li.ok > div{color:var(--muted)}
+ol.passos li.ok > div > b:first-child{text-decoration:line-through;text-decoration-color:var(--muted)}
+.dica,.cuidado{font-size:13.5px;padding:10px 12px;border-radius:6px;max-width:65ch}
+.dica{background:var(--accent-soft)}
+.cuidado{background:var(--warn-soft)}
+.cuidado b{color:var(--warn)}
+.cod{position:relative;margin-top:6px}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);font:13px/1.55 var(--mono);padding:12px 14px;border-radius:6px;overflow-x:auto;white-space:pre}
+.copiar{position:absolute;top:6px;right:6px;font-size:11px;padding:2px 8px;color:var(--code-ink);border-color:color-mix(in srgb,var(--code-ink) 30%,transparent);background:var(--code-bg)}
+table{border-collapse:collapse;font-size:13.5px;width:100%}
+.tab{overflow-x:auto}
+td,th{text-align:left;padding:6px 10px 6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+footer{font-size:13px;color:var(--muted)}
+@media (max-width:560px){.corpo{padding-left:16px}summary{grid-template-columns:auto 1fr}.conta{grid-column:2}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<main>
+  <header>
+    <span class="eyebrow">DispatchBot 1.7.0 · 05/10/2026</span>
+    <h1>O que falta para o DispatchBot entrar em uso</h1>
+    <p>A ordem segue o piloto só com Backup: instalar, conferir o formulário, ligar o aviso no Teams e abrir o primeiro chamado com o plantonista conferindo. O fluxo GMUD | Todos já está em produção. As marcações ficam salvas só neste navegador.</p>
+  </header>
+
+  <div class="barra">
+    <span><b id="feitos">0</b> de <b id="total">0</b> passos</span>
+    <div class="progresso" aria-hidden="true"><i id="barra"></i></div>
+    <div class="botoes">
+      <button type="button" id="abrir">Abrir tudo</button>
+      <button type="button" id="fechar">Recolher tudo</button>
+    </div>
+  </div>
+
+  <div class="etapas">
+
+    <!-- A -->
+    <details id="e-a" open>
+      <summary><span class="letra">A</span><span class="tit"><strong>Instalar na máquina do plantão</strong><span>Dispatcher N1 · uns 15 minutos</span></span><span class="conta"></span></summary>
+      <div class="corpo">
+        <ol class="passos">
+          <li><input type="checkbox" id="a1"><div><b>Copiar o instalador</b> <code>dist\instalador\DispatchBot-Setup-1.7.0.exe</code> para a máquina e rodar. Não pede administrador. Deixe marcado “Iniciar com o Windows”.</div></li>
+          <li><input type="checkbox" id="a2"><div><b>Login no ServiceNow</b> na janela que o robô abre: ele clica em “Use external login” sozinho; o plantonista faz o resto (e-mail, conta Microsoft, Windows Hello).</div></li>
+          <li><input type="checkbox" id="a3"><div><b>Login Microsoft no navegador do robô</b>, se a janela do SharePoint aparecer pedindo. Depois disso a fila é lida sem abrir janela.</div></li>
+          <li><input type="checkbox" id="a4"><div><b>Conferir o ícone na bandeja</b>: verde é ativo. Vermelho mostra o motivo ao passar o mouse.</div></li>
+          <li><input type="checkbox" id="a5"><div><b>Deixar as outras máquinas em Pausado</b> pelo menu do ícone. Só o Dispatcher N1 da vez fica ativo.</div></li>
+        </ol>
+        <p class="dica">Log em <code>%LOCALAPPDATA%\DispatchBot\logs\robo.log</code>. É nele que aparecem os avisos de login e as renovações de sessão.</p>
+      </div>
+    </details>
+
+    <!-- B -->
+    <details id="e-b">
+      <summary><span class="letra">B</span><span class="tit"><strong>Conferir o formulário de Backup no portal real</strong><span>Concluído em 05/10/2026 · Failure Type entra como Execution failure (1.6.2)</span></span><span class="conta"></span></summary>
+      <div class="corpo">
+        <ol class="passos">
+          <li><input type="checkbox" id="b1"><div><b>Rodar o teste</b> no Prompt de Comando da máquina instalada:
+            <div class="cod"><pre>"%LOCALAPPDATA%\Programs\DispatchBot\DispatchBot-Mapear.exe" --testar "%LOCALAPPDATA%\Programs\DispatchBot\exemplos\BACKUP.json"</pre><button type="button" class="copiar">Copiar</button></div></div></li>
+          <li><input type="checkbox" id="b2"><div><b>Olhar a tela preenchida</b>: título <code>#FALHA DE BACKUP …</code>, serviço afetado Veritas Netbackup e o texto do impacto na língua do portal.</div></li>
+          <li><input type="checkbox" id="b3"><div><b>Ler a lista de obrigatórios</b> que o teste imprime. Se “Failure Type” aparecer como <code>VAZIO</code>, ele precisa entrar no config.</div></li>
+          <li><input type="checkbox" id="b4"><div><b>Fechar sem enviar.</b> Se algo não bateu, mande a saída do teste para ajustar o <code>config.default.json</code>.</div></li>
+        </ol>
+        <p class="cuidado"><b>Não clique em Enviar.</b> O teste nunca envia sozinho, mas a janela fica aberta com o formulário pronto.</p>
+      </div>
+    </details>
+
+    <!-- C -->
+    <details id="e-c">
+      <summary><span class="letra">C</span><span class="tit"><strong>Trocar o título do Backup</strong><span>Power Automate · BackupBot</span></span><span class="conta"></span></summary>
+      <div class="corpo">
+        <ol class="passos">
+          <li><input type="checkbox" id="c1"><div><b>Abrir uma execução antiga</b> do BackupBot e copiar uma linha de falha (o <code>item()</code> do loop “Para Cada Falha”).</div></li>
+          <li><input type="checkbox" id="c2"><div><b>Confirmar as colunas</b>, que foram deduzidas (o CSV não tem cabeçalho):
+            <div class="tab"><table><tr><th>Índice</th><th>Coluna</th></tr><tr><td class="mono">[0]</td><td>JobID</td></tr><tr><td class="mono">[2]</td><td>Política</td></tr><tr><td class="mono">[3]</td><td>Cliente</td></tr></table></div></div></li>
+          <li><input type="checkbox" id="c3"><div><b>Trocar o <code>titulo</code></b> do <code>JSON_BACKUP</code>, no lugar de <code>take(item(),80)</code>:
+            <div class="cod"><pre>concat(split(item(), ',')[2], ' | ', split(item(), ',')[3], ' | Job ', split(item(), ',')[0])</pre><button type="button" class="copiar">Copiar</button></div>
+            Resultado: <code>#FALHA DE BACKUP YDUQS_VMWARE_X | servidor01 | Job 26509786</code></div></li>
+          <li><input type="checkbox" id="c4"><div><b>Opcional:</b> remover a ação “Run a flow built with Power Automate for desktop”. Era só teste e é o que deixa o fluxo premium.</div></li>
+        </ol>
+        <p class="dica">Combinado: os fluxos existentes não são alterados. Se preferir, faça a troca numa cópia (Save As) e vire depois.</p>
+      </div>
+    </details>
+
+    <!-- D -->
+    <details id="e-d">
+      <summary><span class="letra">D</span><span class="tit"><strong>Criar o fluxo DispatchBot | Retorno</strong><span>Power Automate · posta o número no chat do time</span></span><span class="conta"></span></summary>
+      <div class="corpo">
+        <p>Um fluxo só para todos os tipos. Os chats são em grupo, sem thread: o fluxo posta uma mensagem nova citando a CHG ou a falha de Backup.</p>
+        <ol class="passos">
+          <li><input type="checkbox" id="d1"><div><b>Gatilho</b> SharePoint · <i>When a file is created (properties only)</i>: site MANAGEDSERVICE, biblioteca Documentos Compartilhados, pasta <code>YDUQS/N1/DispatchBot-Fila/retorno</code>. Em Settings → Trigger conditions:
+            <div class="cod"><pre>@endsWith(triggerOutputs()?['body/{FilenameWithExtension}'], '.json')</pre><button type="button" class="copiar">Copiar</button></div></div></li>
+          <li><input type="checkbox" id="d2"><div><b>Get file content</b> (mesmo site), File Identifier = <b>Identifier</b> do gatilho.</div></li>
+          <li><input type="checkbox" id="d3"><div><b>Compose <code>Retorno</code></b>:
+            <div class="cod"><pre>json(body('Get_file_content'))</pre><button type="button" class="copiar">Copiar</button></div>
+            Se der erro de tipo, use <code>json(base64ToString(body('Get_file_content')?['$content']))</code>.</div></li>
+          <li><input type="checkbox" id="d4"><div><b>Compose <code>Mensagem</code></b>:
+            <div class="cod"><pre>if(equals(outputs('Retorno')?['status'], 'ok'),
+   concat('✅ ', outputs('Retorno')?['tipo'], ' ', if(equals(outputs('Retorno')?['tipo'], 'BACKUP'), outputs('Retorno')?['titulo'], outputs('Retorno')?['id']), ': chamado ', outputs('Retorno')?['numero'], ' aberto. Tratar: ', outputs('Retorno')?['url']),
+   concat('⚠️ ', outputs('Retorno')?['tipo'], ' ', if(equals(outputs('Retorno')?['tipo'], 'BACKUP'), outputs('Retorno')?['titulo'], outputs('Retorno')?['id']), ': o robô NÃO abriu o chamado. Abrir manualmente. Motivo: ', outputs('Retorno')?['mensagem']))</pre><button type="button" class="copiar">Copiar</button></div></div></li>
+          <li><input type="checkbox" id="d5"><div><b>Switch</b> em <code>outputs('Retorno')?['tipo']</code>, um Case por chat, cada um com Teams · <i>Post message in a chat or channel</i> (Flow bot, Chat em grupo, mensagem = <code>outputs('Mensagem')</code>). Default vazio.
+            <div class="tab"><table><tr><th>Case</th><th>Chat em grupo</th></tr>
+              <tr><td class="mono">INFRA</td><td>(FC) NET / SOC</td></tr>
+              <tr><td class="mono">DBA</td><td>(FC) BANCO DE DADOS (DBA'S + N1 + Gestão)</td></tr>
+              <tr><td class="mono">SO</td><td>(FC) LINUX - WINDOWS - VMWARE</td></tr>
+              <tr><td class="mono">BACKUP</td><td>(FC) NETBACKUP</td></tr></table></div></div></li>
+          <li><input type="checkbox" id="d6"><div><b>Opcional:</b> SharePoint · Delete file com o mesmo Identifier, para a pasta <code>retorno</code> ficar limpa.</div></li>
+          <li><input type="checkbox" id="d7"><div><b>Testar sem postar</b>: grave em <code>retorno</code> um arquivo com tipo de teste. Ele cai no Default; confira no histórico da execução se a <code>Mensagem</code> saiu certa.
+            <div class="cod"><pre>{"id":"CHG0000000","tipo":"TESTE","titulo":"teste","status":"ok","numero":"RITM0000000","mensagem":""}</pre><button type="button" class="copiar">Copiar</button></div></div></li>
+        </ol>
+      </div>
+    </details>
+
+    <!-- E -->
+    <details id="e-e">
+      <summary><span class="letra">E</span><span class="tit"><strong>Piloto com Backup</strong><span>Primeiro chamado real, com o plantonista conferindo</span></span><span class="conta"></span></summary>
+      <div class="corpo">
+        <ol class="passos">
+          <li><input type="checkbox" id="e1"><div><b>Esperar uma falha real de Backup.</b> O BackupBot grava o JSON em <code>pendentes</code> e o robô preenche o formulário.</div></li>
+          <li><input type="checkbox" id="e2"><div><b>Plantonista confere e clica em Enviar.</b> O ícone fica amarelo e aparece um aviso na tela. Sem clique em 30 min, o alerta vai para <code>erro</code>.</div></li>
+          <li><input type="checkbox" id="e3"><div><b>Conferir o resultado</b>: número INC no chat (FC) NETBACKUP e o arquivo em <code>processados</code>.</div></li>
+          <li><input type="checkbox" id="e4"><div><b>Medir a sessão do ServiceNow</b> durante o plantão: contar no log quantas vezes o robô pediu login. Isso mostra o tempo real de sessão da Cirion.</div></li>
+          <li><input type="checkbox" id="e5"><div><b>Ver a renovação do SharePoint</b>: quando a sessão Microsoft vencer, o robô renova sozinho ou abre a janela pedindo login.</div></li>
+        </ol>
+      </div>
+    </details>
+
+    <!-- F -->
+    <details id="e-f">
+      <summary><span class="letra">F</span><span class="tit"><strong>Ligar a GMUD</strong><span>Depois do piloto de Backup</span></span><span class="conta"></span></summary>
+      <div class="corpo">
+        <ol class="passos">
+          <li><input type="checkbox" id="f1"><div><b>Conferir o Default do Switch</b> no GMUD | Todos: precisa ter Control → Terminate (Succeeded). Vazio, um alerta de PRODUCAO chega à fila e cai em <code>erro</code> com aviso.</div></li>
+          <li><input type="checkbox" id="f2"><div><b>Acompanhar as primeiras GMUDs</b> de INFRA, DBA e SO: plantonista confere o título <code>#GMUD CHG… | SOC/DBA/SO | dd/MM HH:mm |</code> e clica em Submit.</div></li>
+          <li><input type="checkbox" id="f3"><div><b>Envio sem conferir</b> (opcional, decisão do plantonista): menu do ícone → “Enviar GMUD sem conferir”.</div></li>
+        </ol>
+      </div>
+    </details>
+
+    <!-- G -->
+    <details id="e-g">
+      <summary><span class="letra">G</span><span class="tit"><strong>Fechamento</strong><span>Quando estiver tudo rodando</span></span><span class="conta"></span></summary>
+      <div class="corpo">
+        <ol class="passos">
+          <li><input type="checkbox" id="g1"><div><b>Tirar o aviso “Em implantação”</b> do guia dos colaboradores e republicar.</div></li>
+          <li><input type="checkbox" id="g2"><div><b>Testar a desinstalação</b> por Configurações → Aplicativos numa máquina de teste.</div></li>
+          <li><input type="checkbox" id="g3"><div><b>Certificado de assinatura de código</b> (recomendado, com Segurança). O antivírus já removeu um desinstalador nos testes; o build assina sozinho se houver certificado.</div></li>
+        </ol>
+      </div>
+    </details>
+
+  </div>
+
+  <footer>Detalhes: <code>docs/power-automate.md</code> (fluxos) e a documentação técnica.</footer>
+</main>
+
+<script>
+(function(){
+  var CHAVE = "dispatchbot-faltando";
+  var salvo = {};
+  try { salvo = JSON.parse(localStorage.getItem(CHAVE) || "{}") || {}; } catch(e) { salvo = {}; }
+  var caixas = Array.prototype.slice.call(document.querySelectorAll("ol.passos input[type=checkbox]"));
+  var etapas = Array.prototype.slice.call(document.querySelectorAll(".etapas details"));
+
+  function atualizar(){
+    var feitos = 0;
+    caixas.forEach(function(c){ c.closest("li").classList.toggle("ok", c.checked); if (c.checked) feitos++; });
+    etapas.forEach(function(d){
+      var cs = d.querySelectorAll("ol.passos input"), n = 0;
+      cs.forEach(function(c){ if (c.checked) n++; });
+      d.classList.toggle("feita", n === cs.length);
+      d.querySelector(".conta").innerHTML = n + "/" + cs.length + '<span class="seta">›</span>';
+    });
+    document.getElementById("feitos").textContent = feitos;
+    document.getElementById("total").textContent = caixas.length;
+    document.getElementById("barra").style.width = (caixas.length ? feitos / caixas.length * 100 : 0) + "%";
+  }
+
+  caixas.forEach(function(c){
+    c.checked = !!salvo[c.id];
+    c.addEventListener("change", function(){
+      salvo[c.id] = c.checked;
+      try { localStorage.setItem(CHAVE, JSON.stringify(salvo)); } catch(e) {}
+      atualizar();
+    });
+  });
+
+  document.getElementById("abrir").addEventListener("click", function(){ etapas.forEach(function(d){ d.open = true; }); });
+  document.getElementById("fechar").addEventListener("click", function(){ etapas.forEach(function(d){ d.open = false; }); });
+
+  document.querySelectorAll(".copiar").forEach(function(b){
+    b.addEventListener("click", function(){
+      var pre = b.parentNode.querySelector("pre");
+      function marcar(){ var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+      try {
+        navigator.clipboard.writeText(pre.textContent).then(function(){ b.textContent = "Copiado"; setTimeout(function(){ b.textContent = "Copiar"; }, 1500); }, marcar);
+      } catch(e) { marcar(); }
+    });
+  });
+
+  atualizar();
+})();
+</script>

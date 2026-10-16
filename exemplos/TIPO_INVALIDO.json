@@ -1,0 +1,11 @@
+{
+  "versao": 1,
+  "id": "<TESTE-INVALIDO-0001@exemplo.local>",
+  "tipo": "REDES",
+  "recebido_em": "2026-09-25T18:15:00-03:00",
+  "titulo": "TESTE - Tipo que não existe no config",
+  "descricao": "Deve ir para /erro com a mensagem de tipo desconhecido.",
+  "criticidade": "Baixa",
+  "dados_brutos": "",
+  "teams": { "team_id": "", "channel_id": "", "message_id": "" }
+}

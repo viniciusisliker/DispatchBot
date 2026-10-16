@@ -1,0 +1,19 @@
+{
+  "versao": 2,
+  "id": "CHG9990002",
+  "tipo": "DBA",
+  "grupo_executor": "SN_TI_CHG_EXECUTOR_CIRION_DBA",
+  "chg": "CHG9990002",
+  "ctask": "CTASK9990002",
+  "data_execucao": "30/04/2026 22:00",
+  "tipo_mudanca": "Padrão",
+  "titulo": "TESTE - Aplicação de patch no cluster Oracle",
+  "descricao": "TESTE do DispatchBot, ignorar. Aplicação do patch de segurança no cluster ORAPRD, com indisponibilidade prevista de 30 minutos.",
+  "recebido_em": "2026-09-29T10:00:00-03:00",
+  "dados_brutos": "Uma tarefa de Mudança foi atribuída a você ou ao seu grupo executor. CHG9990002 ...",
+  "teams": {
+    "team_id": "",
+    "channel_id": "",
+    "message_id": ""
+  }
+}

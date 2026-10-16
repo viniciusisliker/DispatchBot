@@ -1,0 +1,765 @@
+<title>Documentação técnica do DispatchBot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#F3F5F4; --surface:#FFFFFF; --sunken:#E8ECEA;
+  --ink:#16201D; --muted:#56635E; --line:#D3DAD7;
+  --accent:#0E6B66; --accent-soft:#D6ECE9;
+  --ok:#1F7A3E; --ok-soft:#DDF1E3;
+  --warn:#9A5B00; --warn-soft:#FBEBCF;
+  --info:#2F5DA8; --info-soft:#DEE7F7;
+  --err:#B42318; --err-soft:#FBE3E0;
+  --code-bg:#1C2624; --code-ink:#DCE7E3; --code-key:#8FD3C9; --code-str:#F2C98A; --code-com:#7F918B;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --cond:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#101614; --surface:#18201E; --sunken:#1F2926;
+    --ink:#E4ECE9; --muted:#9AA9A4; --line:#2E3A37;
+    --accent:#5CC4B9; --accent-soft:#16332F;
+    --ok:#6BD08D; --ok-soft:#173222;
+    --warn:#F0B454; --warn-soft:#3A2A10;
+    --info:#8DB0EE; --info-soft:#1C2940;
+    --err:#F2877B; --err-soft:#3A1A17;
+    --code-bg:#0B100F; --code-ink:#D5E2DD;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101614; --surface:#18201E; --sunken:#1F2926;
+  --ink:#E4ECE9; --muted:#9AA9A4; --line:#2E3A37;
+  --accent:#5CC4B9; --accent-soft:#16332F;
+  --ok:#6BD08D; --ok-soft:#173222;
+  --warn:#F0B454; --warn-soft:#3A2A10;
+  --info:#8DB0EE; --info-soft:#1C2940;
+  --err:#F2877B; --err-soft:#3A1A17;
+  --code-bg:#0B100F; --code-ink:#D5E2DD;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);padding:0 16px}
+.wrap{max-width:920px;margin:0 auto;padding-block:40px 80px;display:flex;flex-direction:column;gap:56px}
+h1,h2,h3{font-family:var(--cond);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:40px;font-weight:600;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:600}
+h3{font-size:17px;font-weight:600}
+p{margin:0;max-width:68ch}
+a{color:var(--accent)}
+code,.mono{font-family:var(--mono);font-size:.88em}
+p code,li code,td code{background:var(--sunken);padding:1px 5px;border-radius:4px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+section{display:flex;flex-direction:column;gap:18px}
+.sec-head{display:flex;flex-direction:column;gap:6px;border-top:2px solid var(--ink);padding-top:14px}
+
+/* cabeçalho */
+header{display:flex;flex-direction:column;gap:14px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;color:var(--muted);font-size:13px}
+.meta span b{color:var(--ink);font-weight:500}
+.lede{font-size:17px;color:var(--ink)}
+
+/* chips de status */
+.chip{display:inline-flex;align-items:center;gap:6px;font:500 11.5px/1 var(--mono);letter-spacing:.04em;text-transform:uppercase;padding:5px 8px;border-radius:4px;white-space:nowrap}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.chip.ok{color:var(--ok);background:var(--ok-soft)}
+.chip.warn{color:var(--warn);background:var(--warn-soft)}
+.chip.info{color:var(--info);background:var(--info-soft)}
+
+/* resumo */
+.tally{display:flex;flex-wrap:wrap;gap:10px}
+
+/* esteira do fluxo */
+.flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.stage{padding:16px 16px 18px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:6px;position:relative}
+.stage:last-child{border-right:0}
+.stage .where{font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.stage .what{font-weight:600;font-family:var(--cond);font-size:16px;line-height:1.25}
+.stage .how{font-size:13px;color:var(--muted);line-height:1.45}
+.stage .step{font:500 11px/1 var(--mono);color:var(--muted)}
+@media (max-width:640px){.stage{border-right:0;border-bottom:1px solid var(--line)}.stage:last-child{border-bottom:0}}
+
+/* ciclo de vida do arquivo */
+.life{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font:500 13px/1 var(--mono)}
+.life .box{padding:8px 10px;border:1px solid var(--line);background:var(--surface);border-radius:5px}
+.life .box.end-ok{border-color:var(--ok);color:var(--ok)}
+.life .box.end-err{border-color:var(--warn);color:var(--warn)}
+.life .arr{color:var(--muted)}
+
+/* decisões */
+.decisions{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.dec{display:grid;grid-template-columns:44px 1fr auto;gap:4px 16px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.dec:last-child{border-bottom:0}
+.dec .id{font:600 15px/1.3 var(--mono);color:var(--accent)}
+.dec .body{display:flex;flex-direction:column;gap:6px;min-width:0}
+.dec .body p{color:var(--muted);font-size:14px}
+.dec .body p b{color:var(--ink);font-weight:500}
+.dec .body ul{margin:0;padding-left:18px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:3px}
+.dec .answer{font-size:13.5px;background:var(--ok-soft);color:var(--ink);padding:8px 10px;border-radius:5px}
+.dec .answer.pend{background:var(--warn-soft)}
+@media (max-width:640px){.dec{grid-template-columns:1fr;padding:16px}.dec .id{order:-1}.dec>.chip{justify-self:start}}
+
+/* código */
+.code{background:var(--code-bg);color:var(--code-ink);border-radius:8px;overflow-x:auto;font:13px/1.6 var(--mono);padding:16px 18px;margin:0}
+.code .k{color:var(--code-key)}.code .s{color:var(--code-str)}.code .c{color:var(--code-com)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:18px}
+.col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.caption{font-size:13px;color:var(--muted)}
+
+/* tabelas */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font:500 11.5px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunken)}
+td.who{white-space:nowrap;font-weight:500}
+
+/* árvore */
+.tree{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px;font:13px/1.65 var(--mono);overflow-x:auto;margin:0;color:var(--ink)}
+.tree .c{color:var(--muted)}
+.note{border-left:3px solid var(--warn);background:var(--warn-soft);padding:12px 14px;border-radius:0 6px 6px 0;font-size:14px}
+.note b{font-weight:600}
+footer{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+
+/* guia passo a passo */
+.guia{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.partes{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--line)}
+.parte{appearance:none;background:none;border:0;border-right:1px solid var(--line);padding:12px 12px 11px;text-align:left;cursor:pointer;color:var(--muted);font:inherit;display:flex;flex-direction:column;gap:4px;position:relative;min-width:0}
+.parte:last-child{border-right:0}
+.parte .n{font:500 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.parte .t{font:600 15px/1.2 var(--cond);color:var(--ink)}
+.parte .m{font-size:12px;line-height:1.3;font-variant-numeric:tabular-nums}
+.parte:hover{background:var(--sunken)}
+.parte[aria-selected="true"]{background:var(--accent-soft)}
+.parte[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--accent)}
+.parte:focus-visible,.btn:focus-visible,.check input:focus-visible,.sim-opcao input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.parte:focus-visible{outline-offset:-3px}
+@media (max-width:720px){
+  .partes{grid-template-columns:repeat(3,1fr)}
+  .parte:nth-child(3){border-right:0}
+  .parte:nth-child(-n+3){border-bottom:1px solid var(--line)}
+}
+.painel{padding:22px 24px 20px;display:flex;flex-direction:column;gap:16px}
+@media (max-width:560px){.painel{padding:18px 16px}}
+.painel-topo{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px 20px}
+.painel-topo p{color:var(--muted);font-size:14.5px}
+.prog{display:flex;align-items:center;gap:10px;font:500 12.5px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.prog .barra{width:140px;height:6px;border-radius:3px;background:var(--sunken);overflow:hidden}
+.prog .barra i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+ol.passos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.passo{display:grid;grid-template-columns:36px 1fr auto;gap:4px 14px;padding:14px 0;border-top:1px solid var(--line);transition:opacity .25s}
+.passo:first-child{border-top:0;padding-top:4px}
+.passo .num{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:600 13px/1 var(--mono);background:var(--sunken);color:var(--ink);transition:background .25s,box-shadow .25s}
+.passo.feito .num{background:var(--ok);color:var(--surface)}
+.passo.ativo .num{background:var(--accent);color:var(--surface);box-shadow:0 0 0 5px var(--accent-soft)}
+.passo.falhou .num{background:var(--err);color:var(--surface);box-shadow:0 0 0 5px var(--err-soft)}
+.passo.pulado{opacity:.4}
+.passo .corpo{display:flex;flex-direction:column;gap:6px;min-width:0;color:var(--muted);font-size:14.5px}
+.passo .corpo b{color:var(--ink);font-weight:600}
+.passo .titulo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.passo h3{font-size:16.5px;color:var(--ink)}
+.passo ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.check{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap;align-self:start;padding-top:5px}
+.check input{width:18px;height:18px;margin:0;accent-color:var(--ok);cursor:pointer}
+@media (max-width:560px){.passo{grid-template-columns:32px 1fr}.passo .check{grid-column:2;padding-top:2px}}
+.sim-barra{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 14px;background:var(--sunken);border-radius:8px}
+.sim-opcao{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink);cursor:pointer}
+.sim-opcao input{width:16px;height:16px;margin:0;accent-color:var(--accent);cursor:pointer}
+.btn{appearance:none;border:1px solid var(--accent);background:var(--accent);color:var(--surface);font:600 14px/1 var(--sans);padding:9px 14px;border-radius:6px;cursor:pointer}
+.btn.sec{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.bandeja{display:inline-flex;align-items:center;gap:8px;margin-left:auto;font:500 13px/1 var(--mono);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 8px}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;display:inline-block;transition:background .25s}
+.dot.verde{background:#2E9E5B}.dot.amarelo{background:#E0A100}.dot.vermelho{background:#D23C3C}.dot.cinza{background:#8A8F8C}
+.resultado{padding:12px 14px;border-radius:8px;font-size:14.5px;color:var(--ink)}
+.resultado.ok{background:var(--ok-soft)}.resultado.erro{background:var(--err-soft)}
+.legenda{display:grid;grid-template-columns:auto auto 1fr;gap:8px 12px;align-items:center;margin-top:2px}
+.legenda b{white-space:nowrap}
+.caminhos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px;margin-top:4px}
+.caminho{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.caminho .alcance{font:500 11px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+.kbd{font:500 12.5px/1.6 var(--mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 6px;background:var(--surface);color:var(--ink);white-space:nowrap}
+.painel-nav{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:14px}
+.painel-nav .btn{font-size:13.5px}
+.nota-local{font-size:12.5px;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion: reduce){.passo,.passo .num,.dot,.prog .barra i{transition:none}}
+</style>
+
+<div class="wrap">
+
+<header>
+  <span class="eyebrow">Proposta técnica · Automação RPA</span>
+  <h1>DispatchBot: alertas de GMUD viram chamados no ServiceNow</h1>
+  <p class="lede">O fluxo <b>GMUD | Todos</b> (INFRA, DBA e SO) e o <b>BackupBot</b> continuam postando no Teams. Agora, cada alerta também abre um chamado no Employee Center da Cirion. Isso é feito por um robô local que usa a sessão SSO do Dispatcher N1 de plantão.</p>
+  <div class="meta">
+    <span>Atualizado em <b>14/10/2026</b></span>
+    <span>Versão <b>1.10.0</b></span>
+    <span><a href="#passo-a-passo">Passo a passo →</a></span>
+    <span>Status <b>pronto para os testes finais</b></span>
+    <span>Instância <b class="mono">envdatacenter.service-now.com/esc</b></span>
+  </div>
+  <div class="tally">
+    <span class="chip ok">12 decisões fechadas</span>
+    <span class="chip ok">4 formulários mapeados</span>
+    <span class="chip ok">Retorno no Teams testado</span>
+    <span class="chip info">Painel escuro (1.10.0)</span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Visão geral</span><h2>Caminho de um alerta</h2></div>
+  <p>A API do ServiceNow não está disponível e o login é por SSO com MFA. Por isso, a abertura do chamado é automação de navegador na máquina do plantonista. O Power Automate e o robô se comunicam por arquivos JSON numa pasta do SharePoint, que o robô lê pela API REST.</p>
+  <div class="flow">
+    <div class="stage"><span class="step">1</span><span class="where">Outlook</span><span class="what">E-mail de alerta</span><span class="how">Gatilho “When a new email arrives (V3)” no GMUD | Todos e no BackupBot.</span></div>
+    <div class="stage"><span class="step">2</span><span class="where">Power Automate</span><span class="what">Post no Teams + JSON</span><span class="how">Mantém o card do Flow bot e grava <code>&lt;TIPO&gt;_&lt;id&gt;.json</code> em <code>/pendentes</code>.</span></div>
+    <div class="stage"><span class="step">3</span><span class="where">Máquina do N1</span><span class="what">Robô local</span><span class="how">Lê a fila no SharePoint (API REST, com a sessão Microsoft do navegador do robô), reserva o arquivo e preenche no Edge com o perfil próprio do robô.</span></div>
+    <div class="stage"><span class="step">4</span><span class="where">ServiceNow ESC</span><span class="what">Chamado aberto</span><span class="how">Preenche o formulário do tipo, confere os obrigatórios e clica em enviar (se faltar algum, o plantonista completa e envia); o robô captura o número (RITM na GMUD, INC no Backup).</span></div>
+    <div class="stage"><span class="step">5</span><span class="where">Power Automate</span><span class="what">Mensagem no chat do time</span><span class="how">O fluxo “DispatchBot | Retorno” lê <code>/retorno</code> e posta o número e o link de tratamento no chat em grupo do time.</span></div>
+  </div>
+  <h3>Ciclo de vida do arquivo</h3>
+  <div class="life">
+    <span class="box">/pendentes</span><span class="arr">→</span>
+    <span class="box">/processando</span><span class="arr">→</span>
+    <span class="box end-ok">/processados</span><span class="arr">ou</span>
+    <span class="box end-err">/erro</span><span class="arr">+</span>
+    <span class="box">/retorno</span>
+  </div>
+</section>
+
+<section id="passo-a-passo">
+  <div class="sec-head"><span class="eyebrow">Guia</span><h2>Passo a passo, da instalação ao dia a dia</h2></div>
+  <p>São 22 passos em 6 partes. As partes 1 e 2 são feitas uma vez; a parte 3 acontece sozinha a cada alerta. Na parte 3, use <b>Simular um alerta</b> para ver a ordem.</p>
+  <div class="guia">
+    <div class="partes" role="tablist" aria-label="Partes do passo a passo" id="partes"></div>
+    <div class="painel" role="tabpanel" id="painel" tabindex="-1"></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Decisões</span><h2>O que foi decidido</h2></div>
+  <div class="decisions">
+
+    <div class="dec">
+      <span class="id">A</span>
+      <div class="body">
+        <h3>Empacotamento com PyInstaller (onedir)</h3>
+        <p>O Python embeddable não traz o tkinter, que é usado no diálogo da primeira execução, e o pip nele é frágil. O PyInstaller empacota o driver do Playwright sem nenhum navegador. O modo onedir abre mais rápido e o antivírus corporativo reclama menos que no onefile.</p>
+        <p><b>Saída:</b> <code>DispatchBot.exe</code> e <code>DispatchBot-Mapear.exe</code>, cerca de 150 MB (medido no build). O driver do Playwright ocupa cerca de 105 MB e nenhum navegador entra no pacote.</p>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">B</span>
+      <div class="body">
+        <h3>Instalador por usuário, sem admin</h3>
+        <p>O Inno Setup roda com <code>PrivilegesRequired=lowest</code> e instala em <code>%LOCALAPPDATA%\Programs\DispatchBot</code>. Cria um atalho no Menu Iniciar e tem a opção “Iniciar com o Windows” via <code>HKCU\…\Run</code>. Os dados ficam em <code>%LOCALAPPDATA%\DispatchBot</code> e sobrevivem a atualizações.</p>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">C</span>
+      <div class="body">
+        <h3>Fila lida direto no SharePoint, por polling</h3>
+        <p>O robô lista <code>/pendentes</code> pela API REST do SharePoint no intervalo do config (15 s), sem OneDrive. A autenticação usa os cookies da sessão Microsoft (FedAuth/rtFa) salvos no perfil do navegador do robô: na maioria das vezes ele nem abre o site. Quando a sessão vence, visita o site para renovar; se a Microsoft pedir login, abre uma janela e espera o plantonista. A pasta sincronizada pelo OneDrive ficou só como modo reserva (<code>fila_sharepoint.site</code> vazio).</p>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">D</span>
+      <div class="body">
+        <h3>Um robô ativo por vez</h3>
+        <p>A reserva move o arquivo de <code>pendentes</code> para <code>processando</code> com o MoveTo do SharePoint, que é atômico: duas máquinas nunca pegam o mesmo arquivo. Mesmo assim, só o Dispatcher N1 de plantão roda o robô ativo; nas demais máquinas, ele fica em <b>Pausado</b>.</p>
+        <div class="answer">Resposta: só o plantonista da vez (Dispatcher N1). A pesquisa no ServiceNow antes de abrir o chamado fica <b>desligada</b> por padrão, com um liga/desliga no config.</div>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">E</span>
+      <div class="body">
+        <h3>Nunca abrir dois chamados para o mesmo alerta</h3>
+        <p>O id do alerta é gravado como <code>enviando</code> antes do clique em Enviar e como <code>ok</code> junto com o número depois. Se o robô cair no meio, o alerta vai para <code>/erro</code> para conferência manual. O envio nunca é repetido às cegas.</p>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">F</span>
+      <div class="body">
+        <h3>Navegador e login SSO</h3>
+        <ul>
+          <li>Usa o Edge (<code>msedge</code>) e, se ele não estiver instalado, o Chrome. O contexto é persistente, no perfil do robô, e nunca no perfil pessoal.</li>
+          <li>Quando o navegador cai na tela de SSO, o ícone da bandeja fica amarelo, aparece o aviso “Faça login no ServiceNow na janela aberta” e o robô espera o portal voltar.</li>
+          <li>O robô nunca guarda nem digita senha.</li>
+        </ul>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">G</span>
+      <div class="body">
+        <h3>Formulários descritos no config, um bloco por tipo</h3>
+        <p>Para cada tipo, o config tem a URL do formulário, uma lista de passos (<code>preencher</code>, <code>selecionar</code>, <code>referencia</code>, <code>clicar</code>…), o botão de envio e a regex que captura o número. Adicionar um tipo novo é criar outro bloco. Um tipo desconhecido vai para <code>/erro</code>. O <code>DispatchBot-Mapear.exe --testar</code> preenche o formulário sem enviar e lista os campos obrigatórios que ficaram vazios.</p>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">H</span>
+      <div class="body">
+        <h3>Número do chamado postado no chat do time</h3>
+        <p>Um único fluxo novo, <b>DispatchBot | Retorno</b>, atende todos os tipos. Os alertas são postados em <b>chats em grupo</b>, que não têm thread: o Retorno posta uma mensagem nova no chat do time, citando a CHG (ou a falha de Backup) e o número. O chat sai do <code>tipo</code> do JSON, então os fluxos de alerta não precisam guardar o id da mensagem.</p>
+        <div class="answer">Chats: INFRA → (FC) NET / SOC · DBA → (FC) BANCO DE DADOS (DBA'S + N1 + Gestão) · SO → (FC) LINUX - WINDOWS - VMWARE · BACKUP → (FC) NETBACKUP.</div>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">I</span>
+      <div class="body">
+        <h3>Onde fica a pasta <code>/DispatchBot-Fila</code></h3>
+        <p>Uma <b>biblioteca de documentos do SharePoint do time</b>: não depende da conta de uma pessoa e os fluxos usam o conector do SharePoint.</p>
+        <div class="answer">Criada em 01/10/2026: site <code>MANAGEDSERVICE</code>, biblioteca <b>Documentos Compartilhados</b>, pasta <code>YDUQS/N1/DispatchBot-Fila</code>. No config: <code>fila_sharepoint.site</code> e <code>fila_sharepoint.pasta</code>.</div>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">J</span>
+      <div class="body">
+        <h3>Número da GMUD é o RITM, com link de tratamento</h3>
+        <p>O formulário Hosting cria um caso <b>CS</b> e um <b>RITM</b> ligado a ele. O time trabalha com o RITM, então o robô lê só a linha do RITM e o cabeçalho do caso (a descrição pode citar outros chamados) e espera até 30 s pelo RITM antes de aceitar o CS. Junto com o número vai o <b>link de tratamento</b>: abre o chamado direto na tela clássica do ServiceNow (<code>link_tratamento</code> no config; a tabela sai do prefixo do número).</p>
+        <div class="answer">Confirmado em 05/10/2026: CS0720955 → REQ0415170 / RITM0415846. O link vai no retorno, no histórico e no painel.</div>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">K</span>
+      <div class="body">
+        <h3>Painel do plantonista (tema escuro) e janela "Precisa de você"</h3>
+        <p>Clicar no ícone da bandeja abre o painel em tema escuro (CustomTkinter, ícones do Windows): status com o detalhe, contadores do dia, <b>Precisa de você</b> (login, chamado para conferir, alerta antigo), <b>chamados abertos hoje</b> (Tratar abre o chamado na tela de tratamento; Copiar) e <b>erros de hoje</b> com o motivo. Rodapé: Verificar agora, Logs e PARAR AGORA. Quando o robô precisa do plantonista, uma <b>janelinha</b> aparece sozinha no canto da tela, mesmo com o painel fechado. O ícone é o avatar do robô com uma bolinha na cor do status.</p>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+    <div class="dec">
+      <span class="id">L</span>
+      <div class="body">
+        <h3>Fluxos agrupados numa Solução</h3>
+        <p>No Power Automate, os fluxos ficam na Solução <b>DispatchBot</b>. O e-mail de Backup chega numa caixa diferente da GMUD, e cada fluxo tem um gatilho só; por isso não existe um fluxo de entrada único. São três: <b>GMUD | Todos</b>, <b>BackupBot</b> e <b>DispatchBot | Retorno</b>.</p>
+        <div class="answer">Decidido em 09/10/2026. O Retorno já nasceu na Solução; os outros dois entram por “Adicionar existente”, sem mexer na lógica.</div>
+      </div>
+      <span class="chip ok">Fechada</span>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Segurança</span><h2>Parada de emergência</h2></div>
+  <p>Se o robô estiver abrindo chamados errados, qualquer pessoa para na hora. O robô interrompe no meio do passo, fecha o navegador e não volta sozinho. Um alerta que ainda não foi enviado volta intacto para a fila. Um alerta que já foi enviado vai para <code>/erro</code> para conferência e nunca é reenviado.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Como</th><th>Alcance</th><th>Liberar</th><th>Tempo medido</th></tr></thead>
+      <tbody>
+        <tr><td><b>PARAR AGORA</b>, primeiro item do menu da bandeja (pede confirmação desde a 1.7.1) ou botão do painel (imediato)</td><td>A máquina do robô</td><td>Desmarcar <i>Pausado</i></td><td class="mono">1,1 s</td></tr>
+        <tr><td>Atalho <b class="mono">Ctrl+Alt+Shift+P</b>, com qualquer janela na frente</td><td>A máquina do robô</td><td>Desmarcar <i>Pausado</i></td><td class="mono">0,8 s</td></tr>
+        <tr><td>Arquivo <b class="mono">PARAR</b> na pasta <code>DispatchBot-Fila</code>; o texto dentro dele vira o motivo</td><td><b>Todos os robôs</b></td><td>Apagar o arquivo</td><td class="mono">até 10 s (<code>intervalo_parar_seg</code>)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Resiliência</span><h2>Quando algo dá errado</h2></div>
+  <p>Cada situação abaixo foi testada contra um ServiceNow simulado e com o instalador na pasta real de instalação. O princípio é o mesmo em todas: repetir só o que é seguro repetir, e nunca reenviar um formulário que pode ter sido enviado.</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Situação</th><th>O que o robô faz</th></tr></thead>
+      <tbody>
+        <tr><td>Rede, instância lenta (503), navegador travado</td><td>Tenta até 3 vezes com um navegador novo, depois manda para <code>/erro</code></td></tr>
+        <tr><td>ServiceNow recusa o formulário</td><td>Vai para <code>/erro</code> na hora com a mensagem da tela, sem repetir</td></tr>
+        <tr><td>Falha depois do clique em Enviar</td><td>Vai para <code>/erro</code> com “confira no ServiceNow” e nunca reenvia sozinho</td></tr>
+        <tr><td>SSO entra sozinho</td><td>Segue sem avisar ninguém</td></tr>
+        <tr><td>Ninguém faz o login</td><td>O alerta volta para a fila e espera. Depois de 60 min, vai para <code>/erro</code> e o Teams avisa para abrir manualmente</td></tr>
+        <tr><td>SharePoint fora do ar ou <code>config.json</code> com erro</td><td>Ícone vermelho com o motivo. Volta sozinho quando o problema é resolvido</td></tr>
+        <tr><td>Sessão Microsoft vencida (SharePoint)</td><td>Renova sozinho; se a Microsoft pedir login, abre a janela e o ícone fica amarelo</td></tr>
+        <tr><td>Sessão do ServiceNow parada</td><td>Com o navegador ocioso, o robô recarrega o portal a cada 10 min. Se a sessão caiu, pede o login na hora, e não no próximo alerta</td></tr>
+        <tr><td>Alerta antigo na fila (mais de 2 h, ex.: robô ficou pausado)</td><td>Pergunta ao plantonista antes de abrir: abrir, já aberto à mão (não abre e não avisa o Teams) ou decidir depois (pergunta de novo em 30 min). Sem resposta, o alerta espera e os novos seguem</td></tr>
+        <tr><td>Alerta com texto ilegível (anexo lido errado pelo fluxo)</td><td>Não abre chamado: vai para <code>/erro</code> e o Teams avisa para abrir à mão pelo e-mail original</td></tr>
+        <tr><td>Janela do Edge do robô fechada</td><td>Não é erro: o robô avisa e reabre a janela no próximo ciclo</td></tr>
+        <tr><td>Máquina caiu com um alerta reservado</td><td>Na própria máquina, retoma quando o robô volta. Se for outra máquina, o alerta vai para <code>/erro</code> depois de 60 min</td></tr>
+        <tr><td>Dois robôs ativos ao mesmo tempo</td><td>Cada máquina grava o status em <code>/status</code>, e os dois robôs avisam o plantonista</td></tr>
+        <tr><td>Robô fecha por erro</td><td>O vigia (tarefa agendada, a cada 5 min) reabre. Se o plantonista fechou pelo menu, não reabre</td></tr>
+        <tr><td>Atualização com o robô rodando</td><td>O instalador pede para o robô sair, espera o alerta em andamento terminar e abre o robô de novo depois</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Contratos</span><h2>Formato dos arquivos</h2></div>
+  <div class="cols">
+    <div class="col">
+      <h3>Entrada · <code>/pendentes</code></h3>
+<pre class="code">{
+  <span class="k">"versao"</span>: 2,
+  <span class="k">"id"</span>: <span class="s">"CHG0047305"</span>,  <span class="c">// GMUD: a CHG; Backup: Message-Id do e-mail</span>
+  <span class="k">"tipo"</span>: <span class="s">"INFRA"</span>,  <span class="c">// INFRA, DBA, SO ou BACKUP</span>
+  <span class="k">"grupo_executor"</span>: <span class="s">"SN_TI_CHG_EXECUTOR_CIRION_INFRA"</span>,
+  <span class="k">"chg"</span>: <span class="s">"CHG0047305"</span>,
+  <span class="k">"ctask"</span>: <span class="s">"CTASK0051234"</span>,
+  <span class="k">"data_execucao"</span>: <span class="s">"29/04/2026 09:30"</span>,
+  <span class="k">"tipo_mudanca"</span>: <span class="s">"Normal"</span>,
+  <span class="k">"titulo"</span>: <span class="s">"Criação de Regras de Segurança"</span>,
+  <span class="k">"descricao"</span>: <span class="s">"Criação de novas regras de segurança nos firewalls..."</span>,
+  <span class="k">"recebido_em"</span>: <span class="s">"2026-04-28T14:02:00-03:00"</span>,
+  <span class="k">"dados_brutos"</span>: <span class="s">"texto tratado do e-mail"</span>
+}</pre>
+      <p class="caption">O <code>id</code> impede chamado duplicado: numa GMUD, é o número da CHG. Os campos <code>chg</code>, <code>data_execucao</code> e <code>descricao</code> são obrigatórios na GMUD; se faltarem, o robô não abre e avisa. Um bloco <code>teams</code>, se vier, só é repassado ao retorno; o Retorno escolhe o chat pelo <code>tipo</code>.</p>
+    </div>
+    <div class="col">
+      <h3>Retorno · <code>/retorno</code></h3>
+<pre class="code">{
+  <span class="k">"id"</span>: <span class="s">"&lt;Message-Id do e-mail&gt;"</span>,
+  <span class="k">"tipo"</span>: <span class="s">"INFRA"</span>,
+  <span class="k">"titulo"</span>: <span class="s">"Criação de Regras de Segurança"</span>,
+  <span class="k">"status"</span>: <span class="s">"ok"</span>,  <span class="c">// ou "erro"</span>
+  <span class="k">"numero"</span>: <span class="s">"RITM0012345"</span>,
+  <span class="k">"url"</span>: <span class="s">"https://envdatacenter.service-now.com/now/nav/ui/classic/..."</span>,  <span class="c">// link de tratamento</span>
+  <span class="k">"mensagem"</span>: <span class="s">""</span>,
+  <span class="k">"maquina"</span>: <span class="s">"NB-DISPATCH-01"</span>,
+  <span class="k">"processado_em"</span>: <span class="s">"2026-09-25T18:01:12-03:00"</span>,
+  <span class="k">"teams"</span>: { <span class="c">/* copiado da entrada */</span> }
+}</pre>
+      <p class="caption">Com <code>status: "ok"</code>, a mensagem leva o número e o link de tratamento (“✅ INFRA CHG…: chamado RITM… aberto. Tratar: …”). Com <code>status: "erro"</code>, a mensagem no chat avisa que o chamado precisa ser aberto manualmente e traz a mensagem do erro.</p>
+    </div>
+  </div>
+
+  <h3>O modelo das GMUDs no <code>config.json</code></h3>
+<pre class="code">{
+  <span class="k">"_GMUD"</span>: {  <span class="c">// formulário Hosting do Employee Center (POP 11)</span>
+    <span class="k">"url_formulario"</span>: <span class="s">"/esc?id=sc_cat_item&amp;sys_id=42761d80873931902beeeb930cbb3593"</span>,
+    <span class="k">"variaveis"</span>: { <span class="k">"conta_busca"</span>: <span class="s">"SOCIEDADE DE ENSINO SUPERIOR ESTACIO"</span>, <span class="k">"conta_codigo"</span>: <span class="s">"3-9R2V6QXWXV"</span>,
+                   <span class="k">"caller"</span>: <span class="s">"OPERACAO YDUQS"</span>, <span class="k">"categoria"</span>: <span class="s">"Other"</span> },
+    <span class="k">"validar"</span>: { <span class="k">"chg"</span>: <span class="s">"CHG\d{{7}}"</span> },
+    <span class="k">"passos"</span>: [
+      { <span class="k">"campo"</span>: <span class="s">"Conta *"</span>,      <span class="k">"acao"</span>: <span class="s">"referencia"</span>, <span class="k">"busca"</span>: <span class="s">"{conta_busca}"</span>, <span class="k">"valor"</span>: <span class="s">"{conta_codigo}"</span> },
+      { <span class="k">"campo"</span>: <span class="s">"CallerID *"</span>,   <span class="k">"acao"</span>: <span class="s">"referencia"</span>, <span class="k">"valor"</span>: <span class="s">"{caller}"</span> },
+      { <span class="k">"campo"</span>: <span class="s">"Categoria *"</span>,  <span class="k">"acao"</span>: <span class="s">"escolher"</span>,   <span class="k">"valor"</span>: <span class="s">"{categoria}"</span> },
+      { <span class="k">"campo"</span>: <span class="s">"Descrição resumida *"</span>, <span class="k">"acao"</span>: <span class="s">"preencher"</span>,
+        <span class="k">"valor"</span>: <span class="s">"#GMUD {chg} | {time_titulo} | {data_execucao|dd/MM HH:mm} |"</span> },
+      { <span class="k">"campo"</span>: <span class="s">"Descrição *"</span>,  <span class="k">"acao"</span>: <span class="s">"preencher"</span>, <span class="k">"valor"</span>: <span class="s">"{descricao}"</span> }
+    ]
+  },
+  <span class="k">"INFRA"</span>: { <span class="k">"herda"</span>: <span class="s">"_GMUD"</span>, <span class="k">"variaveis"</span>: { <span class="k">"time_titulo"</span>: <span class="s">"SOC"</span> } },
+  <span class="k">"DBA"</span>:   { <span class="k">"herda"</span>: <span class="s">"_GMUD"</span>, <span class="k">"variaveis"</span>: { <span class="k">"time_titulo"</span>: <span class="s">"DBA"</span> } },
+  <span class="k">"SO"</span>:    { <span class="k">"herda"</span>: <span class="s">"_GMUD"</span>, <span class="k">"variaveis"</span>: { <span class="k">"time_titulo"</span>: <span class="s">"SO"</span> } },
+  <span class="k">"BACKUP"</span>: { <span class="c">/* mesmos campos, título #FALHA DE BACKUP */</span> }
+}
+<span class="c">// fora de "tipos": "envio_automatico": { "GMUD": true, "BACKUP": true } (menu do ícone: Enviar GMUD / Backup sem conferir)</span></pre>
+  <p class="caption">Cada passo tem o nome do campo na tela; o <code>seletor</code> de cada um sai do mapeamento. <code>{campo}</code> vem do alerta, <code>variaveis</code> são valores fixos do tipo e <code>herda</code> reaproveita o modelo. Enquanto houver <code>PREENCHER</code>, o tipo não abre chamado (é o caso de PRODUCAO, que ficou fora do escopo).</p>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Onde fica cada coisa</span><h2>Pastas</h2></div>
+  <div class="cols">
+    <div class="col">
+      <h3>Máquina do plantonista</h3>
+<pre class="tree">%LOCALAPPDATA%\Programs\DispatchBot\   <span class="c">binários</span>
+%LOCALAPPDATA%\DispatchBot\
+├─ config.json
+├─ browser-profile\                <span class="c">sessão SSO do robô</span>
+├─ logs\robo.log                   <span class="c">rotativo</span>
+├─ logs\screenshots\               <span class="c">capturas de erro</span>
+├─ processados.jsonl               <span class="c">idempotência</span>
+└─ painel.jsonl                    <span class="c">histórico do painel</span></pre>
+    </div>
+    <div class="col">
+      <h3>SharePoint · MANAGEDSERVICE › Documentos Compartilhados › YDUQS/N1</h3>
+<pre class="tree">/DispatchBot-Fila/
+├─ pendentes/     <span class="c">gravado pelo GMUD | Todos e pelo BackupBot</span>
+├─ processando/   <span class="c">reserva do robô</span>
+├─ processados/   <span class="c">sucesso, com número</span>
+├─ erro/          <span class="c">falha ou tipo desconhecido</span>
+├─ retorno/       <span class="c">lido pelo DispatchBot | Retorno</span>
+└─ status/        <span class="c">batimento de cada máquina</span></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Próximos passos</span><h2>Pendências</h2></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Item</th><th>Responsável</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Pasta <code>DispatchBot-Fila</code> no SharePoint e leitura direta pela API REST (sessão renovada sozinha em 14/10/2026)</td><td class="who">Time RPA</td><td><span class="chip ok">Feito</span></td></tr>
+        <tr><td><b>GMUD</b> (INFRA, DBA, SO): formulário Hosting mapeado; o robô guarda o RITM e manda o link de tratamento</td><td class="who">Time RPA</td><td><span class="chip ok">Feito</span></td></tr>
+        <tr><td><b>Backup</b>: formulário de Incidente conferido no portal real (6 obrigatórios, Failure Type); título novo no BackupBot; texto do anexo voltou a chegar legível</td><td class="who">Time RPA</td><td><span class="chip ok">Feito</span></td></tr>
+        <tr><td>Fluxos <b>GMUD | Todos</b> (em produção), <b>BackupBot</b> e <b>DispatchBot | Retorno</b> (testado no chat de teste)</td><td class="who">Time RPA</td><td><span class="chip ok">Feito</span></td></tr>
+        <tr><td>Login: o robô clica em <i>Use external login</i> e em <i>Submit</i> sozinho; o plantonista só conclui a conta Microsoft e o Windows Hello</td><td class="who">Claude</td><td><span class="chip ok">Feito</span></td></tr>
+        <tr><td>Painel escuro, janela "Precisa de você", alerta antigo com pergunta, guarda de texto ilegível, mensagens em português (1.10.0)</td><td class="who">Claude</td><td><span class="chip ok">Entregue</span></td></tr>
+        <tr><td><b>Testes finais</b>: primeira GMUD real (fila → Submit → RITM → mensagem no Teams), primeiro Backup real com o título novo e a mensagem de erro ⚠️ do Retorno</td><td class="who">Time RPA + N1</td><td><span class="chip warn">Próximo</span></td></tr>
+        <tr><td>Depois dos testes: instalar na máquina do Dispatcher N1 e compartilhar o guia e esta página com o time</td><td class="who">Time RPA</td><td><span class="chip info">Depois dos testes</span></td></tr>
+        <tr><td>Certificado de assinatura de código: só se o antivírus bloquear o robô na máquina do N1</td><td class="who">Time RPA + Segurança</td><td><span class="chip info">Se precisar</span></td></tr>
+        <tr><td>Fora do escopo: entrada por e-mail com IA, fluxo de tratamento do chamado e PRODUCAO</td><td class="who">—</td><td><span class="chip ok">Desconsiderado</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note"><b>Atenção no plantão:</b> só a máquina do Dispatcher N1 da vez deve estar com o robô <b>ativo</b>. Nas outras, deixe em Pausado pelo ícone da bandeja. A pausa fica salva entre reinicializações.</div>
+</section>
+
+<footer>DispatchBot · proposta de arquitetura para validação do time.</footer>
+
+<script>
+(function () {
+  // Conteúdo do guia. "pend"/"pronto" refletem o status real do projeto em 09/10/2026.
+  var LEGENDA =
+    '<div class="legenda">' +
+    '<span class="dot verde"></span><b>Verde</b><span>Ativo, tudo certo.</span>' +
+    '<span class="dot amarelo"></span><b>Amarelo</b><span>Fazer login no ServiceNow, ou completar o chamado que o robô não enviou sozinho e clicar em Submit.</span>' +
+    '<span class="dot vermelho"></span><b>Vermelho</b><span>Erro. O motivo aparece no menu, e o alerta está em <code>erro</code> para abrir manualmente.</span>' +
+    '<span class="dot cinza"></span><b>Cinza</b><span>Pausado.</span></div>';
+  var CAMINHOS =
+    '<div class="caminhos">' +
+    '<div class="caminho"><span class="alcance">Esta máquina</span><b>Menu do ícone</b><span>Botão direito no ícone, <b>PARAR AGORA</b> e confirmar. No painel, o botão para na hora.</span></div>' +
+    '<div class="caminho"><span class="alcance">Esta máquina</span><b>Atalho</b><span><span class="kbd">Ctrl</span> <span class="kbd">Alt</span> <span class="kbd">Shift</span> <span class="kbd">P</span>, com qualquer janela na frente.</span></div>' +
+    '<div class="caminho"><span class="alcance">Todos os robôs</span><b>Arquivo PARAR</b><span>Criar um arquivo <code>PARAR</code> na pasta <code>DispatchBot-Fila</code> do SharePoint. O texto dentro dele vira o motivo. Vale em até 10 s.</span></div>' +
+    '</div>';
+
+  var PARTES = [
+    { id: "parte1", titulo: "Preparação", meta: "Uma vez · time", checklist: true,
+      intro: "Feita uma vez pelo time, antes da primeira instalação.",
+      passos: [
+        { n: 1, t: "Criar a pasta da fila", c: "Pasta <code>DispatchBot-Fila</code> na biblioteca do SharePoint do time, com o endereço em <code>fila_sharepoint</code> no config. Feito: MANAGEDSERVICE › Documentos Compartilhados › YDUQS/N1.", status: "pronto" },
+        { n: 2, t: "Ajustar os fluxos do Power Automate", c: "Seguindo o <code>docs/power-automate.md</code>:",
+          l: ["<b>Nos fluxos de alerta</b> (GMUD | Todos e BackupBot): depois do post no Teams, gravar o JSON do alerta em <code>pendentes</code>.",
+              "<b>Criar o fluxo DispatchBot | Retorno</b>, que posta o número do chamado no chat em grupo do time.",
+              "Falta só o título do Backup no BackupBot."], status: "pend" },
+        { n: 3, t: "Mapear os formulários", c: "Com a ferramenta <b>Mapear campos do ServiceNow</b>, mapear o formulário de cada tipo (INFRA, DBA, SO e BACKUP) e preencher o <code>config.json</code>. Feito: GMUD e Backup conferidos no portal real.", status: "pronto" },
+        { n: 4, t: "Gerar o instalador", c: "Rodar <code>build\\build.ps1</code>. Ele gera o <code>DispatchBot-Setup-x.y.z.exe</code>.", status: "pronto" }
+      ] },
+    { id: "parte2", titulo: "Instalação", meta: "Cada máquina", checklist: true,
+      intro: "Em cada máquina de plantão. O plantonista só clica em Instalar; os passos 6 a 8 são automáticos.",
+      passos: [
+        { n: 5, t: "Rodar o instalador e clicar em Instalar", c: "Um botão só, sem administrador. O robô passa a abrir com o Windows e ganha o vigia que o reabre se cair." },
+        { n: 6, t: "O robô conecta na fila do SharePoint (automático)", c: "Usa a sessão Microsoft do perfil do navegador do robô. Se a Microsoft pedir login, abre uma janela e o plantonista entra com a conta da empresa, só desta vez." },
+        { n: 7, t: "Login no ServiceNow (automático ao iniciar)", c: "O robô abre o portal ao iniciar e clica em <b>Use external login</b>. O plantonista conclui (e-mail, conta Microsoft, Windows Hello). O navegador fica aberto para a sessão não cair." },
+        { n: 8, t: "Conferir o ícone verde", c: "Pronto. Se não for a máquina de plantão, deixar em <b>Pausado</b>." }
+      ] },
+    { id: "parte3", titulo: "Cada alerta", meta: "Automático", simulacao: true,
+      intro: "Acontece sozinho a cada alerta. O plantonista só entra em cena se a sessão do ServiceNow expirar.",
+      passos: [
+        { n: 9, t: "Chega o e-mail de alerta", c: "O Power Automate posta o card no Teams, como já faz hoje, e grava o JSON na pasta <code>pendentes</code> do SharePoint." },
+        { n: 10, t: "O robô lê a fila", c: "Lista <code>pendentes</code> pela API REST do SharePoint a cada 15 segundos." },
+        { n: 11, t: "O robô pega o alerta", c: "Move o arquivo para <code>processando</code> (atômico no SharePoint), para que nenhuma outra máquina pegue o mesmo." },
+        { n: 12, t: "O robô abre o Edge no formulário do tipo", c: "Se a sessão expirou, o SSO costuma entrar sozinho. Se precisar de alguém, aparece o aviso <b>Faça login no ServiceNow</b>: o plantonista faz o login naquela janela e o robô continua sozinho." },
+        { n: 13, t: "Preenche, envia e captura o número", c: "Usa os campos e valores do <code>config.json</code>. Antes de clicar em enviar, confere os campos obrigatórios do formulário; se faltar algum, não envia: o ícone fica amarelo e o plantonista completa e envia. O plantonista pode voltar a conferir sempre pelo menu do ícone (<b>Enviar GMUD/Backup sem conferir</b>, chave <code>envio_automatico</code>). O robô lê o número do chamado na tela (RITM na GMUD, INC no Backup)." },
+        { n: 14, t: "Guarda o resultado", c: "O alerta vai para <code>processados</code> e um arquivo de retorno vai para <code>retorno</code>." },
+        { n: 15, t: "Avisa no Teams", c: "O fluxo <b>DispatchBot | Retorno</b> posta no chat em grupo do time o número do chamado e o link para tratar." }
+      ] },
+    { id: "parte4", titulo: "Dia a dia", meta: "Plantonista",
+      intro: "O que o plantonista faz durante o turno.",
+      passos: [
+        { n: 16, t: "Só a máquina do Dispatcher N1 da vez fica ativa", c: "Nas outras, clicar no ícone e marcar <b>Pausado</b>." },
+        { n: 17, t: "Na troca de plantão", c: "Quem sai marca <b>Pausado</b>. Quem entra desmarca." },
+        { n: 18, t: "Acompanhar pelo ícone e pelo painel", c: LEGENDA + "Clicar no ícone abre o <b>painel</b>: chamados abertos hoje (duplo clique abre o chamado para tratar) e erros de hoje com o motivo." },
+        { n: 19, t: "Ícone vermelho", c: "Conferir o motivo no painel. Abrir o chamado manualmente se o Teams pediu. Depois de corrigir a causa, dá para mover o alerta de <code>erro</code> de volta para <code>pendentes</code>." }
+      ] },
+    { id: "parte5", titulo: "Emergência", meta: "Qualquer pessoa",
+      intro: "Se o robô estiver abrindo chamados errados. Ele para no meio do passo e não volta sozinho.",
+      passos: [
+        { n: 20, t: "Parar na hora", c: "Qualquer um destes caminhos:" + CAMINHOS },
+        { n: 21, t: "Voltar a funcionar", c: "Desmarcar <b>Pausado</b> no menu. Se a parada foi pelo arquivo, apagar o <code>PARAR</code>." }
+      ] },
+    { id: "parte6", titulo: "Atualização", meta: "Nova versão",
+      intro: "Quando sair uma versão nova do DispatchBot.",
+      passos: [
+        { n: 22, t: "Instalar por cima", c: "Rodar o instalador da versão nova. O robô termina o alerta em andamento, atualiza e volta sozinho. Configuração e sessão são mantidas." }
+      ] }
+  ];
+
+  var CHAVE = "dispatchbot-guia-v1";
+  var estado = { parte: "parte1", feitos: {} };
+  try { var salvo = JSON.parse(localStorage.getItem(CHAVE) || "null"); if (salvo) estado = salvo; } catch (e) {}
+  if (/^#parte[1-6]$/.test(location.hash)) estado.parte = location.hash.slice(1);
+  function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {} }
+
+  var elPartes = document.getElementById("partes");
+  var elPainel = document.getElementById("painel");
+  var reduzir = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var timer = null;
+
+  function contagem(p) {
+    var f = p.passos.filter(function (s) { return estado.feitos[s.n]; }).length;
+    return { feitos: f, total: p.passos.length };
+  }
+  function metaAba(p) {
+    if (!p.checklist) return p.meta;
+    var c = contagem(p);
+    return p.meta + " · " + c.feitos + "/" + c.total;
+  }
+
+  function desenharAbas() {
+    elPartes.innerHTML = "";
+    PARTES.forEach(function (p, i) {
+      var b = document.createElement("button");
+      b.className = "parte"; b.type = "button"; b.id = "aba-" + p.id;
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", String(p.id === estado.parte));
+      b.setAttribute("aria-controls", "painel");
+      b.tabIndex = p.id === estado.parte ? 0 : -1;
+      b.innerHTML = '<span class="n">Parte ' + (i + 1) + '</span><span class="t">' + p.titulo + '</span><span class="m">' + metaAba(p) + "</span>";
+      b.addEventListener("click", function () { abrir(p.id, false); });
+      elPartes.appendChild(b);
+    });
+  }
+
+  function htmlPasso(s, p) {
+    var chip = s.status === "pend" ? '<span class="chip warn">Pendente</span>' : s.status === "pronto" ? '<span class="chip ok">Pronto</span>' : "";
+    var lista = s.l ? "<ul>" + s.l.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>" : "";
+    var check = p.checklist
+      ? '<label class="check"><input type="checkbox" id="feito-' + s.n + '" data-n="' + s.n + '"' + (estado.feitos[s.n] ? " checked" : "") + "> Concluído</label>"
+      : "<span></span>";
+    return '<li class="passo' + (p.checklist && estado.feitos[s.n] ? " feito" : "") + '" id="passo-' + s.n + '">' +
+      '<span class="num" aria-hidden="true">' + s.n + "</span>" +
+      '<div class="corpo"><div class="titulo"><h3><span class="sr">Passo ' + s.n + ": </span>" + s.t + "</h3>" + chip + "</div>" +
+      "<div>" + s.c + "</div>" + lista + "</div>" + check + "</li>";
+  }
+
+  function desenharPainel() {
+    pararSimulacao();
+    var i = PARTES.findIndex(function (p) { return p.id === estado.parte; });
+    var p = PARTES[i];
+    elPainel.setAttribute("aria-labelledby", "aba-" + p.id);
+    var topo = '<div class="painel-topo"><p>' + p.intro + "</p>";
+    if (p.checklist) {
+      var c = contagem(p);
+      topo += '<div class="prog"><span id="prog-texto">' + c.feitos + " de " + c.total + '</span><span class="barra"><i id="prog-barra" style="width:' + (100 * c.feitos / c.total) + '%"></i></span></div>';
+    }
+    topo += "</div>";
+    var sim = p.simulacao
+      ? '<div class="sim-barra">' +
+        '<button class="btn" type="button" id="sim-iniciar">Simular um alerta</button>' +
+        '<label class="sim-opcao"><input type="checkbox" id="sim-login"> Sessão expirada (pede login)</label>' +
+        '<label class="sim-opcao"><input type="checkbox" id="sim-erro"> Com erro</label>' +
+        '<span class="bandeja" aria-live="polite"><span class="dot verde" id="sim-dot"></span><span id="sim-status">Ativo</span></span></div>'
+      : "";
+    var nav = '<div class="painel-nav">' +
+      (i > 0 ? '<button class="btn sec" type="button" id="nav-ant">← ' + PARTES[i - 1].titulo + "</button>" : "<span></span>") +
+      (i < PARTES.length - 1 ? '<button class="btn sec" type="button" id="nav-prox">' + PARTES[i + 1].titulo + " →</button>" : "<span></span>") + "</div>";
+    var nota = p.checklist ? '<p class="nota-local">O que você marca como concluído fica salvo só neste navegador.</p>' : "";
+    elPainel.innerHTML = topo + sim + '<ol class="passos">' + p.passos.map(function (s) { return htmlPasso(s, p); }).join("") + "</ol>" +
+      '<div id="sim-resultado" hidden></div>' + nota + nav;
+
+    elPainel.querySelectorAll(".check input").forEach(function (cb) {
+      cb.addEventListener("change", function () {
+        var n = cb.getAttribute("data-n");
+        if (cb.checked) estado.feitos[n] = true; else delete estado.feitos[n];
+        cb.closest(".passo").classList.toggle("feito", cb.checked);
+        var c = contagem(p);
+        document.getElementById("prog-texto").textContent = c.feitos + " de " + c.total;
+        document.getElementById("prog-barra").style.width = (100 * c.feitos / c.total) + "%";
+        salvar(); desenharAbas();
+      });
+    });
+    var ant = document.getElementById("nav-ant"), prox = document.getElementById("nav-prox");
+    if (ant) ant.addEventListener("click", function () { abrir(PARTES[i - 1].id, true); });
+    if (prox) prox.addEventListener("click", function () { abrir(PARTES[i + 1].id, true); });
+    if (p.simulacao) document.getElementById("sim-iniciar").addEventListener("click", simular);
+  }
+
+  function abrir(id, focarPainel) {
+    estado.parte = id; salvar(); desenharAbas(); desenharPainel();
+    if (focarPainel) {
+      elPainel.focus({ preventScroll: true });
+      document.getElementById("passo-a-passo").scrollIntoView({ behavior: reduzir ? "auto" : "smooth", block: "start" });
+    } else {
+      document.getElementById("aba-" + id).focus();
+    }
+  }
+
+  // Setas do teclado entre as abas (padrão de tablist)
+  elPartes.addEventListener("keydown", function (e) {
+    var i = PARTES.findIndex(function (p) { return p.id === estado.parte; });
+    var alvo = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: PARTES.length - 1 }[e.key];
+    if (alvo === undefined) return;
+    e.preventDefault();
+    abrir(PARTES[(alvo + PARTES.length) % PARTES.length].id, false);
+  });
+
+  // --- simulação da parte 3 ---
+  function bandeja(cor, texto) {
+    document.getElementById("sim-dot").className = "dot " + cor;
+    document.getElementById("sim-status").textContent = texto;
+  }
+  function marcar(n, classe) {
+    var el = document.getElementById("passo-" + n);
+    if (!el) return;
+    el.classList.remove("ativo", "feito", "falhou", "pulado");
+    if (classe) el.classList.add(classe);
+  }
+  function pararSimulacao() { if (timer) { clearTimeout(timer); timer = null; } }
+
+  function simular() {
+    pararSimulacao();
+    var comLogin = document.getElementById("sim-login").checked;
+    var comErro = document.getElementById("sim-erro").checked;
+    var botao = document.getElementById("sim-iniciar");
+    var resultado = document.getElementById("sim-resultado");
+    var seq = [9, 10, 11, 12, 13, 14, 15];
+    seq.forEach(function (n) { marcar(n, null); });
+    resultado.hidden = true;
+    bandeja("verde", "Ativo");
+    botao.disabled = true;
+    var i = 0;
+
+    function fim(ok) {
+      resultado.hidden = false;
+      resultado.className = "resultado " + (ok ? "ok" : "erro");
+      resultado.innerHTML = ok
+        ? "<b>Chamado RITM0012345 aberto</b> (número de exemplo). A mensagem com o número foi postada no chat do time no Teams."
+        : "<b>O alerta foi para <code>erro</code>.</b> O ícone ficou vermelho, e o Teams recebeu o aviso para abrir o chamado manualmente, com o motivo. Nada foi reenviado.";
+      botao.disabled = false;
+      botao.textContent = "Simular de novo";
+    }
+
+    function proximo() {
+      if (i > 0) marcar(seq[i - 1], "feito");
+      if (i >= seq.length) { fim(true); return; }
+      var n = seq[i];
+      marcar(n, "ativo");
+      var espera = 1100;
+      if (n === 12 && comLogin) { bandeja("amarelo", "Aguardando login"); espera = 2400; }
+      if (n === 13) {
+        bandeja("verde", "Ativo");
+        if (comErro) {
+          timer = setTimeout(function () {
+            marcar(13, "falhou"); marcar(14, "pulado"); marcar(15, "pulado");
+            bandeja("vermelho", "Erro");
+            fim(false);
+          }, reduzir ? 0 : 1100);
+          return;
+        }
+      }
+      i++;
+      timer = setTimeout(proximo, reduzir ? 0 : espera);
+    }
+    proximo();
+  }
+
+  desenharAbas();
+  desenharPainel();
+})();
+</script>
+
+</div>

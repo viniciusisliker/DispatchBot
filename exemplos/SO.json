@@ -1,0 +1,19 @@
+{
+  "versao": 2,
+  "id": "CHG9990003",
+  "tipo": "SO",
+  "grupo_executor": "SN_TI_CHG_EXECUTOR_CIRION_SO",
+  "chg": "CHG9990003",
+  "ctask": "CTASK9990003",
+  "data_execucao": "01/05/2026 01:00",
+  "tipo_mudanca": "Emergencial",
+  "titulo": "TESTE - Atualização de kernel",
+  "descricao": "TESTE do DispatchBot, ignorar. Atualização de kernel e reboot de 4 servidores de aplicação.",
+  "recebido_em": "2026-09-29T10:00:00-03:00",
+  "dados_brutos": "Uma tarefa de Mudança foi atribuída a você ou ao seu grupo executor. CHG9990003 ...",
+  "teams": {
+    "team_id": "",
+    "channel_id": "",
+    "message_id": ""
+  }
+}

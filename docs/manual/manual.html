@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Manual do DispatchBot</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm;
+    @bottom-left { content: "Manual do DispatchBot · versão 1.10.4"; font: 8.5pt "Segoe UI", sans-serif; color: #7A8590; }
+    @bottom-right { content: counter(page); font: 8.5pt "Segoe UI", sans-serif; color: #7A8590; } }
+  @page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+  :root { --teal: #0E9F8E; --teal-claro: #E3F6F3; --tinta: #1B2228; --apagado: #5B6670; --linha: #DDE3E8;
+          --amarelo: #B7790A; --amarelo-claro: #FDF3DE; --vermelho: #C23434; --vermelho-claro: #FBE7E7;
+          --verde: #23854E; --verde-claro: #E4F4EA; --cinza-claro: #F3F5F7; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font: 10.5pt/1.55 "Segoe UI", system-ui, sans-serif; color: var(--tinta); background: #fff; }
+  h1, h2, h3 { line-height: 1.2; margin: 0; }
+  h2 { font-size: 19pt; margin: 0 0 4mm; padding-top: 1mm; }
+  h2 .num { color: var(--teal); margin-right: 3mm; }
+  h3 { font-size: 12pt; margin: 6mm 0 2mm; }
+  p { margin: 0 0 3mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1.2mm; }
+  b { font-weight: 600; }
+  .ui { font-weight: 600; background: var(--cinza-claro); border: 1px solid var(--linha); border-radius: 4px; padding: 0 1.6mm; white-space: nowrap; }
+  .tecla { font: 600 9pt "Segoe UI", sans-serif; border: 1px solid #B8C1C9; border-bottom-width: 2px; border-radius: 4px; padding: 0.3mm 1.8mm; background: #fff; }
+  .secao { break-before: page; }
+  .sem-quebra { break-inside: avoid; }
+  .lead { font-size: 11.5pt; color: var(--apagado); margin-bottom: 6mm; }
+
+  /* Capa */
+  .capa { height: 297mm; background: #0F1215; color: #fff; padding: 30mm 22mm 22mm; display: flex; flex-direction: column; }
+  .capa img { width: 34mm; height: 34mm; border: 3px solid #fff; }
+  .capa .rotulo { margin-top: 26mm; color: #14B8A6; font-weight: 600; letter-spacing: 0.25em; font-size: 10pt; }
+  .capa h1 { font-size: 40pt; margin-top: 3mm; }
+  .capa .sub { font-size: 15pt; color: #B9C2CA; margin-top: 5mm; max-width: 140mm; line-height: 1.4; }
+  .capa .barra { width: 22mm; height: 2mm; background: #14B8A6; margin-top: 10mm; }
+  .capa .rodape { margin-top: auto; display: flex; justify-content: space-between; color: #8C969F; font-size: 9.5pt; border-top: 1px solid #2A3036; padding-top: 5mm; }
+
+  /* Sumário */
+  .sumario { list-style: none; padding: 0; margin: 4mm 0 0; counter-reset: s; }
+  .sumario li { display: flex; gap: 4mm; padding: 2.6mm 0; border-bottom: 1px solid var(--linha); font-size: 11.5pt; }
+  .sumario li span:first-child { color: var(--teal); font-weight: 700; width: 8mm; }
+  .sumario li small { color: var(--apagado); margin-left: auto; font-size: 9.5pt; align-self: center; }
+
+  /* Caixas */
+  .caixa { border-radius: 6px; padding: 3.5mm 4.5mm; margin: 4mm 0; break-inside: avoid; border-left: 4px solid; }
+  .caixa p:last-child, .caixa ul:last-child { margin-bottom: 0; }
+  .caixa .t { font-weight: 700; display: block; margin-bottom: 1mm; }
+  .dica { background: var(--teal-claro); border-color: var(--teal); }
+  .atencao { background: var(--amarelo-claro); border-color: var(--amarelo); }
+  .perigo { background: var(--vermelho-claro); border-color: var(--vermelho); }
+
+  /* Passos do fluxo */
+  .fluxo { display: grid; grid-template-columns: 1fr 7mm 1fr 7mm 1fr; align-items: stretch; margin: 5mm 0; }
+  .fluxo .passo { border: 1px solid var(--linha); border-radius: 8px; padding: 4mm; background: var(--cinza-claro); }
+  .fluxo .passo b { display: block; margin-bottom: 1mm; }
+  .fluxo .passo .n { display: inline-block; width: 6.5mm; height: 6.5mm; border-radius: 50%; background: var(--teal); color: #fff; text-align: center; font-weight: 700; line-height: 6.5mm; font-size: 9.5pt; margin-bottom: 2mm; }
+  .fluxo .seta { align-self: center; text-align: center; color: var(--teal); font-size: 14pt; }
+
+  /* Tabelas */
+  table { width: 100%; border-collapse: collapse; margin: 3mm 0 4mm; break-inside: avoid; font-size: 10pt; }
+  th { text-align: left; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.04em; color: var(--apagado); font-weight: 600; border-bottom: 2px solid var(--linha); padding: 2mm 2.5mm; }
+  td { border-bottom: 1px solid var(--linha); padding: 2.4mm 2.5mm; vertical-align: top; }
+  td.ic { width: 16mm; }
+  td.ic img { width: 11mm; height: 11mm; display: block; }
+  .cor { font-weight: 700; }
+
+  /* Imagens */
+  figure { margin: 4mm 0; break-inside: avoid; }
+  figure img { display: block; max-width: 100%; border-radius: 6px; border: 1px solid #2A3036; }
+  figcaption { font-size: 9pt; color: var(--apagado); margin-top: 1.8mm; }
+  .lado { display: grid; grid-template-columns: 78mm 1fr; gap: 6mm; align-items: start; }
+
+  /* Passo a passo numerado */
+  .passos { counter-reset: p; list-style: none; padding: 0; }
+  .passos > li { counter-increment: p; position: relative; padding-left: 10mm; margin-bottom: 3.2mm; break-inside: avoid; }
+  .passos > li::before { content: counter(p); position: absolute; left: 0; top: 0.2mm; width: 6.5mm; height: 6.5mm; border-radius: 50%; background: var(--teal); color: #fff; font-weight: 700; font-size: 9.5pt; text-align: center; line-height: 6.5mm; }
+
+  .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .cartao { border: 1px solid var(--linha); border-radius: 8px; padding: 4mm; break-inside: avoid; }
+  .cartao h3 { margin-top: 0; }
+  .cartao .tag { font-size: 8.5pt; font-weight: 700; letter-spacing: 0.06em; color: var(--teal); text-transform: uppercase; }
+
+  .faq h3 { font-size: 11pt; margin-top: 3.2mm; margin-bottom: 1mm; }
+  .faq p { margin-bottom: 1.5mm; }
+  .msg { font-family: "Segoe UI", sans-serif; background: #F5F3FF; border: 1px solid #DCD6F7; border-radius: 6px; padding: 2.5mm 3.5mm; margin: 2mm 0 3mm; font-size: 10pt; }
+</style>
+</head>
+<body>
+
+<!-- Capa -->
+<section class="capa">
+  <img src="avatar.png" alt="">
+  <div class="rotulo">MANUAL DO PLANTONISTA</div>
+  <h1>DispatchBot</h1>
+  <div class="sub">Abra seu chamado de forma automática: o robô transforma os alertas de GMUD e de Backup em chamados no ServiceNow e avisa no Teams.</div>
+  <div class="barra"></div>
+  <div class="rodape"><span>Operação YDUQS · Dispatcher N1</span><span>Versão 1.10.4 · outubro de 2026</span></div>
+</section>
+
+<!-- Sumário -->
+<section class="secao">
+  <h2>Sumário</h2>
+  <ol class="sumario">
+    <li><span>1</span>O que é o DispatchBot<small>o que ele faz por você</small></li>
+    <li><span>2</span>Instalação e primeiro login<small>uma vez por computador</small></li>
+    <li><span>3</span>O ícone perto do relógio<small>o que cada cor quer dizer</small></li>
+    <li><span>4</span>O painel do robô<small>chamados de hoje, erros e histórico do time</small></li>
+    <li><span>5</span>Quando o robô precisa de você<small>conferir, enviar, alertas antigos (login: seção 2)</small></li>
+    <li><span>6</span>As mensagens no Teams<small>número do chamado ou aviso de erro</small></li>
+    <li><span>7</span>Troca de plantão<small>assumir o plantão de um colega</small></li>
+    <li><span>8</span>Emergência: parar o robô<small>três formas</small></li>
+    <li><span>9</span>Perguntas frequentes<small>e o que fazer quando algo dá errado</small></li>
+  </ol>
+  <div class="caixa dica"><span class="t">Resumo em uma frase</span>
+    O robô preenche e envia o chamado sozinho, e o número aparece no chat do time. Você só entra quando ele pede (ícone amarelo).</div>
+</section>
+
+<!-- 1 -->
+<section class="secao">
+  <h2><span class="num">1</span>O que é o DispatchBot</h2>
+  <p class="lead">Um robô que roda no computador de quem está de plantão e abre no ServiceNow (Employee Center) os chamados dos alertas de GMUD e de Backup, sem ninguém precisar digitar.</p>
+
+  <div class="fluxo">
+    <div class="passo"><span class="n">1</span><b>Chega o alerta</b>O e-mail de GMUD ou de Backup chega e o card aparece no chat do time no Teams, como sempre.</div>
+    <div class="seta">→</div>
+    <div class="passo"><span class="n">2</span><b>O robô preenche</b>No seu computador, ele abre o formulário do ServiceNow, preenche tudo, confere os campos obrigatórios e envia.</div>
+    <div class="seta">→</div>
+    <div class="passo"><span class="n">3</span><b>O número vai para o Teams</b>O robô pega o número do chamado e o Teams avisa no mesmo chat, com o link para tratar.</div>
+  </div>
+
+  <h3>Quais alertas ele atende</h3>
+  <table>
+    <tr><th>Alerta</th><th>Chamado aberto</th><th>Número que volta</th><th>Chat do Teams</th></tr>
+    <tr><td><b>GMUD INFRA</b></td><td>Formulário Hosting</td><td>RITM</td><td>(FC) NET / SOC</td></tr>
+    <tr><td><b>GMUD DBA</b></td><td>Formulário Hosting</td><td>RITM</td><td>(FC) BANCO DE DADOS</td></tr>
+    <tr><td><b>GMUD SO</b></td><td>Formulário Hosting</td><td>RITM</td><td>(FC) LINUX - WINDOWS - VMWARE</td></tr>
+    <tr><td><b>GMUD Backup</b></td><td>Formulário Hosting</td><td>RITM</td><td>(FC) NETBACKUP</td></tr>
+    <tr><td><b>Falha de Backup</b></td><td>Incidente (cartão Backup)</td><td>INC</td><td>(FC) NETBACKUP</td></tr>
+  </table>
+  <div class="caixa dica"><span class="t">Falhas de backup que não viram chamado</span>
+    Falhas dos media servers <b>appflexrj01-inst01</b> e <b>appnburj03</b> não abrem chamado (orientação do time de NetBackup). O card continua aparecendo no Teams; o robô só não abre o chamado.</div>
+
+  <h3>O que ele nunca faz</h3>
+  <ul>
+    <li><b>Não digita senha.</b> O login é sempre seu, com a sua conta Microsoft e o Windows Hello.</li>
+    <li><b>Não inventa dados.</b> Se faltar o número da CHG, a data ou a descrição, ele não abre e avisa no Teams para abrir à mão.</li>
+    <li><b>Não abre o mesmo chamado duas vezes.</b> Ele lembra de cada alerta atendido (nas GMUDs, pelo número da CHG).</li>
+    <li><b>Não reenvia sozinho.</b> Depois do clique em Submit/Enviar, nunca tenta de novo por conta própria.</li>
+    <li><b>Não fica ligado em dois computadores sem avisar.</b> Só o Dispatcher N1 da vez deixa o robô ativo (seção 7).</li>
+  </ul>
+
+</section>
+
+<!-- 2 -->
+<section class="secao">
+  <h2><span class="num">2</span>Instalação e primeiro login</h2>
+  <p class="lead">Uma vez só, em cada computador de plantão. Não precisa de administrador. O instalador é enviado pelo time de RPA.</p>
+  <ol class="passos">
+    <li><b>Abra o instalador</b> (<i>DispatchBot-Setup-1.10.4.exe</i>) e clique em <span class="ui">Instalar</span>. Leva menos de um minuto.</li>
+    <li><b>Espere o ícone aparecer perto do relógio.</b> Enquanto o robô se prepara, a bolinha do ícone fica <b style="color:#2F7FD1">azul</b>. Não precisa fazer nada.</li>
+    <li><b>Se a Microsoft pedir, entre com a conta da empresa.</b> Na primeira vez, o robô precisa da sua sessão do SharePoint (onde fica a fila de alertas). A janela aparece sozinha; é só desta vez.</li>
+    <li><b>Faça o login no ServiceNow.</b> O robô abre o ServiceNow logo ao ligar, para o login ser no começo do plantão e não no meio de um alerta. Ele mesmo clica em <span class="ui">Use external login</span> e em <span class="ui">Submit</span>; falta só você escolher a sua conta Microsoft e confirmar no Windows Hello.</li>
+    <li><b>Diga o seu nome.</b> Na primeira vez, o robô pergunta como o time vai ver você (aparece para os colegas no painel e no histórico). Confira o nome sugerido e clique em <span class="ui">Salvar</span>.</li>
+    <li><b>Pronto:</b> o ícone fica <b style="color:var(--verde)">verde</b>. Se não for a sua vez de plantão, clique com o botão direito no ícone e marque <span class="ui">Pausado</span>.</li>
+  </ol>
+
+  <div class="lado" style="grid-template-columns:72mm 1fr; align-items:center">
+  <figure style="margin:0"><img src="nome.png" alt="Janela do nome"><figcaption>A pergunta do nome (nome de exemplo).</figcaption></figure>
+  <div class="caixa dica" style="margin:0"><span class="t">Quando o robô pede login, ele avisa</span>
+    O ícone fica amarelo, aparece uma notificação e a janelinha "Precisa de você" mostra o aviso <b>LOGIN</b> com o botão <span class="ui">Mostrar janela de login</span>, que traz a janela do navegador do robô para a frente.</div>
+  </div>
+
+  <h3>Onde fica o quê</h3>
+  <table>
+    <tr><th>O quê</th><th>Onde</th></tr>
+    <tr><td>Abrir o robô de novo</td><td>Menu Iniciar → <b>DispatchBot</b></td></tr>
+    <tr><td>Trocar o seu nome</td><td>Botão direito no ícone → <span class="ui">Meu nome no DispatchBot...</span></td></tr>
+    <tr><td>Desinstalar</td><td>Configurações → Aplicativos → DispatchBot → Desinstalar</td></tr>
+    <tr><td>Logs (para o time de RPA)</td><td>Botão direito no ícone → <span class="ui">Abrir pasta de logs</span></td></tr>
+    <tr><td>Fila de alertas</td><td>Botão direito no ícone → <span class="ui">Abrir pasta DispatchBot-Fila</span> (SharePoint)</td></tr>
+  </table>
+</section>
+
+<!-- 3 -->
+<section class="secao">
+  <h2><span class="num">3</span>O ícone perto do relógio</h2>
+  <p class="lead">O ícone do DispatchBot fica na bandeja do Windows, ao lado do relógio (se não estiver visível, clique na setinha <b>^</b>). A bolinha no canto mostra o que o robô está fazendo.</p>
+  <table>
+    <tr><th></th><th>Cor</th><th>O que significa</th><th>O que fazer</th></tr>
+    <tr><td class="ic"><img src="icone_ativo.png" alt=""></td><td class="cor" style="color:var(--verde)">Verde</td><td>Ligado e atendendo os alertas.</td><td>Nada. Siga o plantão normalmente.</td></tr>
+    <tr><td class="ic"><img src="icone_preparando.png" alt=""></td><td class="cor" style="color:#2F7FD1">Azul</td><td>Preparando (abrindo o navegador, conectando na fila).</td><td>Esperar alguns segundos.</td></tr>
+    <tr><td class="ic"><img src="icone_confirmar.png" alt=""></td><td class="cor" style="color:var(--amarelo)">Amarelo</td><td>Precisa de você: fazer login ou completar um chamado que o robô não enviou sozinho.</td><td>Olhe a janelinha "Precisa de você" (seção 5).</td></tr>
+    <tr><td class="ic"><img src="icone_erro.png" alt=""></td><td class="cor" style="color:var(--vermelho)">Vermelho</td><td>Algo deu errado (ex.: sem internet, fila fora do ar).</td><td>Abra o painel e veja o motivo. Se continuar, avise o time de RPA.</td></tr>
+    <tr><td class="ic"><img src="icone_pausado.png" alt=""></td><td class="cor" style="color:#6F767C">Cinza</td><td>Pausado: não abre chamados.</td><td>Normal fora do seu plantão.</td></tr>
+  </table>
+
+  <h3>Menu do botão direito</h3>
+  <table>
+    <tr><th>Item</th><th>Para que serve</th></tr>
+    <tr><td><span class="ui">PARAR AGORA (emergência)</span></td><td>Para o robô na hora (pede confirmação). Veja a seção 8.</td></tr>
+    <tr><td><span class="ui">Abrir painel</span></td><td>O mesmo que clicar no ícone.</td></tr>
+    <tr><td><span class="ui">Verificar pendentes agora</span></td><td>Olha a fila na hora, sem esperar a próxima volta (ele já olha a cada 15 segundos).</td></tr>
+    <tr><td><span class="ui">Pausado</span></td><td>Marcado = robô parado neste computador. Desmarcado = ligado.</td></tr>
+    <tr><td><span class="ui">Enviar GMUD sem conferir</span></td><td>Marcado (padrão): o robô envia as GMUDs sozinho. Desmarque para conferir cada uma antes do Submit.</td></tr>
+    <tr><td><span class="ui">Enviar Backup sem conferir</span></td><td>O mesmo para o Backup: marcado (padrão), o robô envia sozinho.</td></tr>
+    <tr><td><span class="ui">Meu nome no DispatchBot...</span></td><td>Troca o nome que os colegas veem no painel e no histórico.</td></tr>
+    <tr><td><span class="ui">Sair</span></td><td>Fecha o robô. Ele não volta sozinho até você abrir pelo menu Iniciar.</td></tr>
+  </table>
+</section>
+
+<!-- 4 -->
+<section class="secao">
+  <h2><span class="num">4</span>O painel do robô</h2>
+  <p class="lead">Clique no ícone para abrir o painel. Fechar o painel <b>não</b> desliga o robô.</p>
+  <figure style="max-width:140mm"><img src="painel.png" alt="Painel do DispatchBot"><figcaption>Painel com dados de exemplo: status no topo, a faixa "Também ativo" (outro robô ligado), os contadores e as listas do dia.</figcaption></figure>
+
+  <table>
+    <tr><th>Parte</th><th>O que mostra</th></tr>
+    <tr><td><b>Topo</b></td><td>O que o robô está fazendo agora, quantos alertas há na fila e o botão <span class="ui">Pausar</span> / <span class="ui">Retomar</span>.</td></tr>
+    <tr><td><b>Também ativo</b></td><td>Só aparece quando o robô de outro colega também está ligado: mostra o nome, o computador e o último sinal, com o botão <span class="ui">Assumir o plantão</span> (veja a seção 7).</td></tr>
+    <tr><td><b>Contadores</b></td><td>Na fila · Abertos hoje · Erros hoje · Precisa de você.</td></tr>
+    <tr><td><b>Precisa de você</b></td><td>O mesmo que a janelinha da seção 5: login, conferência e alertas antigos.</td></tr>
+    <tr><td><b>Chamados abertos hoje</b></td><td>Cada chamado com o número (RITM/INC), o botão <span class="ui">Tratar</span> (abre o chamado no ServiceNow) e <span class="ui">Copiar</span> (copia o número).</td></tr>
+    <tr><td><b>Erros de hoje: abrir à mão</b></td><td>Alertas que o robô não conseguiu abrir, com o <b>motivo</b>, o botão <span class="ui">Abrir no ServiceNow</span> e <span class="ui">Copiar</span>.</td></tr>
+    <tr><td><b>Rodapé</b></td><td><span class="ui">Verificar agora</span>, <span class="ui">Logs</span>, <span class="ui">Histórico do time</span> e <span class="ui">PARAR AGORA</span> (pede confirmação).</td></tr>
+  </table>
+
+</section>
+
+<section class="secao">
+  <h3 style="margin-top:0;font-size:15pt">Histórico do time</h3>
+  <p>O botão <span class="ui">Histórico do time</span>, no rodapé do painel, mostra o que aconteceu <b>hoje</b> e <b>ontem</b> em todos os computadores: chamados abertos, erros, quem ligou, pausou ou assumiu o plantão e os alertas ignorados. Os mais recentes ficam em cima.</p>
+  <figure><img src="historico.png" alt="Histórico do time"><figcaption>Histórico do time com dados de exemplo.</figcaption></figure>
+</section>
+
+<!-- 5 -->
+<section class="secao">
+  <h2><span class="num">5</span>Quando o robô precisa de você</h2>
+  <p class="lead">Uma janelinha escura aparece sozinha no canto inferior direito da tela, sempre por cima das outras. Com muitos itens, ela ganha uma barra de rolagem.</p>
+
+  <div class="lado">
+    <figure><img src="janelinha.png" alt="Janelinha Precisa de você"><figcaption>Um Backup que o robô não enviou sozinho: faltou o campo obrigatório Failure Type (dados de exemplo).</figcaption></figure>
+    <div>
+      <h3 style="margin-top:0">A. Quando o robô não envia sozinho</h3>
+      <ol class="passos">
+        <li>Normalmente o robô envia sozinho. Se faltar um campo obrigatório, ele <b>não envia</b>: o ícone fica <b style="color:var(--amarelo)">amarelo</b> e a janelinha mostra o motivo ("Não enviei sozinho: …"), os campos e o tempo que falta.</li>
+        <li>Clique em <span class="ui">Ver formulário</span> para trazer o navegador do robô para a frente.</li>
+        <li>Complete o que faltar, confira e clique em <span class="ui">Submit</span> (GMUD) ou <span class="ui">Enviar</span> (Backup) <b>no próprio formulário</b>.</li>
+        <li>Pronto: o robô pega o número, a janelinha some e o Teams avisa.</li>
+      </ol>
+      <div class="caixa atencao"><span class="t">Prazo: 30 minutos</span>
+        Sem envio em 30 minutos, o robô desiste daquele alerta e o Teams avisa que o chamado precisa ser aberto à mão.</div>
+    </div>
+  </div>
+
+  <h3>Algo errado no formulário? Use <span class="ui">Pular</span></h3>
+  <p>O robô não envia aquele chamado e o Teams avisa para abrir à mão. Se for só um detalhe, você também pode corrigir o campo no formulário antes de enviar.</p>
+
+  <h3>B. Alerta antigo</h3>
+  <p>Quando um alerta chegou há <b>mais de 2 horas</b> (por exemplo, enquanto o robô estava pausado), o robô não abre sozinho: ele pergunta.</p>
+  <table>
+    <tr><th>Botão</th><th>Quando usar</th><th>O que acontece</th></tr>
+    <tr><td><span class="ui">Abrir chamado</span></td><td>Ninguém abriu ainda.</td><td>O robô abre o chamado normalmente.</td></tr>
+    <tr><td><span class="ui">Já foi aberto</span></td><td>Alguém já abriu à mão.</td><td>O alerta é arquivado. Sem chamado e sem mensagem no Teams.</td></tr>
+    <tr><td><span class="ui">Depois</span></td><td>Não sabe agora.</td><td>Pergunta de novo em 30 minutos. Os alertas novos seguem normalmente.</td></tr>
+  </table>
+
+</section>
+
+<!-- 6 -->
+<section class="secao">
+  <h2><span class="num">6</span>As mensagens no Teams</h2>
+  <p class="lead">O robô responde no mesmo chat em grupo onde aparece o card do alerta. São dois tipos de mensagem.</p>
+  <div class="duas">
+    <div class="cartao"><div class="tag">Deu certo</div><h3>✅ Chamado aberto</h3>
+      <div class="msg">✅ INFRA CHG0048630: chamado RITM0416010 aberto. Tratar: &lt;link&gt;</div>
+      <p>Clique no link para abrir o chamado direto no ServiceNow e tratar.</p></div>
+    <div class="cartao"><div class="tag" style="color:var(--vermelho)">Abrir à mão</div><h3>⚠️ Não foi possível abrir</h3>
+      <div class="msg">⚠️ BACKUP YDUQS_VMWARE_… | Job 26509786: o robô NÃO abriu o chamado. Abrir manualmente. Motivo: …</div>
+      <p>Abra o chamado como antes, pelo ServiceNow. O motivo também aparece no painel, em "Erros de hoje".</p></div>
+  </div>
+  <h3>Motivos comuns do ⚠️</h3>
+  <table>
+    <tr><th>Motivo</th><th>O que fazer</th></tr>
+    <tr><td>Faltou informação no alerta (CHG, data ou descrição)</td><td>Abrir à mão pelo e-mail original.</td></tr>
+    <tr><td>Texto ilegível no alerta (caracteres estranhos)</td><td>Abrir à mão pelo e-mail original.</td></tr>
+    <tr><td>O robô pediu conferência e ninguém enviou em 30 minutos</td><td>Abrir à mão ou verificar se já foi aberto.</td></tr>
+    <tr><td>Alerta pulado pelo plantonista</td><td>Abrir à mão com os dados corretos.</td></tr>
+    <tr><td>Login não concluído a tempo</td><td>Fazer o login e abrir à mão o alerta que ficou de fora.</td></tr>
+  </table>
+</section>
+
+<!-- 7 + 8 -->
+<section class="secao">
+  <h2><span class="num">7</span>Troca de plantão</h2>
+  <p class="lead">Só um computador fica com o robô ligado. Na troca:</p>
+  <div class="duas">
+    <div class="cartao"><div class="tag">Quem sai</div><h3>Marque Pausado</h3><p>Botão direito no ícone → marque <span class="ui">Pausado</span>. A bolinha fica <b>cinza</b>.</p></div>
+    <div class="cartao"><div class="tag">Quem entra</div><h3>Desmarque Pausado</h3><p>Botão direito no ícone → desmarque <span class="ui">Pausado</span>. A bolinha fica <b style="color:var(--verde)">verde</b>. Faça o login no ServiceNow se ele pedir.</p></div>
+  </div>
+  <h3>Assumir o plantão pelo painel</h3>
+  <p>Se o colega esqueceu o robô ligado, o seu painel mostra a faixa amarela <b>"Também ativo: Fulano"</b>. Clique em <span class="ui">Assumir o plantão</span>: o robô do colega pausa sozinho (depois de terminar o alerta em andamento, nunca no meio) e o colega recebe um aviso de que você assumiu.</p>
+  <h3>Retomar com outro robô ligado</h3>
+  <p>Se você clicar em <span class="ui">Retomar</span> (ou desmarcar <span class="ui">Pausado</span>) com outro robô ativo, o robô pergunta:</p>
+  <table>
+    <tr><th>Resposta</th><th>O que acontece</th></tr>
+    <tr><td><span class="ui">Sim</span></td><td>Você assume o plantão: o robô do colega pausa e o seu fica ativo.</td></tr>
+    <tr><td><span class="ui">Não</span></td><td>Ativa mesmo assim: os dois ficam ligados.</td></tr>
+    <tr><td><span class="ui">Cancelar</span></td><td>O seu continua pausado.</td></tr>
+  </table>
+  <p>Mesmo com dois robôs ligados, nenhum chamado sai em dobro.</p>
+
+</section>
+
+<section class="secao">
+  <h2><span class="num">8</span>Emergência: parar o robô</h2>
+  <p class="lead">Se o robô estiver abrindo chamados errados, pare na hora.</p>
+  <table>
+    <tr><th>Onde</th><th>Como</th><th>Alcance</th></tr>
+    <tr><td><b>Teclado</b></td><td><span class="tecla">Ctrl</span> + <span class="tecla">Alt</span> + <span class="tecla">Shift</span> + <span class="tecla">P</span>, com qualquer janela aberta</td><td>Este computador</td></tr>
+    <tr><td><b>Ícone</b></td><td>Botão direito → <span class="ui">PARAR AGORA</span> → confirmar (ou o botão do painel)</td><td>Este computador</td></tr>
+    <tr><td><b>Pasta da fila</b></td><td>Criar um arquivo chamado <b>PARAR</b> na pasta <i>DispatchBot-Fila</i> (pode escrever o motivo dentro)</td><td>Todos os computadores</td></tr>
+  </table>
+  <div class="caixa perigo"><span class="t">Depois de parar</span>
+    Nada se perde: o que não foi enviado volta para a fila. Para voltar a funcionar, desmarque <span class="ui">Pausado</span> no ícone ou apague o arquivo PARAR. <b>Avise o time de RPA.</b></div>
+</section>
+
+<!-- 9 -->
+<section class="secao faq">
+  <h2><span class="num">9</span>Perguntas frequentes</h2>
+
+  <h3>Preciso digitar minha senha no robô?</h3>
+  <p>Não. O robô nunca pede nem guarda senha. Ele só clica em "Use external login" e em "Submit"; a conta Microsoft e o Windows Hello são com você.</p>
+
+  <h3>Posso usar o computador enquanto ele trabalha?</h3>
+  <p>Pode. A janela do Edge do robô aparece quando ele preenche um chamado; deixe ela trabalhar. O seu navegador não é afetado.</p>
+
+  <h3>Fechei a janela do Edge do robô sem querer. E agora?</h3>
+  <p>Sem problema. Ele avisa, abre de novo sozinho e tenta outra vez. Nenhum chamado sai duplicado.</p>
+
+  <h3>O robô não abriu o chamado de uma GMUD. Por quê?</h3>
+  <p>Faltou alguma informação no alerta (número da CHG, data de execução ou descrição). O robô não inventa: avisa no Teams com ⚠️ e o chamado deve ser aberto à mão.</p>
+
+  <h3>Um mesmo alerta pode virar dois chamados?</h3>
+  <p>Não. O robô lembra de cada alerta que já atendeu. Mesmo que o e-mail chegue repetido, só um chamado é aberto.</p>
+
+  <h3>Onde vejo o número do chamado?</h3>
+  <p>No chat do time no Teams (mensagem ✅ com o link) e no painel, em "Chamados abertos hoje", com os botões Tratar e Copiar.</p>
+
+  <h3>Fechei o DispatchBot. Como abro de novo?</h3>
+  <p>Menu Iniciar → <b>DispatchBot</b>. Se você fechou pelo item Sair do menu, ele não abre sozinho: é de propósito.</p>
+
+  <h3>O ícone está vermelho. O que faço?</h3>
+  <p>Abra o painel e leia o motivo no topo. Normalmente é internet ou sessão expirada, e o robô tenta de novo sozinho. Se continuar vermelho por mais de alguns minutos, avise o time de RPA e abra os chamados à mão enquanto isso.</p>
+
+  <h3>Uma falha de backup não virou chamado. Por quê?</h3>
+  <p>Se for de um dos media servers ignorados (appflexrj01-inst01 ou appnburj03), é de propósito: orientação do time de NetBackup. Ela aparece como IGNORADO no histórico do time.</p>
+
+  <h3>Fechei a janelinha "Precisa de você" sem querer.</h3>
+  <p>Ela volta quando surgir algo novo, e tudo continua disponível no painel (clique no ícone).</p>
+
+  <h3>Quero conferir cada chamado antes de enviar.</h3>
+  <p>Botão direito no ícone → desmarque <span class="ui">Enviar GMUD sem conferir</span> ou <span class="ui">Enviar Backup sem conferir</span>. Para voltar ao envio sozinho, marque de novo (pede confirmação).</p>
+
+  <div class="caixa dica" style="margin-top:5mm"><span class="t">Dúvidas ou problemas</span>
+    Fale com o time de RPA. Se puder, mande junto um print do painel e a hora em que aconteceu.</div>
+</section>
+
+</body>
+</html>

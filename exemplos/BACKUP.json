@@ -1,0 +1,14 @@
+{
+  "versao": 2,
+  "id": "<TESTE-BACKUP-0001@exemplo.local>",
+  "tipo": "BACKUP",
+  "recebido_em": "2026-09-25T18:20:00-03:00",
+  "titulo": "TESTE - Job BKP_DIARIO_FS01 com falha",
+  "descricao": "TESTE do DispatchBot, ignorar. Job BKP_DIARIO_FS01 terminou com status Failed às 02:14. Cliente: FS01.",
+  "dados_brutos": "Job BKP_DIARIO_FS01 terminou com status Failed às 02:14. Cliente: FS01.",
+  "teams": {
+    "team_id": "",
+    "channel_id": "",
+    "message_id": ""
+  }
+}

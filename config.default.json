@@ -1,0 +1,261 @@
+﻿{
+  "instancia_url": "https://envdatacenter.service-now.com",
+  "portal_path": "/esc",
+  "_ajuda_link_tratamento": "Link do chamado na tela de tratamento (interface clássica), usado no Teams e no painel. {tabela} = sc_req_item, incident, sc_request ou sn_customerservice_case; {numero} = número capturado.",
+  "link_tratamento": "/now/nav/ui/classic/params/target/{tabela}.do%3Fsysparm_query%3Dnumber%3D{numero}",
+  "_ajuda_fila_sharepoint": "Fila lida direto no SharePoint, com a sessão Microsoft do navegador do robô (sem OneDrive). site = endereço do site; pasta = caminho da DispatchBot-Fila a partir do servidor (como aparece na barra de endereço, com espaços no lugar de %20). Deixe site vazio para usar a pasta sincronizada pelo OneDrive (pasta_sincronizada / link_sincronizar).",
+  "fila_sharepoint": {
+    "site": "https://camara1.sharepoint.com/sites/MANAGEDSERVICE",
+    "pasta": "/sites/MANAGEDSERVICE/Documentos Compartilhados/YDUQS/N1/DispatchBot-Fila",
+    "intervalo_parar_seg": 10
+  },
+  "pasta_sincronizada": "",
+  "_ajuda_link_sincronizar": "Link odopen:// da pasta DispatchBot-Fila no SharePoint (gerado uma vez pelo time, ver README). Na primeira execução, se a pasta ainda não estiver sincronizada, o robô abre este link e o OneDrive sincroniza sozinho. Vazio = o robô procura a pasta e, se não achar, pergunta.",
+  "link_sincronizar": "",
+  "intervalo_polling_seg": 15,
+  "idade_minima_arquivo_seg": 5,
+  "janela_confirmacao_seg": 10,
+  "pausado": false,
+  "_ajuda_nome_plantonista": "Nome que o time vê no painel e no histórico (ex.: \"Vinicius\"). O robô pergunta na primeira vez; para trocar, use \"Meu nome no DispatchBot\" no menu do ícone. Vazio = usa o usuário do Windows.",
+  "nome_plantonista": "",
+  "_ajuda_envio_automatico": "true = o robô clica em enviar sozinho, mas só se todos os campos obrigatórios do formulário estiverem preenchidos (senão para e o plantonista confere). false = o robô preenche e o plantonista confere e clica em enviar. GMUD vale para todos os tipos que herdam _GMUD. Quem muda é o plantonista, pelo menu do ícone (Enviar GMUD / Backup sem conferir).",
+  "envio_automatico": {
+    "GMUD": true,
+    "BACKUP": true
+  },
+  "_ajuda_resiliencia": "tentativas_por_alerta: falhas passageiras (rede, navegador) antes de mandar para /erro. max_espera_login_min: depois disso, sem login, o alerta vai para /erro e o Teams avisa para abrir manualmente. reserva_abandonada_min: reserva de outra máquina parada há mais que isso vai para /erro.",
+  "_ajuda_alerta_antigo": "Alerta recebido há mais de perguntar_alerta_antigo_min minutos (ex.: robô ficou pausado): antes de abrir, o robô pergunta ao plantonista se ainda deve abrir ou se já foi aberto à mão. Sem resposta, o alerta fica esperando em /pendentes e os alertas novos seguem normalmente. 0 = nunca pergunta.",
+  "perguntar_alerta_antigo_min": 120,
+  "tentativas_por_alerta": 3,
+  "espera_entre_tentativas_seg": 20,
+  "max_espera_login_min": 60,
+  "reserva_abandonada_min": 60,
+  "_ajuda_emergencia": "Parada de emergência: item PARAR AGORA no menu da bandeja, o atalho abaixo (o primeiro livre da lista; funciona com qualquer janela na frente) ou um arquivo PARAR na pasta DispatchBot-Fila, que para todos os robôs. Para retomar: desmarque Pausado no menu (parada local) ou apague o arquivo PARAR (parada remota).",
+  "atalho_emergencia": [
+    "ctrl+alt+shift+p",
+    "ctrl+alt+shift+x",
+    "ctrl+alt+pause"
+  ],
+  "navegador": {
+    "canais": [
+      "msedge",
+      "chrome"
+    ],
+    "timeout_acao_seg": 30,
+    "timeout_login_min": 15,
+    "_ajuda_fechar": "0 = navegador do robô sempre aberto (padrão): a sessão do ServiceNow não sobrevive ao fechamento, então o robô abre o ServiceNow ao iniciar e o login acontece no começo do plantão. Maior que 0 = fecha depois desses minutos parado (e pede login de novo no próximo alerta).",
+    "fechar_apos_ocioso_min": 0,
+    "_ajuda_manter_sessao": "Com o navegador parado há esses minutos, o robô recarrega o portal para a sessão do ServiceNow não expirar por inatividade; se ela caiu, pede o login na hora. 0 = desliga.",
+    "manter_sessao_min": 10
+  },
+  "login": {
+    "_ajuda": "Se a URL contiver algum destes trechos, o robô considera que está na tela de login/SSO. Qualquer host diferente da instância também conta como login.",
+    "padroes_url_login": [
+      "login.microsoftonline.com",
+      "/login.do",
+      "id=login",
+      "/navpage_login",
+      "/saml",
+      "login_with_sso",
+      "external_login",
+      "/adfs/",
+      "okta.com"
+    ],
+    "seletor_portal_pronto": "",
+    "_ajuda_tela_login": "O Service Portal mostra a tela de login no mesmo endereço da página pedida. seletores_tela_login: se algum estiver visível, é tela de login. botao_sso: o robô clica nele para escolher o login da empresa (nunca digita usuário ou senha).",
+    "seletores_tela_login": [
+      "input[type=password]",
+      "text=Log in with Azure B2C",
+      "text=Use external login",
+      "text=Use internal login"
+    ],
+    "botao_sso": "text=Use external login",
+    "_ajuda_email_sso": "Tela External login (Email + Submit), depois do Use external login: o robô clica em Submit, mesmo com o campo vazio. email_sso (opcional, vazio por padrão): se preenchido, o robô digita o e-mail antes. Nunca digita senha.",
+    "email_sso": "",
+    "tela_email": "text=External login",
+    "campo_email": "input[type=email], input[name*=mail i], input[id*=mail i]",
+    "botao_email": "button:has-text('Submit'), input[type=submit]",
+    "aviso_apos_seg": 15
+  },
+  "checar_duplicado_servicenow": {
+    "_ajuda": "Desligado por padrão (só o Dispatcher N1 da vez roda o robô). Se ligar: abre url_busca e, se achar um número de chamado na página, considera que o chamado já existe.",
+    "ativo": false,
+    "url_busca": "/esc?id=search&q={id_curto}",
+    "regex_numero": "(INC|RITM|REQ|CHG)\\d{7}",
+    "espera_ms": 4000
+  },
+  "tipos": {
+    "_ajuda": "Tipos aceitos nos alertas: INFRA, DBA, SO, PRODUCAO (GMUD) e BACKUP. Chaves com _ são modelos. Troque cada PREENCHER pelo valor real (seletores vêm do Mapear campos). Enquanto houver PREENCHER, alertas do tipo vão para /erro sem abrir chamado.",
+    "_GMUD": {
+      "_ajuda": "Formulário Hosting do Employee Center da Cirion (POP 11). Os quatro times herdam deste modelo e só definem o nome do time no título (variaveis.time_titulo). Faltou CHG, data de execução ou descrição no alerta = não abre, vai para /erro.",
+      "url_formulario": "/esc?id=sc_cat_item&sys_id=42761d80873931902beeeb930cbb3593",
+      "seletor_formulario_pronto": "",
+      "variaveis": {
+        "conta": "SOCIEDADE DE ENSINO SUPERIOR ESTACIO DE SA LTDA (3-9R2V6QXWXV)",
+        "conta_busca": "SOCIEDADE DE ENSINO SUPERIOR ESTACIO",
+        "conta_codigo": "3-9R2V6QXWXV",
+        "caller": "OPERACAO YDUQS",
+        "categoria": "Other",
+        "time_titulo": "PREENCHER"
+      },
+      "validar": {
+        "chg": "CHG\\d{7}"
+      },
+      "passos": [
+        {
+          "campo": "Conta *",
+          "acao": "referencia",
+          "seletor": "#s2id_sp_formfield_account",
+          "busca": "{conta_busca}",
+          "valor": "{conta_codigo}"
+        },
+        {
+          "campo": "CallerID *",
+          "acao": "referencia",
+          "seletor": "#s2id_sp_formfield_caller_id",
+          "valor": "{caller}"
+        },
+        {
+          "campo": "Categoria * (lista fixa: escolher abre a lista e clica na opção com esse texto)",
+          "acao": "escolher",
+          "seletor": "#s2id_sp_formfield_category",
+          "valor": "{categoria}"
+        },
+        {
+          "campo": "Descrição resumida *",
+          "acao": "preencher",
+          "seletor": "#sp_formfield_short_description",
+          "valor": "#GMUD {chg} | {time_titulo} | {data_execucao|dd/MM HH:mm} |"
+        },
+        {
+          "campo": "Descrição *",
+          "acao": "preencher",
+          "seletor": "#sp_formfield_description",
+          "valor": "{descricao}"
+        }
+      ],
+      "botao_enviar": "#submit-btn",
+      "seletor_erro_validacao": "",
+      "captura_numero": {
+        "_ajuda": "O Hosting cria um caso CS e, junto, um RITM (aba Related Records do caso). O número que o time usa é o RITM. Lê só a linha do RITM e o cabeçalho do caso: a descrição pode citar outros chamados.",
+        "regex": "(RITM|CS)\\d{7}",
+        "preferir": [
+          "RITM"
+        ],
+        "seletor": "#req-item-toggle a, .ticket-id",
+        "espera_preferido_seg": 30,
+        "timeout_seg": 90
+      },
+      "_origem": "Seletores de Conta, CallerID, Descrição resumida e Descrição: mesmos nomes internos do formulário de Backup (BackupBot, 15/07/2026). URL, Categoria (#s2id_sp_formfield_category, opção Other) e Enviar (#submit-btn) capturados do formulário Hosting real em 01/10/2026; os outros quatro seletores conferidos na mesma captura."
+    },
+    "INFRA": {
+      "herda": "_GMUD",
+      "variaveis": {
+        "time_titulo": "SOC"
+      }
+    },
+    "DBA": {
+      "_ajuda": "Nome do time no título: DBA (informado pelo time em 01/10/2026).",
+      "herda": "_GMUD",
+      "variaveis": {
+        "time_titulo": "DBA"
+      }
+    },
+    "SO": {
+      "_ajuda": "Nome do time no título: SO (informado pelo time em 01/10/2026).",
+      "herda": "_GMUD",
+      "variaveis": {
+        "time_titulo": "SO"
+      }
+    },
+    "GMUD_BACKUP": {
+      "_ajuda": "GMUD da fila SN_TI_CHG_EXECUTOR_Backup_Cirion (16/10/2026). Mesmo formulário Hosting das outras GMUDs. Não confundir com BACKUP (incidente de falha de backup). Nome no título provisório: BACKUP.",
+      "herda": "_GMUD",
+      "variaveis": {
+        "time_titulo": "BACKUP"
+      }
+    },
+    "PRODUCAO": {
+      "_ajuda": "Nome do time no título ainda não documentado (o POP só mostra INFRA = SOC).",
+      "herda": "_GMUD",
+      "variaveis": {
+        "time_titulo": "PREENCHER"
+      }
+    },
+    "BACKUP": {
+      "_ajuda": "Formulário de Incidente do cartão Backup no Employee Center, como no BackupBot (Power Automate Desktop, 15/07/2026). Envio automático ou com conferência: chave envio_automatico.BACKUP (menu do ícone).",
+      "_origem": "URL, seletores e valores de Conta, Contato, Serviço Afetado e Impacto vêm do BackupBot. O POP 03 sugere impacto 'Nenhum'; vale o BackupBot, que é o mais recente. Título #FALHA DE BACKUP segue o POP 08.",
+      "_ajuda_ignorar_clientes": "Clientes (hosts) cujas falhas não abrem chamado: o alerta vai para processados sem chamado e sem Teams. appflexrj01-inst01 e appnburj03 são media servers do NetBackup (orientação do time de NetBackup, 16/10/2026).",
+      "ignorar_clientes": ["appflexrj01-inst01.smpdc.gblx", "appnburj03"],
+      "url_formulario": "/esc?id=sc_cat_item&sys_id=ca634cdd87a1b510baccc8840cbb35b7",
+      "seletor_formulario_pronto": "#sp_formfield_short_description",
+      "variaveis": {
+        "conta_busca": "SOCIEDADE DE ENSINO SUPERIOR ESTACIO DE SA",
+        "conta_codigo": "3-9R2V6QXWXV",
+        "caller": "OPERACAO YDUQS"
+      },
+      "padroes": {
+        "servico_afetado": "Veritas Netbackup",
+        "failure_type": "Execution failure",
+        "impacto": "The incident specifically affects performance, with minimal impact on critical operations."
+      },
+      "passos": [
+        {
+          "campo": "Account (Conta) *",
+          "acao": "referencia",
+          "seletor": "#s2id_sp_formfield_account",
+          "busca": "{conta_busca}",
+          "valor": "{conta_codigo}"
+        },
+        {
+          "campo": "Contact (Contato)",
+          "acao": "referencia",
+          "seletor": "#s2id_sp_formfield_caller_id",
+          "valor": "{caller}"
+        },
+        {
+          "campo": "Service Affected (Serviço Afetado) *",
+          "acao": "referencia",
+          "seletor": "#s2id_sp_formfield_service_affected",
+          "valor": "{servico_afetado}"
+        },
+        {
+          "campo": "Failure Type * (lista fixa: - None -, Execution failure, Unavailability, Slowness)",
+          "acao": "escolher",
+          "seletor": "#s2id_sp_formfield_failure_type",
+          "valor": "{failure_type}"
+        },
+        {
+          "campo": "Impacto nas operações *",
+          "acao": "referencia",
+          "seletor": ".form-group:has(label:has-text('operations')) .select2-container, .form-group:has(label:has-text('operações')) .select2-container",
+          "valor": "{impacto}"
+        },
+        {
+          "campo": "Short Description (Descrição resumida) *",
+          "acao": "preencher",
+          "seletor": "#sp_formfield_short_description",
+          "valor": "#FALHA DE BACKUP {titulo}"
+        },
+        {
+          "campo": "Description (Descrição) *",
+          "acao": "preencher",
+          "seletor": "#sp_formfield_description",
+          "valor": "{descricao}"
+        }
+      ],
+      "botao_enviar": "#submit-btn",
+      "seletor_erro_validacao": "",
+      "confirmacao_timeout_min": 30,
+      "captura_numero": {
+        "regex": "(INC|RITM|REQ|CS)\\d{7}",
+        "preferir": [
+          "INC",
+          "RITM"
+        ],
+        "seletor": "",
+        "timeout_seg": 60
+      }
+    }
+  }
+}

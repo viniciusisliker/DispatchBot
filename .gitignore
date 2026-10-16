@@ -1,0 +1,17 @@
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+
+# Saídas do build (geradas pelo build\build.ps1)
+dist/
+build/tmp/
+
+# Dados locais de teste
+*.log
+screenshots/
+browser-profile/
+
+# Sistema
+Thumbs.db
+desktop.ini
