@@ -1,4 +1,4 @@
-﻿{
+{
   "instancia_url": "https://envdatacenter.service-now.com",
   "portal_path": "/esc",
   "_ajuda_link_tratamento": "Link do chamado na tela de tratamento (interface clássica), usado no Teams e no painel. {tabela} = sc_req_item, incident, sc_request ou sn_customerservice_case; {numero} = número capturado.",
@@ -248,13 +248,14 @@
       "seletor_erro_validacao": "",
       "confirmacao_timeout_min": 30,
       "captura_numero": {
+        "_ajuda": "O formulário de Incidente cria um caso CS e, junto, o INC (fica na aba Related Records, escondida). O número que o time usa é o INC. seletor body = lê o texto da página inteira, inclusive o que está escondido; espera o INC por até 60 s antes de aceitar o CS.",
         "regex": "(INC|RITM|REQ|CS)\\d{7}",
         "preferir": [
-          "INC",
-          "RITM"
+          "INC"
         ],
-        "seletor": "",
-        "timeout_seg": 60
+        "seletor": "body",
+        "espera_preferido_seg": 60,
+        "timeout_seg": 120
       }
     }
   }

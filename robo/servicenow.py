@@ -293,7 +293,7 @@ def abrir_chamado(nav, cfg: dict, tipo_cfg: dict, alerta: dict, enviar: bool = T
     regex = re.compile(captura["regex"])
     seletor_numero = captura.get("seletor", "")
     # Números que já estavam na tela antes do envio não contam
-    ja_na_tela = {m.group(0) for m in regex.finditer(texto_pagina(page))}
+    ja_na_tela = {m.group(0) for m in regex.finditer(texto_pagina(page) + " " + texto_pagina(page, seletor_numero))}
 
     confirmar = bool(tipo_cfg.get("confirmar_antes_de_enviar"))
     motivo = ""  # por que o envio automático virou conferência (vai para a notificação)
