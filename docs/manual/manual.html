@@ -139,15 +139,16 @@
     <tr><td><b>GMUD Backup</b></td><td>Formulário Hosting</td><td>RITM</td><td>(FC) NETBACKUP</td></tr>
     <tr><td><b>Falha de Backup</b></td><td>Incidente (cartão Backup)</td><td>INC</td><td>(FC) NETBACKUP</td></tr>
   </table>
+  <p>Se o RITM (GMUD) ou o INC (Backup) demorar a aparecer no ServiceNow, o robô usa o número do <b>caso CS</b> que o formulário cria: o chamado foi aberto do mesmo jeito.</p>
   <div class="caixa dica"><span class="t">Falhas de backup que não viram chamado</span>
-    Falhas dos media servers <b>appflexrj01-inst01</b>, <b>appnburj03</b> e <b>nbmasterbrarj01</b> não abrem chamado (orientação do time de NetBackup). O card continua aparecendo no Teams; o robô só não abre o chamado.</div>
+    Falhas dos clientes <b>appflexrj01-inst01</b>, <b>appnburj03</b> e <b>nbmasterbrarj01</b> não abrem chamado (os dois primeiros são media servers, por orientação do time de NetBackup; o terceiro entrou a pedido da operação). O card continua aparecendo no Teams; o robô só não abre o chamado.</div>
 
   <h3>O que ele nunca faz</h3>
   <ul>
     <li><b>Não digita senha.</b> O login é sempre seu, com a sua conta Microsoft e o Windows Hello.</li>
     <li><b>Não inventa dados.</b> Se faltar o número da CHG, a data ou a descrição, ele não abre e avisa no Teams para abrir à mão.</li>
     <li><b>Não abre o mesmo chamado duas vezes.</b> Ele lembra de cada alerta atendido (nas GMUDs, pelo número da CHG).</li>
-    <li><b>Não reenvia sozinho.</b> Depois do clique em Submit/Enviar, nunca tenta de novo por conta própria.</li>
+    <li><b>Não reenvia sozinho.</b> Depois do clique em Submit, nunca tenta de novo por conta própria.</li>
     <li><b>Não fica ligado em dois computadores sem avisar.</b> Só o Dispatcher N1 da vez deixa o robô ativo (seção 7).</li>
   </ul>
 
@@ -179,7 +180,8 @@
     <tr><td>Trocar o seu nome</td><td>Botão direito no ícone → <span class="ui">Meu nome no DispatchBot...</span></td></tr>
     <tr><td>Desinstalar</td><td>Configurações → Aplicativos → DispatchBot → Desinstalar</td></tr>
     <tr><td>Logs (para o time de RPA)</td><td>Botão direito no ícone → <span class="ui">Abrir pasta de logs</span></td></tr>
-    <tr><td>Fila de alertas</td><td>Botão direito no ícone → <span class="ui">Abrir pasta DispatchBot-Fila</span> (SharePoint)</td></tr>
+    <tr><td>Fila de alertas</td><td>Botão direito no ícone → <span class="ui">Abrir pasta DispatchBot-Fila</span> (abre a pasta no SharePoint, pelo navegador)</td></tr>
+    <tr><td>Configurações (só com o time de RPA)</td><td>Botão direito no ícone → <span class="ui">Abrir config.json</span></td></tr>
   </table>
 </section>
 
@@ -192,20 +194,22 @@
     <tr><td class="ic"><img src="icone_ativo.png" alt=""></td><td class="cor" style="color:var(--verde)">Verde</td><td>Ligado e atendendo os alertas.</td><td>Nada. Siga o plantão normalmente.</td></tr>
     <tr><td class="ic"><img src="icone_preparando.png" alt=""></td><td class="cor" style="color:#2F7FD1">Azul</td><td>Preparando (abrindo o navegador, conectando na fila).</td><td>Esperar alguns segundos.</td></tr>
     <tr><td class="ic"><img src="icone_confirmar.png" alt=""></td><td class="cor" style="color:var(--amarelo)">Amarelo</td><td>Precisa de você: fazer login ou completar um chamado que o robô não enviou sozinho.</td><td>Olhe a janelinha "Precisa de você" (seção 5).</td></tr>
-    <tr><td class="ic"><img src="icone_erro.png" alt=""></td><td class="cor" style="color:var(--vermelho)">Vermelho</td><td>Algo deu errado (ex.: sem internet, fila fora do ar).</td><td>Abra o painel e veja o motivo. Se continuar, avise o time de RPA.</td></tr>
+    <tr><td class="ic"><img src="icone_erro.png" alt=""></td><td class="cor" style="color:var(--vermelho)">Vermelho</td><td>Algo deu errado (ex.: sem internet, fila fora do ar) ou o robô foi parado em emergência (seção 8).</td><td>Abra o painel e veja o motivo. Se continuar, avise o time de RPA.</td></tr>
     <tr><td class="ic"><img src="icone_pausado.png" alt=""></td><td class="cor" style="color:#6F767C">Cinza</td><td>Pausado: não abre chamados.</td><td>Normal fora do seu plantão.</td></tr>
   </table>
 
   <h3>Menu do botão direito</h3>
   <table>
     <tr><th>Item</th><th>Para que serve</th></tr>
-    <tr><td><span class="ui">PARAR AGORA (emergência)</span></td><td>Para o robô na hora (pede confirmação). Veja a seção 8.</td></tr>
+    <tr><td><span class="ui">PARAR AGORA (emergência)</span></td><td>Para o robô na hora (pede confirmação). Ao lado aparece o atalho de teclado que está valendo. Veja a seção 8.</td></tr>
+    <tr><td><i>Status</i> e <i>Versão</i></td><td>Só informação (não dá para clicar): o que o robô está fazendo e a versão instalada.</td></tr>
     <tr><td><span class="ui">Abrir painel</span></td><td>O mesmo que clicar no ícone.</td></tr>
     <tr><td><span class="ui">Verificar pendentes agora</span></td><td>Olha a fila na hora, sem esperar a próxima volta (ele já olha a cada 15 segundos).</td></tr>
     <tr><td><span class="ui">Pausado</span></td><td>Marcado = robô parado neste computador. Desmarcado = ligado.</td></tr>
     <tr><td><span class="ui">Enviar GMUD sem conferir</span></td><td>Marcado (padrão): o robô envia as GMUDs sozinho. Desmarque para conferir cada uma antes do Submit.</td></tr>
     <tr><td><span class="ui">Enviar Backup sem conferir</span></td><td>O mesmo para o Backup: marcado (padrão), o robô envia sozinho.</td></tr>
     <tr><td><span class="ui">Meu nome no DispatchBot...</span></td><td>Troca o nome que os colegas veem no painel e no histórico.</td></tr>
+    <tr><td><span class="ui">Abrir pasta DispatchBot-Fila</span> · <span class="ui">Abrir pasta de logs</span> · <span class="ui">Abrir config.json</span></td><td>Atalhos para o time de RPA (veja "Onde fica o quê", na seção 2).</td></tr>
     <tr><td><span class="ui">Sair</span></td><td>Fecha o robô. Ele não volta sozinho até você abrir pelo menu Iniciar.</td></tr>
   </table>
 </section>
@@ -218,12 +222,12 @@
 
   <table>
     <tr><th>Parte</th><th>O que mostra</th></tr>
-    <tr><td><b>Topo</b></td><td>O que o robô está fazendo agora, quantos alertas há na fila e o botão <span class="ui">Pausar</span> / <span class="ui">Retomar</span>.</td></tr>
-    <tr><td><b>Também ativo</b></td><td>Só aparece quando o robô de outro colega também está ligado: mostra o nome, o computador e o último sinal, com o botão <span class="ui">Assumir o plantão</span> (veja a seção 7).</td></tr>
+    <tr><td><b>Topo</b></td><td>O que o robô está fazendo agora (e qual alerta, se estiver atendendo um), quantos alertas há na fila, o nome do plantonista, a hora da última atualização e o botão <span class="ui">Pausar</span> / <span class="ui">Retomar</span>.</td></tr>
+    <tr><td><b>Também ativo</b></td><td>Só aparece quando o robô de outro colega também está ligado: mostra o nome, o computador, desde quando está ativo e o último sinal, com o botão <span class="ui">Assumir o plantão</span> (veja a seção 7).</td></tr>
     <tr><td><b>Contadores</b></td><td>Na fila · Abertos hoje · Erros hoje · Precisa de você.</td></tr>
     <tr><td><b>Precisa de você</b></td><td>O mesmo que a janelinha da seção 5: login, conferência e alertas antigos.</td></tr>
-    <tr><td><b>Chamados abertos hoje</b></td><td>Cada chamado com o número (RITM/INC), o botão <span class="ui">Tratar</span> (abre o chamado no ServiceNow) e <span class="ui">Copiar</span> (copia o número).</td></tr>
-    <tr><td><b>Erros de hoje: abrir à mão</b></td><td>Alertas que o robô não conseguiu abrir, com o <b>motivo</b>, o botão <span class="ui">Abrir no ServiceNow</span> e <span class="ui">Copiar</span>.</td></tr>
+    <tr><td><b>Chamados abertos hoje</b></td><td>Cada chamado com o número (RITM/INC, ou CS), o botão <span class="ui">Tratar</span> (abre o chamado no ServiceNow) e o ícone de copiar (copia o número).</td></tr>
+    <tr><td><b>Erros de hoje: abrir à mão</b></td><td>Alertas que o robô não conseguiu abrir, com o <b>motivo</b>, o botão <span class="ui">Abrir no ServiceNow</span> (abre o portal para você abrir à mão) e o ícone de copiar (copia o alerta e o motivo).</td></tr>
     <tr><td><b>Rodapé</b></td><td><span class="ui">Verificar agora</span>, <span class="ui">Logs</span>, <span class="ui">Histórico do time</span> e <span class="ui">PARAR AGORA</span> (pede confirmação).</td></tr>
   </table>
 
@@ -231,7 +235,7 @@
 
 <section class="secao">
   <h3 style="margin-top:0;font-size:15pt">Histórico do time</h3>
-  <p>O botão <span class="ui">Histórico do time</span>, no rodapé do painel, mostra o que aconteceu <b>hoje</b> e <b>ontem</b> em todos os computadores: chamados abertos, erros, quem ligou, pausou ou assumiu o plantão e os alertas ignorados. Os mais recentes ficam em cima.</p>
+  <p>O botão <span class="ui">Histórico do time</span>, no rodapé do painel, mostra o que aconteceu <b>hoje</b> e <b>ontem</b> em todos os computadores: chamados abertos, erros, quem ligou, pausou ou assumiu o plantão e os alertas ignorados. Os mais recentes ficam em cima. No topo da tela dá para trocar entre <span class="ui">Hoje</span> e <span class="ui">Ontem</span> e clicar em <span class="ui">Atualizar</span>.</p>
   <figure><img src="historico.png" alt="Histórico do time"><figcaption>Histórico do time com dados de exemplo.</figcaption></figure>
 </section>
 
@@ -247,14 +251,14 @@
       <ol class="passos">
         <li>Normalmente o robô envia sozinho. Se faltar um campo obrigatório, ele <b>não envia</b>: o ícone fica <b style="color:var(--amarelo)">amarelo</b> e a janelinha mostra o motivo ("Não enviei sozinho: …"), os campos e o tempo que falta.</li>
         <li>Clique em <span class="ui">Ver formulário</span> para trazer o navegador do robô para a frente.</li>
-        <li>Complete o que faltar, confira e clique em <span class="ui">Submit</span> (GMUD) ou <span class="ui">Enviar</span> (Backup) <b>no próprio formulário</b>.</li>
+        <li>Complete o que faltar, confira e clique em <span class="ui">Submit</span> <b>no próprio formulário</b> (GMUD e Backup usam o mesmo botão).</li>
         <li>Pronto: o robô pega o número, a janelinha some e o Teams avisa. <b>Prazo: 30 minutos.</b> Sem envio nesse tempo, o Teams avisa para abrir à mão.</li>
       </ol>
     </div>
   </div>
 
   <h3>Algo errado no formulário? Use <span class="ui">Pular</span></h3>
-  <p>O robô não envia aquele chamado e o Teams avisa para abrir à mão. Se for só um detalhe, você também pode corrigir o campo no formulário antes de enviar.</p>
+  <p>O robô pede confirmação, não envia aquele chamado e o Teams avisa para abrir à mão. Se for só um detalhe, você também pode corrigir o campo no formulário antes de enviar.</p>
 
   <h3>B. Alerta antigo</h3>
   <p>Quando um alerta chegou há <b>mais de 2 horas</b> (por exemplo, enquanto o robô estava pausado), o robô não abre sozinho: ele pergunta.</p>
@@ -264,6 +268,7 @@
     <tr><td><span class="ui">Já foi aberto</span></td><td>Alguém já abriu à mão: o alerta é arquivado, sem chamado e sem mensagem no Teams.</td></tr>
     <tr><td><span class="ui">Depois</span></td><td>Não sabe agora: pergunta de novo em 30 minutos (os alertas novos seguem).</td></tr>
   </table>
+  <p>Se a janelinha não conseguir abrir, o robô faz a mesma pergunta numa caixa do Windows: <span class="ui">Sim</span> = abrir chamado, <span class="ui">Não</span> = já foi aberto, <span class="ui">Cancelar</span> = depois.</p>
 
 </section>
 
@@ -299,7 +304,8 @@
     <div class="cartao"><div class="tag">Quem entra</div><h3>Desmarque Pausado</h3><p>Botão direito no ícone → desmarque <span class="ui">Pausado</span>. A bolinha fica <b style="color:var(--verde)">verde</b>. Faça o login no ServiceNow se ele pedir.</p></div>
   </div>
   <h3>Assumir o plantão pelo painel</h3>
-  <p>Se o colega esqueceu o robô ligado, o seu painel mostra a faixa amarela <b>"Também ativo: Fulano"</b>. Clique em <span class="ui">Assumir o plantão</span>: o robô do colega pausa sozinho (depois de terminar o alerta em andamento, nunca no meio) e o colega recebe um aviso de que você assumiu.</p>
+  <p>Se o colega esqueceu o robô ligado, o seu painel mostra a faixa amarela <b>"Também ativo: Fulano"</b>. Clique em <span class="ui">Assumir o plantão</span> e confirme: o robô do colega pausa sozinho (depois de terminar o alerta em andamento, nunca no meio) e o colega recebe um aviso de que você assumiu.</p>
+  <p>Enquanto isso, a faixa mostra "pedido enviado, esperando pausar". Quando o robô do colega pausar, você recebe a notificação <b>"O plantão está com você"</b>. Se ele não responder em 12 minutos (computador desligado ou sem internet), o robô avisa: fale com o colega.</p>
   <h3>Retomar com outro robô ligado</h3>
   <p>Se você clicar em <span class="ui">Retomar</span> (ou desmarcar <span class="ui">Pausado</span>) com outro robô ativo, o robô pergunta:</p>
   <table>
@@ -317,12 +323,12 @@
   <p class="lead">Se o robô estiver abrindo chamados errados, pare na hora.</p>
   <table>
     <tr><th>Onde</th><th>Como</th><th>Alcance</th></tr>
-    <tr><td><b>Teclado</b></td><td><span class="tecla">Ctrl</span> + <span class="tecla">Alt</span> + <span class="tecla">Shift</span> + <span class="tecla">P</span>, com qualquer janela aberta</td><td>Este computador</td></tr>
+    <tr><td><b>Teclado</b></td><td><span class="tecla">Ctrl</span> + <span class="tecla">Alt</span> + <span class="tecla">Shift</span> + <span class="tecla">P</span>, com qualquer janela aberta. Se outro programa já usar esse atalho, vale <span class="tecla">Ctrl</span> + <span class="tecla">Alt</span> + <span class="tecla">Shift</span> + <span class="tecla">X</span> ou <span class="tecla">Ctrl</span> + <span class="tecla">Alt</span> + <span class="tecla">Pause</span>: o atalho que está valendo aparece ao lado de PARAR AGORA no menu do ícone.</td><td>Este computador</td></tr>
     <tr><td><b>Ícone</b></td><td>Botão direito → <span class="ui">PARAR AGORA</span> → confirmar (ou o botão do painel)</td><td>Este computador</td></tr>
     <tr><td><b>Pasta da fila</b></td><td>Criar um arquivo chamado <b>PARAR</b> na pasta <i>DispatchBot-Fila</i> (pode escrever o motivo dentro)</td><td>Todos os computadores</td></tr>
   </table>
   <div class="caixa perigo"><span class="t">Depois de parar</span>
-    Nada se perde: o que não foi enviado volta para a fila. Para voltar a funcionar, desmarque <span class="ui">Pausado</span> no ícone ou apague o arquivo PARAR. <b>Avise o time de RPA.</b></div>
+    O ícone fica <b style="color:var(--vermelho)">vermelho</b> com o aviso da parada ("Parada de emergência" ou "Parada remota"). O que não foi enviado volta para a fila. Se a parada pegou um chamado <b>logo depois do Submit</b>, o Teams avisa com ⚠️ para conferir no ServiceNow se ele foi aberto. Para voltar a funcionar, desmarque <span class="ui">Pausado</span> no ícone (parada pelo teclado ou pelo menu) ou apague o arquivo PARAR (parada pela pasta; enquanto ele existir, o robô não volta). <b>Avise o time de RPA.</b></div>
 </section>
 
 <!-- 9 -->
@@ -351,10 +357,10 @@
   <p>Menu Iniciar → <b>DispatchBot</b>. Se você fechou pelo item Sair do menu, ele não abre sozinho: é de propósito.</p>
 
   <h3>O ícone está vermelho. O que faço?</h3>
-  <p>Abra o painel e leia o motivo no topo. Normalmente é internet ou sessão expirada, e o robô tenta de novo sozinho. Se continuar vermelho por mais de alguns minutos, avise o time de RPA e abra os chamados à mão enquanto isso.</p>
+  <p>Abra o painel e leia o motivo no topo. Se for uma parada de emergência ou remota, veja a seção 8. Normalmente é internet ou sessão expirada, e o robô tenta de novo sozinho. Se continuar vermelho por mais de alguns minutos, avise o time de RPA e abra os chamados à mão enquanto isso.</p>
 
   <h3>Uma falha de backup não virou chamado. Por quê?</h3>
-  <p>Se for de um dos media servers ignorados (appflexrj01-inst01, appnburj03 ou nbmasterbrarj01), é de propósito: orientação do time de NetBackup. Ela aparece como IGNORADO no histórico do time.</p>
+  <p>Se for de um dos clientes ignorados (appflexrj01-inst01, appnburj03 ou nbmasterbrarj01), é de propósito. Ela aparece como IGNORADO no histórico do time.</p>
 
   <h3>Fechei a janelinha "Precisa de você" sem querer.</h3>
   <p>Ela volta quando surgir algo novo, e tudo continua disponível no painel (clique no ícone).</p>
