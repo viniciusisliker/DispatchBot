@@ -283,12 +283,13 @@ class Robo:
 
     # --- histórico do time ---
 
-    def evento(self, tipo: str, texto: str, **extra):
-        """Guarda um evento para o histórico do time (gravado no SharePoint pela thread do robô)."""
+    def evento(self, nome_evento: str, texto: str, /, **extra):
+        """Guarda um evento para o histórico do time (gravado no SharePoint pela thread do robô).
+        nome_evento é só posicional: os extras podem trazer tipo= (tipo do alerta) sem conflito."""
         try:
             registro = {"em": datetime.now().astimezone().isoformat(timespec="seconds"), "host": HOST,
                         "nome": config.nome_plantonista(self.cfg), "usuario": os.environ.get("USERNAME", ""),
-                        "evento": tipo, "texto": texto, **{k: v for k, v in extra.items() if v not in (None, "")}}
+                        "evento": nome_evento, "texto": texto, **{k: v for k, v in extra.items() if v not in (None, "")}}
             with self.trava_eventos:
                 self.eventos.append(registro)
                 del self.eventos[:-500]  # sem conexão por muito tempo: guarda só os últimos
