@@ -223,13 +223,22 @@
           "campo": "Failure Type * (lista fixa: - None -, Execution failure, Unavailability, Slowness)",
           "acao": "escolher",
           "seletor": "#s2id_sp_formfield_failure_type",
-          "valor": "{failure_type}"
+          "valor": "{failure_type}",
+          "_ajuda_traducoes": "Portal em português mostra a opção traduzida (Execution failure = 'Falha na execução', print do usuário em 17/10/2026). Vale o texto do valor ou a tradução dele.",
+          "traducoes": {
+            "Execution failure": "Falha na execução"
+          }
         },
         {
           "campo": "Impacto nas operações *",
           "acao": "referencia",
           "seletor": ".form-group:has(label:has-text('operations')) .select2-container, .form-group:has(label:has-text('operações')) .select2-container",
-          "valor": "{impacto}"
+          "valor": "{impacto}",
+          "_ajuda_alternativas": "Portal em português: a opção vem traduzida ('O incidente afetou pontualmente o desempenho, com impacto mínimo nas operações críticas.', print do usuário em 17/10/2026) e a busca em inglês não acha nada. Se a busca em inglês falhar, tenta estas.",
+          "alternativas": [
+            {"busca": "pontualmente", "regex": "pontualmente o desempenho.*m[ií]nim"},
+            {"busca": "", "regex": "desempenho.*m[ií]nim"}
+          ]
         },
         {
           "campo": "Short Description (Descrição resumida) *",
