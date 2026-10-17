@@ -12,7 +12,7 @@ import urllib.request
 from datetime import datetime
 from urllib.parse import quote, urlparse
 
-from fila import HOST, SEP, PastaIndisponivel, agora_iso, nome_original
+from fila import HOST, SEP, FilaInstavel, PastaIndisponivel, agora_iso, nome_original
 from log import log
 
 SUBPASTAS = ("pendentes", "processando", "processados", "erro", "retorno", "status", "plantao", "historico")
@@ -110,9 +110,15 @@ class FilaSharePoint:
                 raise PastaIndisponivel(
                     f"Sem acesso à pasta da fila no SharePoint (HTTP {e.code}). Confira se a conta "
                     "logada no navegador do robô tem acesso ao site do time.") from e
-            raise PastaIndisponivel(f"SharePoint respondeu HTTP {e.code} em {api.split('(')[0]}.") from e
+            tecnico = f"SharePoint respondeu HTTP {e.code} em {api.split('(')[0]}."
+            if e.code == 429 or e.code >= 500:  # sobrecarga ou fora do ar do lado da Microsoft: passa sozinho
+                raise FilaInstavel("O SharePoint da Microsoft está instável. O robô tenta de novo sozinho, "
+                                   "não precisa fazer nada.", tecnico) from e
+            raise PastaIndisponivel(f"O SharePoint recusou o pedido do robô (HTTP {e.code}). "
+                                    "Se continuar, avise o time de RPA.") from e
         except (urllib.error.URLError, OSError) as e:
-            raise PastaIndisponivel(f"Sem conexão com o SharePoint: {getattr(e, 'reason', e)}") from e
+            raise FilaInstavel("Sem conexão com o SharePoint (internet ou VPN). O robô tenta de novo sozinho.",
+                               f"Sem conexão com o SharePoint: {getattr(e, 'reason', e)}") from e
 
     def _form_digest(self) -> str:
         """Token exigido pelo SharePoint em toda gravação; vale ~30 min."""

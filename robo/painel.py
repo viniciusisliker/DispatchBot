@@ -40,7 +40,8 @@ TEXTO, APAGADO = "#E7EBEE", "#8C97A1"
 TEAL, TEAL_HOVER = "#14B8A6", "#0F9488"
 VERDE, AMARELO, VERMELHO, VERMELHO_HOVER = "#22C55E", "#F5A524", "#EF4444", "#B91C1C"
 STATUS_COR = {"ativo": VERDE, "login": AMARELO, "confirmar": AMARELO, "erro": VERMELHO,
-              "pausado": "#9AA4AD", "preparando": "#60A5FA"}
+              "pausado": "#9AA4AD", "preparando": "#60A5FA",
+              "instavel": "#60A5FA"}
 FONTE = "Segoe UI"
 
 # Ícones do próprio Windows (fonte Segoe Fluent Icons; no Windows 10, Segoe MDL2 Assets)
