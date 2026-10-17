@@ -4,6 +4,7 @@ Uso:
   DispatchBot-Mapear.exe                              abre o portal com o Playwright Inspector e lista os campos
   DispatchBot-Mapear.exe --testar exemplos\\INFRA.json  preenche o formulário do tipo, SEM enviar
   DispatchBot-Mapear.exe --testar INFRA.json --enviar   abre o chamado de verdade (não mexe nas pastas da fila)
+  DispatchBot-Mapear.exe --verificar-imagens           confere se o avatar abre no exe (o build usa)
 
 Feche ou pause o DispatchBot antes: os dois não podem usar o mesmo perfil de navegador ao mesmo tempo.
 """
@@ -153,7 +154,15 @@ def main():
     parser = argparse.ArgumentParser(description="Mapeamento e teste dos formulários do ServiceNow")
     parser.add_argument("--testar", metavar="JSON", help="JSON de alerta para preencher o formulário do tipo")
     parser.add_argument("--enviar", action="store_true", help="com --testar: envia de verdade")
+    parser.add_argument("--verificar-imagens", action="store_true",
+                        help="só confere se o avatar abre no exe (usado pelo build) e sai")
     args = parser.parse_args()
+
+    if args.verificar_imagens:
+        import bandeja
+        rosto = bandeja.avatar()
+        print("Avatar OK" if rosto else "Avatar NÃO abriu", bandeja.caminhos_avatar())
+        sys.exit(0 if rosto else 1)
 
     configurar_log()
     cfg = config.carregar()

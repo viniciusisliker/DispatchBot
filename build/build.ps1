@@ -28,6 +28,9 @@ if ($LASTEXITCODE -ne 0) { throw "Erro de sintaxe no código do robô" }
 & $py build\versao_exe.py  # nome "DispatchBot" (em vez de DispatchBot.exe) nas notificações do Windows
 & $py -m PyInstaller --noconfirm --clean --distpath dist --workpath build\tmp build\robo.spec
 if ($LASTEXITCODE -ne 0) { throw "Falha no PyInstaller" }
+# O avatar (ícone da bandeja e das notificações) tem que abrir no exe; sem ele aparece o robô desenhado
+& dist\DispatchBot\DispatchBot-Mapear.exe --verificar-imagens
+if ($LASTEXITCODE -ne 0) { throw "O avatar não abre no exe empacotado" }
 
 function Assinar($arquivos) {
     if (-not $env:DISPATCHBOT_CERT_THUMBPRINT) { return }
