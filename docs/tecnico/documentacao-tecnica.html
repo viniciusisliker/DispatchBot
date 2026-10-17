@@ -6,10 +6,10 @@
 <title>Documentação técnica do DispatchBot</title>
 <!-- Fonte do PDF anexado às Releases (DispatchBot-Documentacao-Tecnica.pdf). Gerar de novo com:
      msedge --headless=new --no-pdf-header-footer --print-to-pdf=docs\tecnico\DispatchBot-Documentacao-Tecnica.pdf docs\tecnico\documentacao-tecnica.html
-     Ao mudar a versão, troque "1.10.9" no @page e na capa. -->
+     Ao mudar a versão, troque "1.10.10" no @page e na capa. -->
 <style>
   @page { size: A4; margin: 18mm 16mm 20mm 16mm;
-    @bottom-left { content: "Documentação técnica do DispatchBot · versão 1.10.9"; font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; }
+    @bottom-left { content: "Documentação técnica do DispatchBot · versão 1.10.10"; font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; }
     @bottom-right { content: counter(page); font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; } }
   @page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
   :root { --teal: #0E9F8E; --teal-claro: #E3F6F3; --tinta: #1B2228; --apagado: #5B6670; --linha: #DDE3E8;
@@ -107,13 +107,13 @@
   <div class="sub">Arquitetura, funcionamento interno, contratos de dados, configuração, build e operação do robô que abre chamados de GMUD e Backup no ServiceNow da Cirion.</div>
   <div class="barra"></div>
   <div class="ficha">
-    <span>Versão do código</span><b>1.10.9</b>
+    <span>Versão do código</span><b>1.10.10</b>
     <span>Público</span><b>Time de RPA / desenvolvimento e sustentação</b>
     <span>Repositório</span><b>github.com/viniciusisliker/DispatchBot</b>
     <span>Pilha</span><b>Python 3.12 · Playwright · pystray · CustomTkinter · PyInstaller · Inno Setup 6</b>
     <span>Integrações</span><b>Power Automate · SharePoint (API REST) · ServiceNow Employee Center · Teams</b>
   </div>
-  <div class="rodape"><span>Operação YDUQS · Dispatcher N1</span><span>Versão 1.10.9 · outubro de 2026</span></div>
+  <div class="rodape"><span>Operação YDUQS · Dispatcher N1</span><span>Versão 1.10.10 · outubro de 2026</span></div>
 </section>
 
 <!-- Sumário -->
@@ -203,7 +203,7 @@
     <tr><td><code>pasta.py</code></td><td>~155</td><td>Só no modo antigo: localizar/sincronizar a pasta do OneDrive.</td></tr>
     <tr><td><code>mapear_campos.py</code></td><td>~175</td><td><code>DispatchBot-Mapear.exe</code>: mapear campos e <code>--testar</code>.</td></tr>
     <tr><td><code>demo.py</code></td><td>~100</td><td>Demonstração: preenche GMUD e Backup no portal real sem enviar.</td></tr>
-    <tr><td><code>versao.py</code></td><td>2</td><td>Fonte única da versão (<code>VERSAO = "1.10.9"</code>).</td></tr>
+    <tr><td><code>versao.py</code></td><td>2</td><td>Fonte única da versão (<code>VERSAO = "1.10.10"</code>).</td></tr>
   </table>
 </section>
 
@@ -886,7 +886,7 @@ enquanto não encerrando:
   <h3>Mensagens do log que valem saber</h3>
   <table>
     <tr><th>Trecho</th><th>Significa</th></tr>
-    <tr><td><code>Robô 1.10.9 iniciado em HOST.</code></td><td>Thread do robô subiu.</td></tr>
+    <tr><td><code>Robô 1.10.10 iniciado em HOST.</code></td><td>Thread do robô subiu.</td></tr>
     <tr><td><code>Processando &lt;arquivo&gt;</code></td><td>Reserva feita.</td></tr>
     <tr><td><code>Envio automático suspenso (...)</code></td><td>Caiu para a conferência; o motivo vem entre parênteses.</td></tr>
     <tr><td><code>Chamado RITM… aberto (SO, …).</code></td><td>Sucesso.</td></tr>
@@ -1067,6 +1067,7 @@ msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\D
     <tr><td>1.10.4</td><td>Envio automático com conferência de obrigatórios; clientes ignorados no Backup; <code>GMUD_BACKUP</code>; plantão entre máquinas e histórico do time. 1ª GMUD real de ponta a ponta (16/10/2026).</td></tr>
     <tr><td>1.10.5</td><td>Recuperação não gera ✅ sem número para alerta ignorado/aberto à mão; <code>nbmasterbrarj01</code> ignorado e comparação só pela coluna Cliente. Release automática no GitHub Actions.</td></tr>
     <tr><td>1.10.7</td><td>Backup no portal em português: o impacto tenta as <code>alternativas</code> do passo <code>referencia</code> ("O incidente afetou pontualmente o desempenho, com impacto mínimo nas operações críticas.") quando a busca em inglês não acha a opção; o <code>escolher</code> do Tipo de falha aceita <code>traducoes</code> (Falha na execução).</td></tr>
+    <tr><td>1.10.10</td><td>Avatar do ícone: registra o PNG, procura em mais lugares e loga o motivo quando não abre; o build confere o avatar no exe (<code>DispatchBot-Mapear.exe --verificar-imagens</code>) antes de publicar.</td></tr>
     <tr><td>1.10.9</td><td>Backup: recarrega a página do caso até o <b>INC</b> aparecer (<code>captura_numero.recarregar_seg</code>); sem INC, guarda print e HTML para diagnóstico.</td></tr>
     <tr><td>1.10.6</td><td>Backup captura o <b>INC</b> (aba escondida) em vez do CS; <code>Robo.evento</code> não estoura mais com <code>tipo=</code> nos extras (o arquivo não fica parado em <code>processando</code>).</td></tr>
   </table>
