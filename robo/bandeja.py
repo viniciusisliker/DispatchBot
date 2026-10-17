@@ -14,9 +14,10 @@ import config
 from log import LOG_DIR, log
 
 CORES = {"ativo": "#2E9E5B", "login": "#E0A100", "confirmar": "#E0A100", "erro": "#D23C3C", "pausado": "#8A8F8C",
-         "preparando": "#2F7FD1"}
+         "preparando": "#2F7FD1", "instavel": "#2F7FD1"}
 TEXTOS = {"ativo": "Ativo", "login": "Aguardando login", "confirmar": "Aguardando sua confirmação",
-          "erro": "Erro", "pausado": "Pausado", "preparando": "Preparando"}
+          "erro": "Erro", "pausado": "Pausado", "preparando": "Preparando",
+          "instavel": "Instável"}
 
 
 _AVATAR = None

@@ -26,7 +26,7 @@ import pasta
 import servicenow
 from bandeja import TEXTOS as TEXTOS_STATUS, Bandeja, aviso_windows
 from emergencia import arquivo_parar, escutar_atalho
-from fila import HOST, Fila, Historico, PastaIndisponivel
+from fila import HOST, Fila, FilaInstavel, Historico, PastaIndisponivel
 from fila_sharepoint import FilaSharePoint
 from log import configurar as configurar_log, log
 from navegador import Interrompido, LoginNaoConcluido, Navegador, matar_navegadores_orfaos
@@ -56,6 +56,8 @@ def instancia_unica() -> bool:
     kernel32.CreateMutexW(None, False, NOME_MUTEX)
     return ctypes.get_last_error() != 183  # ERROR_ALREADY_EXISTS
 
+
+TOLERANCIA_INSTAVEL_MIN = 5  # SharePoint instável por menos que isso: azul e sem notificação; depois, vermelho
 
 MENSAGENS_AMIGAVEIS = (  # erros técnicos (Playwright/rede) -> texto que o plantonista entende
     ("Target page, context or browser has been closed",
@@ -177,6 +179,7 @@ class Robo:
         self.worker = None
         self.fila = None                 # Fila (pasta local) ou FilaSharePoint; criada pela thread do robô
         self.erro_infra = False          # erro de pasta/config: some sozinho quando resolver
+        self.instavel_desde = 0.0        # 1ª falha passageira do SharePoint/rede seguida (0 = respondendo)
         self.preparando = False          # primeira execução, esperando a pasta sincronizar
         self.preparando_desde = 0.0
         self.pasta_fixada = None         # pasta já marcada como "sempre no dispositivo" nesta execução
@@ -609,11 +612,25 @@ class Robo:
 
     def falha(self, mensagem: str, infra: bool = False):
         self.erro_infra = infra
-        self.bandeja.definir_status("erro", mensagem[:80])
+        self.bandeja.definir_status("erro", mensagem[:160])
         anterior, quando = self.ultima_falha
         if mensagem != anterior or time.time() - quando > 600:
             self.bandeja.notificar("DispatchBot - falha", mensagem)
             self.ultima_falha = (mensagem, time.time())
+
+    def instabilidade(self, e: FilaInstavel):
+        """Falha passageira do SharePoint/rede: o robô tenta de novo sozinho. Fica azul ("Instável") e sem
+        notificação; só vira erro (vermelho, com notificação) se durar mais de TOLERANCIA_INSTAVEL_MIN."""
+        log.warning("%s O robô tenta de novo.", e.tecnico)
+        if not self.instavel_desde:
+            self.instavel_desde = time.time()
+        self.erro_infra = True  # o status volta a "Ativo" no primeiro ciclo que der certo
+        if time.time() - self.instavel_desde < TOLERANCIA_INSTAVEL_MIN * 60:
+            self.bandeja.definir_status("instavel", str(e))
+        else:
+            resumo = str(e).split(". ")[0]
+            self.falha(f"{resumo} há mais de {TOLERANCIA_INSTAVEL_MIN} min. O robô continua tentando; "
+                       "se não voltar, avise o time de RPA.", infra=True)
 
     # --- threads ---
 
@@ -688,6 +705,10 @@ class Robo:
                         self.manter_sessao()
                         self.fechar_se_ocioso()
                     self.atualizar_se_preciso()
+                    if self.instavel_desde:
+                        log.info("Ciclo completo de novo (ficou instável por %.0f min).",
+                                 (time.time() - self.instavel_desde) / 60)
+                        self.instavel_desde = 0.0
                 except AguardandoPasta as e:
                     # Primeira instalação: o OneDrive ainda está trazendo a pasta. Não é erro.
                     if not self.preparando:
@@ -701,6 +722,8 @@ class Robo:
                             "DispatchBot", "A pasta da fila ainda não apareceu. Confira se o OneDrive está conectado "
                             "ou fale com o time de RPA.")
                     self.bandeja.definir_status("preparando", "sincronizando a pasta da fila")
+                except FilaInstavel as e:
+                    self.instabilidade(e)
                 except (PastaIndisponivel, config.ConfigInvalido) as e:
                     log.error("%s", e)
                     self.falha(str(e), infra=True)

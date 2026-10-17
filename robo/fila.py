@@ -85,6 +85,14 @@ class PastaIndisponivel(Exception):
     pass
 
 
+class FilaInstavel(PastaIndisponivel):
+    """Falha passageira do SharePoint/rede (HTTP 5xx, 429, sem conexão): o robô tenta de novo sozinho.
+    A mensagem é a do plantonista; `tecnico` vai só para o log."""
+    def __init__(self, mensagem: str, tecnico: str = ""):
+        super().__init__(mensagem)
+        self.tecnico = tecnico or mensagem
+
+
 class Fila:
     def __init__(self, raiz: str):
         self.raiz = Path(raiz)
