@@ -4,7 +4,7 @@ Painel: abre pelo clique no ícone da bandeja (ou "Abrir painel" no menu). Mostr
 - cabeçalho com o avatar, o status do robô e o botão Pausar/Retomar;
 - contadores do dia (na fila, abertos, erros, precisa de você);
 - "Precisa de você": login, chamado para conferir, alerta antigo;
-- "Chamados abertos hoje" (Tratar / Copiar) e "Erros de hoje" (abrir à mão, com o motivo);
+- "Chamados abertos hoje" (Tratar / Copiar) e "Erros de hoje" (abrir à mão, com o motivo e "Resolvido");
 - rodapé: Verificar agora, Logs e PARAR AGORA.
 Fechar a janela só esconde o painel; o robô continua rodando.
 
@@ -56,7 +56,8 @@ EVENTOS = {"chamado": ("CHAMADO", "#22C55E"), "erro": ("ERRO", "#EF4444"), "assu
            "emergencia": ("PARADA", "#EF4444"), "manual": ("À MÃO", "#9AA4AD"), "ignorado": ("IGNORADO", "#9AA4AD"),
            "login": ("LOGIN", "#F5A524"), "login_ok": ("LOGIN OK", "#9AA4AD"), "iniciou": ("ABRIU", "#9AA4AD"),
            "encerrou": ("FECHOU", "#9AA4AD"), "envio": ("ENVIO", "#9AA4AD"), "nome": ("NOME", "#9AA4AD"),
-           "atualizacao": ("ATUALIZANDO", "#14B8A6"), "atualizou": ("ATUALIZOU", "#14B8A6")}
+           "atualizacao": ("ATUALIZANDO", "#14B8A6"), "atualizou": ("ATUALIZOU", "#14B8A6"),
+           "resolvido": ("RESOLVIDO", "#9AA4AD")}
 
 
 def fonte_icones(tam: int):
@@ -88,6 +89,19 @@ def registrar(status: str, tipo: str, alerta, numero: str = "", url: str = "", m
             f.write(json.dumps(registro, ensure_ascii=False) + "\n")
     except OSError as e:
         log.warning("Não foi possível gravar no painel: %s", e)
+
+
+def chave(r: dict) -> str:
+    """Identifica um registro do painel (usada para marcar um erro como resolvido)."""
+    return f"{r.get('em')}|{r.get('alerta')}"
+
+
+def registrar_resolvido(r: dict, nome: str = ""):
+    """Erro tratado pelo plantonista (abriu à mão ou era alarme falso): sai da lista de erros de hoje."""
+    registro = {"em": agora_iso(), "status": "resolvido", "ref": chave(r), "tipo": r.get("tipo", ""),
+                "alerta": r.get("alerta", ""), "por": nome}
+    with open(ARQUIVO, "a", encoding="utf-8") as f:
+        f.write(json.dumps(registro, ensure_ascii=False) + "\n")
 
 
 def ler_hoje() -> list:
@@ -130,12 +144,14 @@ def curto(texto: str, limite: int) -> str:
 
 class Painel:
     def __init__(self, obter_estado, portal_url: str, ao_pausar, ao_verificar, ao_emergencia,
-                 ao_decidir=None, ao_conferencia=None, ao_login=None, ao_assumir=None, ao_historico=None):
+                 ao_decidir=None, ao_conferencia=None, ao_login=None, ao_assumir=None, ao_historico=None,
+                 ao_resolver=None):
         """obter_estado() devolve {"status", "texto", "pausado", "pendentes", "em_andamento",
         "decisoes": [{"id", "tipo", "rotulo", "idade", "recebido", "descricao"}],
         "conferindo": {"tipo", "rotulo", "detalhe", "campos": [(campo, valor)], "limite"} ou None,
         "login": {"sistema", "onde", "primeira"} ou None}.
-        ao_decidir(id, "abrir" | "manual" | "depois"); ao_conferencia("mostrar" | "pular"); ao_login()."""
+        ao_decidir(id, "abrir" | "manual" | "depois"); ao_conferencia("mostrar" | "pular"); ao_login();
+        ao_resolver(registro do erro, erros que sobraram hoje)."""
         self.obter_estado = obter_estado
         self.portal_url = portal_url
         self.ao_pausar = ao_pausar
@@ -145,6 +161,7 @@ class Painel:
         self.ao_conferencia = ao_conferencia or (lambda *a: None)
         self.ao_login = ao_login or (lambda: None)
         self.ao_assumir = ao_assumir or (lambda: None)
+        self.ao_resolver = ao_resolver or (lambda *a: None)
         self.ao_historico = ao_historico            # ao_historico(dia "AAAA-MM-DD") -> lista de eventos do time
         self._pedido_nome = None                    # (nome atual, ao_salvar): janelinha do nome, aberta pela thread do Tk
         self._historico_resultado = None            # resposta da leitura do histórico (thread à parte)
@@ -316,6 +333,7 @@ class Painel:
         self.lbl_detalhe = self._rotulo(textos, "", 12, wraplength=460)
         self.lbl_resumo = self._rotulo(textos, "", 12, cor=APAGADO, wraplength=460)
         self.lbl_resumo.pack(fill="x")
+        textos.bind("<Configure>", self._ajustar_quebra)  # o motivo do erro quebra na largura da janela, sem cortar
 
         # Faixa "Também ativo": outro robô ativo em outra máquina (só aparece quando há)
         self.faixa_outros = self._cartao(raiz, borda="#5A4310")
@@ -513,14 +531,21 @@ class Painel:
 
     # --- listas do dia ---
 
+    def _ajustar_quebra(self, evento):
+        largura = evento.width / (self.janela._get_window_scaling() or 1) - 8
+        if largura > 100:
+            self.lbl_detalhe.configure(wraplength=largura)
+            self.lbl_resumo.configure(wraplength=largura)
+
     def _desenhar_listas(self, registros: list):
         ok = [r for r in registros if r.get("status") == "ok"]
-        erros = [r for r in registros if r.get("status") != "ok"]
+        resolvidos = {r.get("ref") for r in registros if r.get("status") == "resolvido"}
+        erros = [r for r in registros if r.get("status") == "erro" and chave(r) not in resolvidos]
         for lista, itens, atributo, montar, vazio in (
                 (self.lista_ok, ok, "_chaves_ok", self._linha_ok,
                  "Nenhum chamado aberto hoje ainda. Os que o robô abrir aparecem aqui."),
                 (self.lista_erro, erros, "_chaves_erro", self._linha_erro, "Nenhum erro hoje.")):
-            chaves = [f"{r.get('em')}|{r.get('alerta')}" for r in itens]
+            chaves = [chave(r) for r in itens]
             if chaves == getattr(self, atributo):
                 continue
             setattr(self, atributo, chaves)
@@ -561,8 +586,22 @@ class Painel:
                     "sec", 36, icone="copiar").pack(side="right")
         self._botao(linha, "Abrir no ServiceNow", self._seguro(lambda: webbrowser.open(self.portal_url)), "sec",
                     icone="abrir").pack(side="right", padx=6)
-        self._rotulo(cartao, curto(r.get("mensagem"), 220), 12, cor="#F3A6A6", wraplength=640).pack(
+        self._botao(linha, "Resolvido", self._seguro(lambda: self._resolver(r)), "sec",
+                    icone="check").pack(side="right")
+        self._rotulo(cartao, curto(r.get("mensagem"), 400), 12, cor="#F3A6A6", wraplength=640).pack(
             fill="x", padx=14, pady=(0, 10))
+
+    def _resolver(self, r: dict):
+        """Erro tratado (chamado aberto à mão, ou alarme falso/texto ilegível sem nada a abrir)."""
+        if not messagebox.askyesno("DispatchBot", f"Marcar como resolvido?\n\n{curto(r.get('alerta'), 80)}\n\n"
+                                   "Use quando já abriu o chamado à mão ou quando não há nada a abrir "
+                                   "(ex.: alarme falso). O erro sai da lista de hoje.", parent=self.janela):
+            return
+        registrar_resolvido(r, (self.obter_estado() or {}).get("nome", ""))
+        _, erros = self._desenhar_listas(ler_hoje())
+        self.ao_resolver(r, len(erros))
+        self.lbl_aviso.configure(text="Erro marcado como resolvido", text_color=TEAL)
+        self.janela.after(3000, lambda: self.lbl_aviso.configure(text=""))
 
     def _copiar(self, texto: str, aviso: str):
         if not texto:
@@ -781,7 +820,7 @@ class Painel:
             self.janela.iconphoto(False, self._foto(status))
         cor = STATUS_COR.get(status, TEXTO)
         self.lbl_status.configure(text=e.get("texto", ""), text_color=cor)
-        detalhe = curto(e.get("detalhe"), 160)
+        detalhe = curto(e.get("detalhe"), 400)
         if detalhe:  # ex.: o motivo do erro, abaixo do título curto
             self.lbl_detalhe.configure(text=detalhe[:1].upper() + detalhe[1:], text_color=cor)
             self.lbl_detalhe.pack(fill="x", before=self.lbl_resumo)

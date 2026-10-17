@@ -162,7 +162,7 @@ class Robo:
             self.alternar_pausa, self.acordar.set, lambda: self.parar_agora("menu"),
             ao_decidir=self.decidir_antigo, ao_conferencia=self.pedir_conferencia,
             ao_login=self.pedir_login_frente, ao_assumir=self.assumir_plantao,
-            ao_historico=self.ler_historico_time,
+            ao_historico=self.ler_historico_time, ao_resolver=self.resolver_erro,
         )
         self.decisoes = {}               # alertas antigos esperando decisão: id -> dados mostrados no painel
         self.conferindo = None           # chamado preenchido esperando o Submit (dados para o painel)
@@ -221,6 +221,21 @@ class Robo:
                 "conferindo": self.conferindo, "login": self.login_aviso,
                 "nome": config.nome_plantonista(self.cfg), "outros": self.outros_ativos(),
                 "assumindo": [d["nome"] for d in self.assumindo.values()]}
+
+    def resolver_erro(self, registro: dict, restantes: int):
+        """Botão "Resolvido" do painel (thread do Tk): vai para o histórico do time e, sem outro erro aberto,
+        o ícone sai do vermelho. Emergência e erro de pasta/config não saem por aqui."""
+        self.evento("resolvido", f"Erro marcado como resolvido: {registro.get('tipo')} {registro.get('alerta')}".strip(),
+                    tipo=registro.get("tipo"))
+        log.info("Erro marcado como resolvido no painel: %s %s", registro.get("tipo"), registro.get("alerta"))
+        if restantes or self.bandeja.status != "erro" or self.erro_infra:
+            return
+        if self.emergencia.is_set() or self.cfg.get("emergencia"):
+            return
+        if self.cfg.get("pausado"):
+            self.bandeja.definir_status("pausado", self.detalhe_pausa)
+        else:
+            self.bandeja.definir_status("ativo")
 
     def alternar_pausa(self):
         cfg = config.carregar()
@@ -612,7 +627,7 @@ class Robo:
 
     def falha(self, mensagem: str, infra: bool = False):
         self.erro_infra = infra
-        self.bandeja.definir_status("erro", mensagem[:160])
+        self.bandeja.definir_status("erro", mensagem)  # inteira: o painel quebra a linha; o menu do ícone corta
         anterior, quando = self.ultima_falha
         if mensagem != anterior or time.time() - quando > 600:
             self.bandeja.notificar("DispatchBot - falha", mensagem)

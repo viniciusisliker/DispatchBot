@@ -130,7 +130,8 @@ class Bandeja:
 
     def texto_status(self) -> str:
         texto = TEXTOS[self.status]
-        return f"{texto}: {self.detalhe}" if self.detalhe else texto
+        detalhe = self.detalhe if len(self.detalhe) <= 100 else self.detalhe[:99] + "…"  # menu do ícone é estreito
+        return f"{texto}: {detalhe}" if detalhe else texto
 
     def titulo(self) -> str:
         return f"DispatchBot - {self.texto_status()}"[:127]  # limite do Windows
