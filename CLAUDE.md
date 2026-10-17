@@ -1,4 +1,6 @@
-> **Ícone desenhado no lugar do avatar (17/10/2026, sem build, versão segue 1.10.9):** print do usuário: a notificação "Versão 1.10.9 baixada" saiu com o **robô desenhado verde** (o reserva do `bandeja.imagem` quando `avatar()` falha), não com o avatar. Os builds do GitHub Actions (1.10.6+) usam Pillow 13 / PyInstaller 6.22; a 1.10.4 era build local. Causa **não confirmada** (no Linux o exe com Pillow 13 abre o PNG; o instalador do Inno 6.5 não abre no innoextract 1.9). Feito: `bandeja.avatar()` importa o `PngImagePlugin` explicitamente, tenta também `_internal\assets` e `assets` ao lado do exe e **loga o motivo** ("Avatar não carregou...") em vez de cair calado; `DispatchBot-Mapear.exe --verificar-imagens` e o `build.ps1` roda isso depois do PyInstaller (sem avatar, o build falha e não publica). Também: a notificação de versão baixada só aparece no "Procurar atualização agora" (a automática baixa calada; a 1ª olhada é 2 min depois de abrir e depois de hora em hora).
+> **1.10.10 (17/10/2026):** versão subida com a correção do avatar abaixo (pedido do usuário); Release pelo GitHub Actions (disparo manual do `release.yml`: a tag não passa pelo proxy da sessão), notas em `build/notas/1.10.10.md`.
+
+> **Ícone desenhado no lugar do avatar (17/10/2026, na 1.10.10):** print do usuário: a notificação "Versão 1.10.9 baixada" saiu com o **robô desenhado verde** (o reserva do `bandeja.imagem` quando `avatar()` falha), não com o avatar. Os builds do GitHub Actions (1.10.6+) usam Pillow 13 / PyInstaller 6.22; a 1.10.4 era build local. Causa **não confirmada** (no Linux o exe com Pillow 13 abre o PNG; o instalador do Inno 6.5 não abre no innoextract 1.9). Feito: `bandeja.avatar()` importa o `PngImagePlugin` explicitamente, tenta também `_internal\assets` e `assets` ao lado do exe e **loga o motivo** ("Avatar não carregou...") em vez de cair calado; `DispatchBot-Mapear.exe --verificar-imagens` e o `build.ps1` roda isso depois do PyInstaller (sem avatar, o build falha e não publica). Também: a notificação de versão baixada só aparece no "Procurar atualização agora" (a automática baixa calada; a 1ª olhada é 2 min depois de abrir e depois de hora em hora).
 
 > **1.10.9 (17/10/2026):** versão subida com a correção abaixo (pedido do usuário); instalador pelo GitHub Actions (tag `v1.10.9`), notas em `build/notas/1.10.9.md`; rótulos de versão do manual e da documentação técnica trocados para 1.10.9.
 
@@ -92,7 +94,7 @@ Etapas do processo (usuário, 05/10/2026): envio do alerta → criação do cham
 | config.py | carrega/mescla config (chaves novas entram sozinhas), `tipo_efetivo` (herança `herda`) |
 | mapear_campos.py | `DispatchBot-Mapear.exe`: lista campos do formulário; `--testar <json>` preenche sem enviar |
 | atualizacao.py | atualização automática pela Release do GitHub (procura, baixa, confere, roda o instalador silencioso) |
-| versao.py | versão única (hoje **1.10.9**) |
+| versao.py | versão única (hoje **1.10.10**) |
 
 Build: `powershell -ExecutionPolicy Bypass -File build\build.ps1` → `dist\instalador\DispatchBot-Setup-<versão>.exe`. Inno Setup 6 instalado por usuário (winget). Arquivos .iss e .ps1 precisam de UTF-8 **com BOM**.
 
