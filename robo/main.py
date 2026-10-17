@@ -20,6 +20,7 @@ if sys.stderr is None:
 
 from pathlib import Path
 
+import atualizacao
 import config
 import pasta
 import servicenow
@@ -152,6 +153,7 @@ class Robo:
             pausado=self.cfg.get("pausado", False), versao=VERSAO,
             ao_envio=self.alternar_envio, envio_ligado=self.envio_ligado,
             ao_painel=lambda: self.painel.abrir(), ao_nome=self.pedir_nome,
+            ao_atualizar=self.procurar_atualizacao,
         )
         self.painel = Painel(
             self.estado_painel, servicenow.url_absoluta(self.cfg, self.cfg["portal_path"]),
@@ -199,6 +201,12 @@ class Robo:
         self.respostas_antigos = {}      # id do alerta -> "abrir" | "manual" | ("depois", hora)
         self.aguardando_antigos = {}     # nome do arquivo -> id do alerta (não reserva de novo enquanto espera)
         self.pergunta_aberta = False     # uma pergunta por vez na tela
+        # Atualização automática (Release do GitHub): baixa numa thread, instala com o robô parado
+        self.proxima_atualizacao = time.time() + 120  # primeira olhada 2 min depois de abrir
+        self.baixando = False
+        self.instalador_pronto = None    # (versão, caminho) baixado e conferido, esperando o robô ficar parado
+        self.instalando_desde = 0.0      # instalador já rodando: não pega alerta novo enquanto isso
+        self.atualizacao_pedida = False  # "Procurar atualização agora" no menu: avisa mesmo se não houver
 
     # --- menu da bandeja e painel ---
 
@@ -642,6 +650,7 @@ class Robo:
     def loop(self):
         log.info("Robô %s iniciado em %s.", VERSAO, HOST)
         self.evento("iniciou", f"Robô aberto (versão {VERSAO}, {'pausado' if self.cfg.get('pausado') else 'ativo'})")
+        self.conferir_atualizacao_anterior()
         fila = None
         try:
             while not self.parar.is_set():
@@ -674,9 +683,11 @@ class Robo:
                             self.login_inicial()
                         elif self.precisa_abrir_sessao():
                             self.login_inicial(primeira=False)
-                        self.ciclo(fila)
+                        if not self.instalando_desde:
+                            self.ciclo(fila)
                         self.manter_sessao()
                         self.fechar_se_ocioso()
+                    self.atualizar_se_preciso()
                 except AguardandoPasta as e:
                     # Primeira instalação: o OneDrive ainda está trazendo a pasta. Não é erro.
                     if not self.preparando:
@@ -720,6 +731,98 @@ class Robo:
             self.evento("encerrou", "Robô fechado")
             self.gravar_eventos(fila)
             log.info("Robô encerrado.")
+
+    # --- atualização automática ---
+
+    def procurar_atualizacao(self):
+        """Menu do ícone: olha a Release agora e avisa o resultado."""
+        self.atualizacao_pedida = True
+        self.proxima_atualizacao = 0.0
+        self.acordar.set()
+
+    def atualizar_se_preciso(self):
+        """Chamado pela thread do robô a cada ciclo: procura versão nova de hora em hora e instala
+        quando o robô está parado (pausado, ou ativo sem alerta, conferência ou pergunta na tela)."""
+        cfg = self.cfg.get("atualizacao") or {}
+        if not atualizacao.disponivel() or not (cfg.get("automatica", True) or self.atualizacao_pedida):
+            if self.atualizacao_pedida and not atualizacao.disponivel():
+                self.atualizacao_pedida = False
+                self.bandeja.notificar("DispatchBot", "Atualização só no robô instalado.")
+            return
+        if self.instalando_desde:
+            if time.time() - self.instalando_desde > 300:  # o instalador não fechou o robô: volta ao normal
+                log.warning("O instalador não encerrou o robô em 5 min; a atualização fica para a próxima.")
+                self.instalando_desde = 0.0
+                self.bandeja.definir_status("pausado" if self.cfg.get("pausado") else "ativo", self.detalhe_pausa)
+            return
+        if self.instalador_pronto:
+            if self.pode_atualizar():
+                self.instalar_atualizacao(*self.instalador_pronto)
+            return
+        if self.baixando or time.time() < self.proxima_atualizacao:
+            return
+        self.proxima_atualizacao = time.time() + max(10, cfg.get("intervalo_min", 60)) * 60
+        self.baixando = True
+        threading.Thread(target=self.baixar_atualizacao, args=(cfg.get("repositorio") or "",),
+                         name="atualizacao", daemon=True).start()
+
+    def baixar_atualizacao(self, repositorio: str):
+        pedida, self.atualizacao_pedida = self.atualizacao_pedida, False
+        try:
+            versao = atualizacao.ultima_versao(repositorio)
+            if atualizacao.numeros(versao) <= atualizacao.numeros(VERSAO):
+                if pedida:
+                    self.bandeja.notificar("DispatchBot", f"Você já está na versão mais recente ({VERSAO}).")
+                return
+            log.info("Versão nova na Release: %s (esta é %s). Baixando o instalador.", versao, VERSAO)
+            caminho = atualizacao.baixar(repositorio, versao)
+            log.info("Instalador %s baixado e conferido; instala quando o robô estiver parado.", versao)
+            self.instalador_pronto = (versao, caminho)
+            if pedida:
+                self.bandeja.notificar("DispatchBot", f"Versão {versao} baixada. Instala sozinha quando não houver "
+                                                      "alerta em andamento.")
+            self.acordar.set()
+        except Exception as e:
+            log.warning("Não foi possível procurar/baixar a atualização: %s", e)
+            if pedida:
+                self.bandeja.notificar("DispatchBot", f"Não consegui procurar a atualização: {primeira_linha(e)}")
+        finally:
+            self.baixando = False
+
+    def pode_atualizar(self) -> bool:
+        if self.cfg.get("pausado") or self.emergencia.is_set():
+            return True
+        # Alertas antigos esperando decisão não seguram a atualização: a pergunta volta depois de reabrir
+        esperando = len(self.aguardando_antigos)
+        return not (self.em_andamento or self.conferindo or self.pergunta_aberta or self.login_aviso
+                    or self.pendentes > esperando)
+
+    def instalar_atualizacao(self, versao: str, caminho):
+        log.info("Atualizando de %s para %s: rodando o instalador em modo silencioso.", VERSAO, versao)
+        self.evento("atualizacao", f"Atualizando da versão {VERSAO} para a {versao}")
+        self.bandeja.definir_status("preparando", f"atualizando para a versão {versao}")
+        self.bandeja.notificar("DispatchBot", f"Atualizando para a versão {versao}. Volta sozinho em 1 minuto.")
+        self.instalador_pronto = None
+        self.instalando_desde = time.time()
+        try:
+            atualizacao.instalar(caminho, VERSAO, versao, time.time())
+        except Exception as e:
+            log.warning("Não foi possível rodar o instalador da %s: %s", versao, e)
+            self.instalando_desde = 0.0
+            self.bandeja.definir_status("pausado" if self.cfg.get("pausado") else "ativo", self.detalhe_pausa)
+
+    def conferir_atualizacao_anterior(self):
+        """Ao abrir: diz no log, no histórico e na notificação se a última atualização deu certo."""
+        anterior = atualizacao.resultado_anterior()
+        if not anterior:
+            return
+        if anterior.get("para") == VERSAO:
+            log.info("Atualizado da versão %s para a %s.", anterior.get("de"), VERSAO)
+            self.evento("atualizou", f"Atualizado da versão {anterior.get('de')} para a {VERSAO}")
+            self.bandeja.notificar("DispatchBot", f"Atualizado para a versão {VERSAO}.")
+        else:
+            log.warning("A atualização para a %s não terminou (continua na %s). Log do instalador em %s.",
+                        anterior.get("para"), VERSAO, atualizacao.PASTA)
 
     def abrir_fila(self, fila):
         """Fila do SharePoint (padrão) ou da pasta sincronizada. Recria se o config mudou."""

@@ -12,6 +12,12 @@
   "pasta_sincronizada": "",
   "_ajuda_link_sincronizar": "Link odopen:// da pasta DispatchBot-Fila no SharePoint (gerado uma vez pelo time, ver README). Na primeira execução, se a pasta ainda não estiver sincronizada, o robô abre este link e o OneDrive sincroniza sozinho. Vazio = o robô procura a pasta e, se não achar, pergunta.",
   "link_sincronizar": "",
+  "_ajuda_atualizacao": "O robô procura versão nova na última Release do GitHub (repositorio) a cada intervalo_min minutos, baixa o instalador e instala sozinho em modo silencioso quando está parado (pausado, ou ativo sem alerta na fila, conferência ou pergunta na tela). Fecha e abre de novo em cerca de 1 minuto. automatica false = só pelo menu do ícone (Procurar atualização agora).",
+  "atualizacao": {
+    "automatica": true,
+    "repositorio": "viniciusisliker/DispatchBot",
+    "intervalo_min": 60
+  },
   "intervalo_polling_seg": 15,
   "idade_minima_arquivo_seg": 5,
   "janela_confirmacao_seg": 10,

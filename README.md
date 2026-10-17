@@ -38,6 +38,8 @@ A leitura no SharePoint real foi testada em 01/10/2026 (sem janela e sem login),
 
 Para **atualizar**, rode o instalador da versão nova por cima, inclusive em modo silencioso (`/VERYSILENT`). O instalador pede para o robô sair: ele termina o alerta em andamento, e o instalador só força o encerramento se ele não sair em 30 s. Depois o robô é aberto de novo. Configuração, sessão e histórico são preservados, e chaves novas do config entram sozinhas. Na desinstalação, o instalador pergunta se deve apagar também esses dados.
 
+**Atualização automática (1.10.8):** o robô instalado olha a última Release deste repositório de hora em hora (`atualizacao` no config), baixa o instalador para `%LOCALAPPDATA%\DispatchBot\atualizacao` (confere tamanho e o SHA-256 publicado pelo GitHub) e roda `/VERYSILENT` sozinho quando está parado: pausado, ou ativo sem alerta na fila, conferência, pergunta ou login na tela. Fecha e abre de novo em cerca de 1 minuto; no histórico do time aparecem ATUALIZANDO e ATUALIZOU. Menu do ícone: **Procurar atualização agora**. `atualizacao.automatica: false` desliga (só pelo menu). Quem está numa versão anterior à 1.10.8 instala a 1.10.8 à mão uma vez.
+
 O robô fica no ícone da bandeja. **Verde** = ativo, **azul** = preparando (só na instalação), **amarelo** = precisa do plantonista (login, ou conferir um chamado que o robô não enviou sozinho), **vermelho** = erro (detalhe no painel e no log), **cinza** = pausado. **Só o Dispatcher N1 da vez deixa o robô ativo**. Nas outras máquinas, use *Pausado*. Se dois robôs ficarem ativos ao mesmo tempo, os dois mostram um aviso.
 
 ### Painel do plantonista (tema escuro, desde a 1.10.0)
