@@ -50,7 +50,7 @@ Clicar no ícone (ou **Abrir painel** no menu) abre uma janela escura (CustomTki
 - **Contadores do dia:** na fila, abertos hoje, erros hoje e "precisa de você".
 - **Precisa de você:** login esperando, chamado preenchido para conferir (*Ver formulário*, *Pular*; só quando o envio automático está desligado ou o robô achou campo obrigatório vazio) e alerta antigo (*Abrir chamado*, *Já foi aberto*, *Depois*).
 - **Chamados abertos hoje:** CHG (ou título do Backup), número em verde, *Tratar* (abre o chamado na tela de tratamento) e *Copiar*.
-- **Erros de hoje: abrir à mão:** o motivo de cada um, *Abrir no ServiceNow* e *Copiar*.
+- **Erros de hoje: abrir à mão:** o motivo de cada um, *Abrir no ServiceNow*, *Copiar* e *Resolvido* (tira da lista depois de abrir à mão ou quando era alarme falso; sem outro erro, o ícone sai do vermelho).
 - **Rodapé:** *Verificar agora*, *Logs* e **PARAR AGORA** (pede confirmação).
 
 Quando o robô precisa do plantonista, uma **janelinha "Precisa de você"** aparece sozinha no canto da tela, mesmo com o painel fechado (com os campos preenchidos e a contagem do tempo para enviar).
