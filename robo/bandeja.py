@@ -74,7 +74,7 @@ def _seguro(acao):
 
 class Bandeja:
     def __init__(self, ao_pausar, ao_sair, ao_verificar, ao_abrir_pasta, ao_emergencia, pausado: bool, versao: str,
-                 ao_envio=None, envio_ligado=lambda grupo: False, ao_painel=None, ao_nome=None):
+                 ao_envio=None, envio_ligado=lambda grupo: False, ao_painel=None, ao_nome=None, ao_atualizar=None):
         self.pausado = pausado
         self.status = "pausado" if pausado else "ativo"
         self.detalhe = ""
@@ -85,6 +85,7 @@ class Bandeja:
             pystray.Menu.SEPARATOR,
             pystray.MenuItem(lambda item: f"Status: {self.texto_status()}", None, enabled=False),
             pystray.MenuItem(f"Versão {versao}", None, enabled=False),
+            pystray.MenuItem("Procurar atualização agora", _seguro(ao_atualizar or (lambda: None))),
             # default=True: clicar no ícone abre o painel
             pystray.MenuItem("Abrir painel", _seguro(ao_painel or (lambda: None)), default=True),
             pystray.Menu.SEPARATOR,

@@ -54,7 +54,8 @@ EVENTOS = {"chamado": ("CHAMADO", "#22C55E"), "erro": ("ERRO", "#EF4444"), "assu
            "plantao_passado": ("PASSOU", "#F5A524"), "ativou": ("ATIVOU", "#14B8A6"), "pausou": ("PAUSOU", "#9AA4AD"),
            "emergencia": ("PARADA", "#EF4444"), "manual": ("À MÃO", "#9AA4AD"), "ignorado": ("IGNORADO", "#9AA4AD"),
            "login": ("LOGIN", "#F5A524"), "login_ok": ("LOGIN OK", "#9AA4AD"), "iniciou": ("ABRIU", "#9AA4AD"),
-           "encerrou": ("FECHOU", "#9AA4AD"), "envio": ("ENVIO", "#9AA4AD"), "nome": ("NOME", "#9AA4AD")}
+           "encerrou": ("FECHOU", "#9AA4AD"), "envio": ("ENVIO", "#9AA4AD"), "nome": ("NOME", "#9AA4AD"),
+           "atualizacao": ("ATUALIZANDO", "#14B8A6"), "atualizou": ("ATUALIZOU", "#14B8A6")}
 
 
 def fonte_icones(tam: int):
