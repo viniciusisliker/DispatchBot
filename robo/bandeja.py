@@ -3,11 +3,15 @@ import ctypes
 import os
 import threading
 
+import sys
+from pathlib import Path
+
 import pystray
 from PIL import Image, ImageDraw
+from PIL import PngImagePlugin  # noqa: F401  (registra o PNG já no import: no exe o Pillow pode não achá-lo sozinho)
 
 import config
-from log import LOG_DIR
+from log import LOG_DIR, log
 
 CORES = {"ativo": "#2E9E5B", "login": "#E0A100", "confirmar": "#E0A100", "erro": "#D23C3C", "pausado": "#8A8F8C",
          "preparando": "#2F7FD1"}
@@ -18,14 +22,31 @@ TEXTOS = {"ativo": "Ativo", "login": "Aguardando login", "confirmar": "Aguardand
 _AVATAR = None
 
 
+def caminhos_avatar() -> list:
+    """Onde o avatar pode estar: pasta dos recursos do exe e, por garantia, ao lado do exe."""
+    caminhos = [config.pasta_recursos() / "assets" / "avatar.png"]
+    if getattr(sys, "frozen", False):
+        pasta_exe = Path(sys.executable).resolve().parent
+        caminhos += [pasta_exe / "_internal" / "assets" / "avatar.png", pasta_exe / "assets" / "avatar.png"]
+    return list(dict.fromkeys(caminhos))
+
+
 def avatar():
-    """Avatar do robô (assets/avatar.png, imagem inteira), carregado uma vez. None se o arquivo não existir."""
+    """Avatar do robô (assets/avatar.png, imagem inteira), carregado uma vez. None se não abrir
+    (aí o ícone é o robô desenhado; o motivo fica no log)."""
     global _AVATAR
     if _AVATAR is None:
-        try:
-            _AVATAR = Image.open(config.pasta_recursos() / "assets" / "avatar.png").convert("RGBA")
-        except OSError:
-            _AVATAR = False
+        _AVATAR = False
+        erros = []
+        for caminho in caminhos_avatar():
+            try:
+                with Image.open(caminho) as img:
+                    _AVATAR = img.convert("RGBA")
+                break
+            except Exception as e:  # arquivo faltando, Pillow sem o PNG...: tenta o próximo
+                erros.append(f"{caminho}: {type(e).__name__}: {e}")
+        if not _AVATAR:
+            log.warning("Avatar não carregou; usando o ícone desenhado. %s", " | ".join(erros))
     return _AVATAR or None
 
 
