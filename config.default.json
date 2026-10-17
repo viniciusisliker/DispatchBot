@@ -263,14 +263,15 @@
       "seletor_erro_validacao": "",
       "confirmacao_timeout_min": 30,
       "captura_numero": {
-        "_ajuda": "O formulário de Incidente cria um caso CS e, junto, o INC (fica na aba Related Records, escondida). O número que o time usa é o INC. seletor body = lê o texto da página inteira, inclusive o que está escondido; espera o INC por até 60 s antes de aceitar o CS.",
+        "_ajuda": "O formulário de Incidente cria um caso CS e, junto, o INC (fica na aba Related Records, escondida). O número que o time usa é o INC. seletor body = lê o texto da página inteira, inclusive o que está escondido; espera o INC por até 90 s antes de aceitar o CS, recarregando a página do caso a cada 15 s (o INC é criado depois do CS e a página não se atualiza sozinha). Sem INC: guarda print + HTML em logs/screenshots.",
         "regex": "(INC|RITM|REQ|CS)\\d{7}",
         "preferir": [
           "INC"
         ],
         "seletor": "body",
-        "espera_preferido_seg": 60,
-        "timeout_seg": 120
+        "espera_preferido_seg": 90,
+        "recarregar_seg": 15,
+        "timeout_seg": 150
       }
     }
   }
