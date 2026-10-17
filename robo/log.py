@@ -47,7 +47,7 @@ def screenshot(page, nome: str):
 
 def _limpar_screenshots_antigos():
     limite = time.time() - DIAS_MANTER_SCREENSHOTS * 86400
-    for arquivo in SCREENSHOT_DIR.glob("*.png"):
+    for arquivo in [*SCREENSHOT_DIR.glob("*.png"), *SCREENSHOT_DIR.glob("*.html")]:
         try:
             if arquivo.stat().st_mtime < limite:
                 arquivo.unlink()

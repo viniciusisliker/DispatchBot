@@ -148,6 +148,19 @@ def texto_pagina(page, seletor: str = "") -> str:
         return page.url  # página ainda navegando
 
 
+def salvar_diagnostico(page, nome: str):
+    """Screenshot + HTML da página (inclusive o escondido) junto do log, para achar onde o número aparece."""
+    from log import SCREENSHOT_DIR, screenshot
+    screenshot(page, nome)
+    try:
+        nome = "".join(c if c.isalnum() or c in "-_" else "_" for c in nome)[:80]
+        caminho = SCREENSHOT_DIR / f"{datetime.now():%Y%m%d_%H%M%S}_{nome}.html"
+        caminho.write_text(page.content(), encoding="utf-8")
+        log.info("HTML da página salvo: %s", caminho)
+    except Exception as e:
+        log.warning("Não foi possível salvar o HTML da página: %s", e)
+
+
 def verificar_parada(nav):
     """Pausa ou parada de emergência pedida: interrompe entre um passo e outro."""
     if getattr(nav, "deve_parar", None) and nav.deve_parar():
@@ -349,6 +362,7 @@ def abrir_chamado(nav, cfg: dict, tipo_cfg: dict, alerta: dict, enviar: bool = T
             log.warning("Envio automático suspenso (%s): o plantonista confere e envia.", motivo)
 
     verificar_parada(nav)  # última chance de parar sem ter enviado nada
+    url_formulario = page.url  # recarregar aqui não adianta (só mostra o formulário vazio)
     if antes_de_enviar:
         antes_de_enviar()  # a partir daqui o chamado pode existir: nunca reenviar sozinho
     if confirmar:
@@ -370,16 +384,35 @@ def abrir_chamado(nav, cfg: dict, tipo_cfg: dict, alerta: dict, enviar: bool = T
     if isinstance(preferir, str):
         preferir = [preferir]
     visto_em = None
+    reserva = None  # 1º número que não é o preferido (ex.: o CS), caso a página recarregada não mostre mais
+    recarregar_seg = captura.get("recarregar_seg", 0)  # 0 = nunca recarrega
+    recarregou_em = None
     try:
         while time.monotonic() < limite:
             page.wait_for_timeout(1000)
             novos = [m.group(0) for m in regex.finditer(texto_pagina(page, seletor_numero)) if m.group(0) not in ja_na_tela]
             if novos:
                 visto_em = visto_em or time.monotonic()
+                reserva = reserva or novos[0]
+            if visto_em:
                 melhor = next((n for pref in preferir for n in novos if n.startswith(pref)), None)  # na ordem da lista
                 # Sem o preferido, espera um pouco por ele (padrão 10 s); depois aceita o que apareceu
-                if melhor or not preferir or time.monotonic() - visto_em > captura.get("espera_preferido_seg", 10):
+                if melhor or not preferir:
                     return melhor or novos[0], page.url
+                if time.monotonic() - visto_em > captura.get("espera_preferido_seg", 10):
+                    log.warning("O %s não apareceu em %s s: fica o %s.", "/".join(preferir),
+                                captura.get("espera_preferido_seg", 10), reserva)
+                    salvar_diagnostico(page, f"sem_{preferir[0]}_{reserva}")
+                    return reserva, page.url
+                # O INC do Backup é criado depois do CS e a página do caso não se atualiza sozinha: recarrega
+                if recarregar_seg and page.url != url_formulario and \
+                        time.monotonic() - (recarregou_em or visto_em) > recarregar_seg:
+                    recarregou_em = time.monotonic()
+                    log.info("Chamado %s criado; recarregando a página para achar o %s.", reserva, "/".join(preferir))
+                    try:
+                        page.reload(wait_until="domcontentloaded")
+                    except Exception as e:
+                        log.warning("Não deu para recarregar a página do chamado: %s", str(e).splitlines()[0])
             # Pedidos da janela "Precisa de você" (depois de olhar o número: se já saiu, o chamado existe)
             pedido = verificar_pedido() if (confirmar and verificar_pedido) else None
             if pedido == "mostrar":
@@ -387,7 +420,7 @@ def abrir_chamado(nav, cfg: dict, tipo_cfg: dict, alerta: dict, enviar: bool = T
                     page.bring_to_front()
                 except Exception:
                     pass
-            elif pedido == "pular" and not novos:
+            elif pedido == "pular" and not visto_em:
                 raise Pulado("O plantonista pulou este alerta no robô; o chamado não foi enviado. Abra à mão.")
             # Mensagem de validação = o ServiceNow não aceitou o envio. Com confirmação, o plantonista corrige e reenvia.
             if seletor_erro and not confirmar:
