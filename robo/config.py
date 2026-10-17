@@ -60,6 +60,16 @@ def carregar() -> dict:
         if isinstance(cap, dict) and isinstance(cap_modelo, dict) and cap.get("seletor") == "" and cap_modelo.get("seletor"):
             meu["captura_numero"] = dict(cap_modelo)
             mudou = True
+        # alternativas novas de um passo (ex.: impacto em português, 17/10/2026): a mescla não troca
+        # a lista de passos, então copia para o passo instalado de mesmo seletor que ainda não tem
+        if isinstance(meu, dict) and isinstance(tipo, dict) and isinstance(meu.get("passos"), list):
+            do_modelo = {p.get("seletor"): p for p in tipo.get("passos") or [] if isinstance(p, dict)}
+            for p in meu["passos"]:
+                modelo_p = do_modelo.get(p.get("seletor")) if isinstance(p, dict) else None
+                for chave in ("alternativas", "traducoes"):  # traduções do portal em português
+                    if modelo_p and chave in modelo_p and chave not in p:
+                        p[chave] = json.loads(json.dumps(modelo_p[chave]))
+                        mudou = True
         # ignorar_clientes: clientes novos do modelo entram na lista já instalada (a mescla não troca listas)
         if isinstance(meu, dict) and isinstance(tipo, dict) and isinstance(meu.get("ignorar_clientes"), list):
             atuais = {str(n).strip().lower() for n in meu["ignorar_clientes"]}

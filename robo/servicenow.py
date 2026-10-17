@@ -181,24 +181,58 @@ def executar_passo(page, passo: dict, v: dict):
         alvo.click()
     elif acao == "referencia":
         busca = resolver(str(passo.get("busca", "")), v) or valor
-        preencher_referencia(page, alvo, busca, valor, passo)
+        tentativas = [(busca, valor, False)]
+        # Alternativas (ex.: o portal em português mostra a opção com outro texto)
+        for alt in passo.get("alternativas", []):
+            tentativas.append((resolver(str(alt.get("busca", "")), v),
+                               resolver(str(alt.get("regex") or alt.get("valor", "")), v), bool(alt.get("regex"))))
+        preencher_referencia(page, alvo, tentativas, passo)
     elif acao == "escolher":
         # Lista fixa do Service Portal (select2 sobre um <select>): abre e clica na opção com o texto exato
+        # (ou a tradução dele em "traducoes": o portal em português mostra as opções traduzidas)
         alvo.click()
+        textos = [valor] + ([passo["traducoes"][valor]] if valor in passo.get("traducoes", {}) else [])
+        exato = "|".join(re.escape(t) for t in textos)
         opcoes = page.locator(passo.get("seletor_opcao", ".select2-drop-active .select2-result-label"))
-        opcoes.filter(has_text=re.compile(rf"^\s*{re.escape(valor)}\s*$")).first.click()
+        opcoes.filter(has_text=re.compile(rf"^\s*({exato})\s*$")).first.click()
     else:
         raise ValueError(f"Ação desconhecida no config: '{acao}'")
 
 
-def preencher_referencia(page, alvo, busca: str, valor: str, passo: dict):
+def preencher_referencia(page, alvo, tentativas: list, passo: dict):
     """Campo de referência do Service Portal (select2): clica, digita a busca e escolhe a opção
-    que contém o valor (ex.: busca 'SOCIEDADE DE ENSINO', opção com '3-9R2V6QXWXV')."""
+    que contém o valor (ex.: busca 'SOCIEDADE DE ENSINO', opção com '3-9R2V6QXWXV').
+    tentativas = [(busca, valor, é_regex)]: se uma não acha a opção ("Nenhuma correspondência"),
+    apaga a busca e tenta a próxima. Nenhuma achou: erro com as opções que apareceram."""
     alvo.click()
     campo = page.locator(passo.get("seletor_busca", ".select2-drop-active input.select2-input")).first
-    campo.press_sequentially(busca, delay=60)  # select2 busca por tecla digitada
-    opcao = page.locator(passo.get("seletor_opcao", ".select2-drop-active .select2-result-label"))
-    opcao.filter(has_text=valor).first.click()
+    opcoes = page.locator(passo.get("seletor_opcao", ".select2-drop-active .select2-result-label"))
+    sem_resultado = page.locator(".select2-drop-active .select2-no-results")
+    so_uma = len(tentativas) == 1
+    vistas = []
+    for i, (busca, valor, regex) in enumerate(tentativas):
+        if i:
+            campo.fill("")
+        campo.press_sequentially(busca, delay=60)  # select2 busca por tecla digitada
+        filtro = re.compile(valor, re.IGNORECASE) if regex else valor
+        opcao = opcoes.filter(has_text=filtro).first
+        if so_uma:
+            opcao.click()  # comportamento de sempre: espera o tempo padrão do Playwright
+            return
+        # O select2 só refaz a busca um pouco depois da última tecla: sem a pausa, o
+        # "Nenhuma correspondência" da busca anterior ainda está na tela
+        page.wait_for_timeout(int(passo.get("pausa_ms", 800)))
+        try:
+            # Para assim que aparecer a opção certa ou o "Nenhuma correspondência encontrada"
+            opcao.or_(sem_resultado).first.wait_for(state="visible", timeout=int(passo.get("espera_seg", 8)) * 1000)
+        except Exception:
+            pass
+        if opcao.is_visible():
+            opcao.click()
+            return
+        vistas = [t.strip() for t in opcoes.all_inner_texts() if t.strip()] or vistas
+    raise ValueError(f"Campo '{passo.get('campo', passo['seletor'])}': nenhuma opção encontrada "
+                     f"(tentei {len(tentativas)} buscas). Opções que apareceram: {vistas[:8] or 'nenhuma'}")
 
 
 # Campos obrigatórios do formulário (asterisco do Service Portal) e se ficaram preenchidos.
