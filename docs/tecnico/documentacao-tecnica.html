@@ -6,10 +6,10 @@
 <title>Documentação técnica do DispatchBot</title>
 <!-- Fonte do PDF anexado às Releases (DispatchBot-Documentacao-Tecnica.pdf). Gerar de novo com:
      msedge --headless=new --no-pdf-header-footer --print-to-pdf=docs\tecnico\DispatchBot-Documentacao-Tecnica.pdf docs\tecnico\documentacao-tecnica.html
-     Ao mudar a versão, troque "1.10.11" no @page e na capa. -->
+     Ao mudar a versão, troque "1.10.12" no @page e na capa. -->
 <style>
   @page { size: A4; margin: 18mm 16mm 20mm 16mm;
-    @bottom-left { content: "Documentação técnica do DispatchBot · versão 1.10.11"; font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; }
+    @bottom-left { content: "Documentação técnica do DispatchBot · versão 1.10.12"; font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; }
     @bottom-right { content: counter(page); font: 8.5pt "Segoe UI", "Liberation Sans", sans-serif; color: #7A8590; } }
   @page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
   :root { --teal: #0E9F8E; --teal-claro: #E3F6F3; --tinta: #1B2228; --apagado: #5B6670; --linha: #DDE3E8;
@@ -107,13 +107,13 @@
   <div class="sub">Arquitetura, funcionamento interno, contratos de dados, configuração, build e operação do robô que abre chamados de GMUD e Backup no ServiceNow da Cirion.</div>
   <div class="barra"></div>
   <div class="ficha">
-    <span>Versão do código</span><b>1.10.11</b>
+    <span>Versão do código</span><b>1.10.12</b>
     <span>Público</span><b>Time de RPA / desenvolvimento e sustentação</b>
     <span>Repositório</span><b>github.com/viniciusisliker/DispatchBot</b>
     <span>Pilha</span><b>Python 3.12 · Playwright · pystray · CustomTkinter · PyInstaller · Inno Setup 6</b>
     <span>Integrações</span><b>Power Automate · SharePoint (API REST) · ServiceNow Employee Center · Teams</b>
   </div>
-  <div class="rodape"><span>Operação YDUQS · Dispatcher N1</span><span>Versão 1.10.11 · outubro de 2026</span></div>
+  <div class="rodape"><span>Operação YDUQS · Dispatcher N1</span><span>Versão 1.10.12 · outubro de 2026</span></div>
 </section>
 
 <!-- Sumário -->
@@ -203,7 +203,7 @@
     <tr><td><code>pasta.py</code></td><td>~155</td><td>Só no modo antigo: localizar/sincronizar a pasta do OneDrive.</td></tr>
     <tr><td><code>mapear_campos.py</code></td><td>~175</td><td><code>DispatchBot-Mapear.exe</code>: mapear campos e <code>--testar</code>.</td></tr>
     <tr><td><code>demo.py</code></td><td>~100</td><td>Demonstração: preenche GMUD e Backup no portal real sem enviar.</td></tr>
-    <tr><td><code>versao.py</code></td><td>2</td><td>Fonte única da versão (<code>VERSAO = "1.10.11"</code>).</td></tr>
+    <tr><td><code>versao.py</code></td><td>2</td><td>Fonte única da versão (<code>VERSAO = "1.10.12"</code>).</td></tr>
   </table>
 </section>
 
@@ -411,10 +411,10 @@ enquanto não encerrando:
   <table>
     <tr><th>Tipo</th><th>Regex</th><th>Preferir</th><th>Seletor</th><th>Tempo</th></tr>
     <tr><td>GMUD (Hosting)</td><td><code>(RITM|CS)\d{7}</code></td><td>RITM</td><td><code>#req-item-toggle a, .ticket-id</code></td><td>90 s; espera o RITM 30 s</td></tr>
-    <tr><td>BACKUP (Incidente)</td><td><code>(INC|RITM|REQ|CS)\d{7}</code></td><td>INC</td><td><code>body</code> (página inteira, inclusive escondido)</td><td>120 s; espera o INC 60 s</td></tr>
+    <tr><td>BACKUP (Incidente)</td><td><code>CS\d{7}</code></td><td>(nenhum)</td><td><code>body</code> (página inteira, inclusive escondido)</td><td>90 s; fica com o CS assim que aparece</td></tr>
   </table>
   <p>O Hosting cria um caso <b>CS</b> e um <b>RITM</b> ligado (aba Related Records, já no DOM escondido). O número do time é o RITM; o seletor restrito evita pegar RITMs citados na descrição.</p>
-  <p>O Incidente do Backup também cria um <b>CS</b>, e o <b>INC</b> fica na aba Related Records, escondida. Até a 1.10.5 o seletor vazio lia só o texto visível (<code>inner_text</code>) e o robô aceitava o CS depois de 10 s. Desde a 1.10.6 o seletor é <code>body</code> (lê também o escondido) e o robô espera o INC por até 60 s; sem INC nesse tempo, aceita o CS (o chamado já foi criado). Desde a 1.10.9, visto o CS e sem INC, o robô <b>recarrega a página do caso</b> a cada <code>recarregar_seg</code> (15 s no Backup; nunca a do formulário), porque o INC pode ser criado depois do CS; o modelo espera até 90 s (<code>timeout_seg</code> 150). Se ficar o CS, grava print e HTML da página em <code>logs/screenshots</code> (<code>*_sem_INC_&lt;CS&gt;.png/.html</code>). O número que o time usa no Backup é o <b>INC</b>.</p>
+  <p>O Incidente do Backup também cria um <b>CS</b>, e o <b>INC</b> fica na aba Related Records, escondida. Até a 1.10.5 o seletor vazio lia só o texto visível (<code>inner_text</code>) e o robô aceitava o CS depois de 10 s. Desde a 1.10.6 o seletor é <code>body</code> (lê também o escondido) e o robô espera o INC por até 60 s; sem INC nesse tempo, aceita o CS (o chamado já foi criado). Desde a 1.10.9, visto o CS e sem INC, o robô <b>recarrega a página do caso</b> a cada <code>recarregar_seg</code> (15 s no Backup; nunca a do formulário), porque o INC pode ser criado depois do CS; o modelo espera até 90 s (<code>timeout_seg</code> 150). Se ficar o CS, grava print e HTML da página em <code>logs/screenshots</code> (<code>*_sem_INC_&lt;CS&gt;.png/.html</code>). <b>Desde a 1.10.12</b> (decisão do usuário, 21/10/2026) o Backup fica com o <b>CS</b>: <code>regex</code> <code>CS\d{7}</code>, sem <code>preferir</code> nem <code>recarregar_seg</code>; o código de recarregar continua no <code>servicenow.py</code>, sem uso. O número que o time usa no Backup é o <b>CS</b>.</p>
 
   <h3>Link de tratamento</h3>
   <p><code>link_tratamento(cfg, numero)</code> monta <code>instancia_url + link_tratamento</code> com a tabela pelo prefixo: RITM → <code>sc_req_item</code>, INC → <code>incident</code>, REQ → <code>sc_request</code>, CS → <code>sn_customerservice_case</code>. Resultado: <code>/now/nav/ui/classic/params/target/sc_req_item.do%3Fsysparm_query%3Dnumber%3DRITM0421153</code>. Vai no <code>url</code> do retorno, do histórico e do painel.</p>
@@ -655,7 +655,7 @@ enquanto não encerrando:
   <ul>
     <li><code>carregar()</code> lê com <code>utf-8-sig</code>; JSON inválido → <code>ConfigInvalido</code> com linha e coluna (o ciclo inteiro é pulado: o robô fica vermelho com a linha do erro e não lê a fila até o arquivo ser corrigido; ações do menu que gravam o config, como Pausado, envio e nome, também falham).</li>
     <li><b>Mescla</b> (<code>_mesclar</code>): chaves que existem no modelo e não no arquivo do usuário entram sozinhas, recursivamente em dicionários. Valores do usuário sempre prevalecem. <b>Listas não são mescladas</b>: um passo novo em <code>passos</code> não chega a um config já instalado.</li>
-    <li>Exceções pontuais: <code>botao_enviar</code> vazio no usuário e preenchido no modelo é copiado do modelo; <code>captura_numero</code> com <code>seletor</code> vazio é trocada pela do modelo (1.10.6, captura do INC); clientes do modelo que faltam em <code>ignorar_clientes</code> são acrescentados à lista instalada (1.10.5; não dá para tirar um cliente do modelo só pelo config.json); <code>alternativas</code> e <code>traducoes</code> de um passo do modelo são copiadas para o passo instalado com o mesmo <code>seletor</code> (1.10.7, portal em português).</li>
+    <li>Exceções pontuais: <code>botao_enviar</code> vazio no usuário e preenchido no modelo é copiado do modelo; <code>captura_numero</code> com <code>seletor</code> vazio é trocada pela do modelo (1.10.6, captura do INC); <code>captura_numero</code> com <code>preferir</code> <code>["INC"]</code> é trocada pela do modelo quando o modelo não prefere nada (1.10.12, Backup fica com o CS); clientes do modelo que faltam em <code>ignorar_clientes</code> são acrescentados à lista instalada (1.10.5; não dá para tirar um cliente do modelo só pelo config.json); <code>alternativas</code> e <code>traducoes</code> de um passo do modelo são copiadas para o passo instalado com o mesmo <code>seletor</code> (1.10.7, portal em português).</li>
     <li><code>salvar()</code>: grava em <code>.tmp</code> e faz <code>os.replace</code> (atômico).</li>
   </ul>
 
@@ -886,7 +886,7 @@ enquanto não encerrando:
   <h3>Mensagens do log que valem saber</h3>
   <table>
     <tr><th>Trecho</th><th>Significa</th></tr>
-    <tr><td><code>Robô 1.10.11 iniciado em HOST.</code></td><td>Thread do robô subiu.</td></tr>
+    <tr><td><code>Robô 1.10.12 iniciado em HOST.</code></td><td>Thread do robô subiu.</td></tr>
     <tr><td><code>Processando &lt;arquivo&gt;</code></td><td>Reserva feita.</td></tr>
     <tr><td><code>Envio automático suspenso (...)</code></td><td>Caiu para a conferência; o motivo vem entre parênteses.</td></tr>
     <tr><td><code>Chamado RITM… aberto (SO, …).</code></td><td>Sucesso.</td></tr>
@@ -1032,7 +1032,7 @@ msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\D
     <li>Depois de abrir a GMUD: <b>só avisar no Teams</b>; sem planilha CHANGES e sem Planner.</li>
     <li>Só o Dispatcher N1 da vez fica ativo; fila numa biblioteca do SharePoint do time.</li>
     <li>O robô não inventa dados; nunca reenvia sozinho depois do clique em Enviar.</li>
-    <li>Número da GMUD = RITM e do Backup = INC (nunca o CS), com link de tratamento na interface clássica.</li>
+    <li>Número da GMUD = RITM e do Backup = CS (desde a 1.10.12), com link de tratamento na interface clássica.</li>
     <li>Envio automático (GMUD e Backup) por padrão desde 16/10/2026, com conferência de obrigatórios.</li>
     <li>Login: robô clica em "Use external login" e "Submit" sem preencher nada; nunca senha.</li>
     <li>Fora do escopo: entrada por e-mail genérico/IA, fluxo de tratamento do chamado, PRODUCAO.</li>
@@ -1049,7 +1049,7 @@ msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\D
 
   <h3>Pendências (outubro de 2026)</h3>
   <ul>
-    <li>1º Backup real que abra chamado (Submit → INC → Teams) e a 1ª mensagem ⚠️ real do Retorno.</li>
+    <li>1º Backup real que abra chamado (Submit → CS → Teams) e a 1ª mensagem ⚠️ real do Retorno.</li>
     <li>1ª GMUD de Backup (<code>GMUD_BACKUP</code>) real.</li>
     <li>Teste de plantão com duas máquinas reais no SharePoint.</li>
     <li>Instalar na máquina do N1 e compartilhar o manual com o time.</li>
@@ -1067,6 +1067,7 @@ msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\docs\tecnico\D
     <tr><td>1.10.4</td><td>Envio automático com conferência de obrigatórios; clientes ignorados no Backup; <code>GMUD_BACKUP</code>; plantão entre máquinas e histórico do time. 1ª GMUD real de ponta a ponta (16/10/2026).</td></tr>
     <tr><td>1.10.5</td><td>Recuperação não gera ✅ sem número para alerta ignorado/aberto à mão; <code>nbmasterbrarj01</code> ignorado e comparação só pela coluna Cliente. Release automática no GitHub Actions.</td></tr>
     <tr><td>1.10.7</td><td>Backup no portal em português: o impacto tenta as <code>alternativas</code> do passo <code>referencia</code> ("O incidente afetou pontualmente o desempenho, com impacto mínimo nas operações críticas.") quando a busca em inglês não acha a opção; o <code>escolher</code> do Tipo de falha aceita <code>traducoes</code> (Falha na execução).</td></tr>
+    <tr><td>1.10.12</td><td>Backup fica com o número do <b>CS</b> assim que ele aparece, sem esperar nem recarregar a página atrás do INC; config instalado que esperava o INC é trocado sozinho.</td></tr>
     <tr><td>1.10.11</td><td>SharePoint fora do ar por pouco tempo (HTTP 429/5xx, sem conexão) vira status "Instável" (azul, sem notificação) por até 5 min, com texto amigável; botão "Resolvido" nos erros do painel (sai da lista, evento <code>resolvido</code> no histórico e, sem outro erro, o ícone sai do vermelho); motivo do erro inteiro no cabeçalho do painel.</td></tr>
     <tr><td>1.10.10</td><td>Avatar do ícone: registra o PNG, procura em mais lugares e loga o motivo quando não abre; o build confere o avatar no exe (<code>DispatchBot-Mapear.exe --verificar-imagens</code>) antes de publicar.</td></tr>
     <tr><td>1.10.9</td><td>Backup: recarrega a página do caso até o <b>INC</b> aparecer (<code>captura_numero.recarregar_seg</code>); sem INC, guarda print e HTML para diagnóstico.</td></tr>
