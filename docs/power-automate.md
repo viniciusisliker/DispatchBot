@@ -136,11 +136,17 @@ Um único fluxo atende todos os tipos. Os alertas são postados em **chats em gr
    - Inputs (expressão):
      ```
      if(equals(outputs('Retorno')?['status'], 'ok'),
-        concat('✅ ', outputs('Retorno')?['tipo'], ' ', if(equals(outputs('Retorno')?['tipo'], 'BACKUP'), outputs('Retorno')?['titulo'], outputs('Retorno')?['id']), ': chamado ', outputs('Retorno')?['numero'], ' aberto. Tratar: ', outputs('Retorno')?['url']),
-        concat('⚠️ ', outputs('Retorno')?['tipo'], ' ', if(equals(outputs('Retorno')?['tipo'], 'BACKUP'), outputs('Retorno')?['titulo'], outputs('Retorno')?['id']), ': o robô NÃO abriu o chamado. Abrir manualmente. Motivo: ', outputs('Retorno')?['mensagem']))
+        concat('✅ <b>', outputs('Retorno')?['tipo'], ' ', if(equals(outputs('Retorno')?['tipo'], 'BACKUP'), outputs('Retorno')?['titulo'], outputs('Retorno')?['id']), '</b><br><br>Chamado <b>', outputs('Retorno')?['numero'], '</b> aberto.<br><br><a href="', outputs('Retorno')?['url'], '">Abrir o chamado no ServiceNow</a>'),
+        concat('⚠️ <b>', outputs('Retorno')?['tipo'], ' ', if(equals(outputs('Retorno')?['tipo'], 'BACKUP'), outputs('Retorno')?['titulo'], outputs('Retorno')?['id']), '</b><br><br>O robô NÃO abriu o chamado. Abrir manualmente.<br><br>Motivo: ', outputs('Retorno')?['mensagem']))
      ```
-   - O `url` é o link que abre o chamado direto na tela de tratamento (interface clássica); o Teams mostra como link clicável.
-   - Exemplos: `✅ INFRA CHG0048582: chamado RITM0123456 aberto. Tratar: https://envdatacenter.service-now.com/now/nav/ui/classic/...` · `⚠️ BACKUP YDUQS_VMWARE_... | Job 26509786: o robô NÃO abriu o chamado. Abrir manualmente. Motivo: ...`
+   - A mensagem do Teams aceita HTML: `<b>` = negrito, `<br><br>` = uma linha em branco, `<a href>` = link clicável com texto (o `url` abre o chamado direto na tela de tratamento, interface clássica). Formato com espaçamento pedido pelo usuário em 21/10/2026 (antes era uma linha só).
+   - Exemplo (sucesso):
+     > ✅ **BACKUP YDUQS_VMWARE_RJO_VCLOUD-02_NEW | ESRVDTDOCKER-rtfz | Job 26819484 | Status 1**
+     >
+     > Chamado **CS0735598** aberto.
+     >
+     > [Abrir o chamado no ServiceNow](https://envdatacenter.service-now.com/now/nav/ui/classic/...)
+   - Exemplo (erro): `⚠️ BACKUP YDUQS_VMWARE_... | Job 26509786` em negrito, linha em branco, "O robô NÃO abriu o chamado. Abrir manualmente.", linha em branco, "Motivo: ...".
 5. **Switch** · On: `outputs('Retorno')?['tipo']`
    - Um *Case* por linha da tabela acima (`INFRA`, `DBA`, `SO`, `BACKUP`), cada um com **Teams · Post message in a chat or channel**:
      - Post as: **Flow bot** · Post in: **Chat em grupo** · Chat em grupo: o da tabela
