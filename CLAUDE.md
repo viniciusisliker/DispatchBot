@@ -1,4 +1,6 @@
-> **Backup fica com o CS (21/10/2026, sem build; versão segue 1.10.11):** pedido do usuário: não precisa recarregar procurando o INC, só no Backup. `BACKUP.captura_numero` agora é `regex` `CS\d{7}`, `seletor` `body`, `timeout_seg` 90, sem `preferir`/`espera_preferido_seg`/`recarregar_seg` (pega o CS assim que aparece). `config.carregar` troca a captura instalada pela do modelo quando ela tem `preferir` `["INC"]` e o modelo não prefere nada. O código de recarregar (`recarregar_seg`) continua no `servicenow.py`, só não é usado. GMUD não muda (continua preferindo o RITM). Testado: mescla com o config da 1.10.11. README e manual.html atualizados; PDF **não** regerado.
+> **1.10.12 (21/10/2026):** versão subida com o Backup ficando com o CS (abaixo), pedido do usuário; Release pelo GitHub Actions (disparo manual do `release.yml` depois do merge), notas em `build/notas/1.10.12.md`.
+
+> **Backup fica com o CS (21/10/2026, na 1.10.12):** pedido do usuário: não precisa recarregar procurando o INC, só no Backup. `BACKUP.captura_numero` agora é `regex` `CS\d{7}`, `seletor` `body`, `timeout_seg` 90, sem `preferir`/`espera_preferido_seg`/`recarregar_seg` (pega o CS assim que aparece). `config.carregar` troca a captura instalada pela do modelo quando ela tem `preferir` `["INC"]` e o modelo não prefere nada. O código de recarregar (`recarregar_seg`) continua no `servicenow.py`, só não é usado. GMUD não muda (continua preferindo o RITM). Testado: mescla com o config da 1.10.11. README e manual.html atualizados; PDF **não** regerado.
 
 > **1.10.11 (17/10/2026):** versão subida com o botão "Resolvido" e o motivo inteiro (abaixo) e o "Instável" do SharePoint (pedido do usuário); Release pelo GitHub Actions (disparo manual do `release.yml` depois do merge), notas em `build/notas/1.10.11.md`.
 
@@ -102,7 +104,7 @@ Etapas do processo (usuário, 05/10/2026): envio do alerta → criação do cham
 | config.py | carrega/mescla config (chaves novas entram sozinhas), `tipo_efetivo` (herança `herda`) |
 | mapear_campos.py | `DispatchBot-Mapear.exe`: lista campos do formulário; `--testar <json>` preenche sem enviar |
 | atualizacao.py | atualização automática pela Release do GitHub (procura, baixa, confere, roda o instalador silencioso) |
-| versao.py | versão única (hoje **1.10.11**) |
+| versao.py | versão única (hoje **1.10.12**) |
 
 Build: `powershell -ExecutionPolicy Bypass -File build\build.ps1` → `dist\instalador\DispatchBot-Setup-<versão>.exe`. Inno Setup 6 instalado por usuário (winget). Arquivos .iss e .ps1 precisam de UTF-8 **com BOM**.
 
