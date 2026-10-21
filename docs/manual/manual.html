@@ -137,9 +137,9 @@
     <tr><td><b>GMUD DBA</b></td><td>Formulário Hosting</td><td>RITM</td><td>(FC) BANCO DE DADOS</td></tr>
     <tr><td><b>GMUD SO</b></td><td>Formulário Hosting</td><td>RITM</td><td>(FC) LINUX - WINDOWS - VMWARE</td></tr>
     <tr><td><b>GMUD Backup</b></td><td>Formulário Hosting</td><td>RITM</td><td>(FC) NETBACKUP</td></tr>
-    <tr><td><b>Falha de Backup</b></td><td>Incidente (cartão Backup)</td><td>INC</td><td>(FC) NETBACKUP</td></tr>
+    <tr><td><b>Falha de Backup</b></td><td>Incidente (cartão Backup)</td><td>CS</td><td>(FC) NETBACKUP</td></tr>
   </table>
-  <p>Se o RITM (GMUD) ou o INC (Backup) demorar a aparecer no ServiceNow, o robô usa o número do <b>caso CS</b> que o formulário cria: o chamado foi aberto do mesmo jeito.</p>
+  <p>No Backup, o número que vai para o Teams é o do <b>caso CS</b> que o formulário cria. Na GMUD, se o RITM demorar a aparecer no ServiceNow, o robô usa o CS: o chamado foi aberto do mesmo jeito.</p>
   <div class="caixa dica"><span class="t">Falhas de backup que não viram chamado</span>
     Falhas dos clientes <b>appflexrj01-inst01</b>, <b>appnburj03</b> e <b>nbmasterbrarj01</b> não abrem chamado (os dois primeiros são media servers, por orientação do time de NetBackup; o terceiro entrou a pedido da operação). O card continua aparecendo no Teams; o robô só não abre o chamado.</div>
 
@@ -227,7 +227,7 @@
     <tr><td><b>Também ativo</b></td><td>Só aparece quando o robô de outro colega também está ligado: mostra o nome, o computador, desde quando está ativo e o último sinal, com o botão <span class="ui">Assumir o plantão</span> (veja a seção 7).</td></tr>
     <tr><td><b>Contadores</b></td><td>Na fila · Abertos hoje · Erros hoje · Precisa de você.</td></tr>
     <tr><td><b>Precisa de você</b></td><td>O mesmo que a janelinha da seção 5: login, conferência e alertas antigos.</td></tr>
-    <tr><td><b>Chamados abertos hoje</b></td><td>Cada chamado com o número (RITM/INC, ou CS), o botão <span class="ui">Tratar</span> (abre o chamado no ServiceNow) e o ícone de copiar (copia o número).</td></tr>
+    <tr><td><b>Chamados abertos hoje</b></td><td>Cada chamado com o número (RITM ou CS), o botão <span class="ui">Tratar</span> (abre o chamado no ServiceNow) e o ícone de copiar (copia o número).</td></tr>
     <tr><td><b>Erros de hoje: abrir à mão</b></td><td>Alertas que o robô não conseguiu abrir, com o <b>motivo</b>, o botão <span class="ui">Abrir no ServiceNow</span> (abre o portal para você abrir à mão) o ícone de copiar (copia o alerta e o motivo) e <span class="ui">Resolvido</span>: use depois de abrir à mão, ou quando não há nada a abrir (ex.: alarme falso, texto ilegível). O erro sai da lista e, se era o último, o ícone sai do vermelho.</td></tr>
     <tr><td><b>Rodapé</b></td><td><span class="ui">Verificar agora</span>, <span class="ui">Logs</span>, <span class="ui">Histórico do time</span> e <span class="ui">PARAR AGORA</span> (pede confirmação).</td></tr>
   </table>

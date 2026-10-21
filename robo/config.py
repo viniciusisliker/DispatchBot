@@ -60,6 +60,12 @@ def carregar() -> dict:
         if isinstance(cap, dict) and isinstance(cap_modelo, dict) and cap.get("seletor") == "" and cap_modelo.get("seletor"):
             meu["captura_numero"] = dict(cap_modelo)
             mudou = True
+        # captura que esperava o INC (Backup de 16 a 17/10/2026) e o modelo não prefere mais nada
+        # (usuário, 21/10/2026: o Backup fica com o CS): troca pela captura do modelo
+        elif isinstance(cap, dict) and isinstance(cap_modelo, dict) and cap.get("preferir") == ["INC"] \
+                and not cap_modelo.get("preferir"):
+            meu["captura_numero"] = dict(cap_modelo)
+            mudou = True
         # alternativas novas de um passo (ex.: impacto em português, 17/10/2026): a mescla não troca
         # a lista de passos, então copia para o passo instalado de mesmo seletor que ainda não tem
         if isinstance(meu, dict) and isinstance(tipo, dict) and isinstance(meu.get("passos"), list):
